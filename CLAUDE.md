@@ -18,7 +18,7 @@ Flutter (stable) + Dart, Riverpod, go_router, Drift (SQLite, local-first), Supab
 10. Never commit secrets. Supabase URL and anon key come from `--dart-define` or `.env` (gitignored).
 
 ## Backend modes (Phase 8)
-`--dart-define=BACKEND=sheets|supabase|local` picks the data source; without it the app uses Supabase when it is configured, otherwise local only. **Supabase and local modes behave exactly as above.** In `sheets` mode there is no server, so some rules above do not apply:
+`--dart-define=BACKEND=sheets|supabase|local` picks the data source; **without it the app runs in `sheets` mode (the default)**. `supabase` and `local` modes still behave exactly as the rules above. In `sheets` mode there is no server, so some rules above do not apply:
 - Rule 6 (RLS) and rule 7 (hashed, rate-limited invite codes) do not apply: Google Drive sharing is the only access control, roles are reduced to organiser (owner) and member (editor who may suggest changes), and pairing codes are checked by the apps (24-hour expiry, single use) and are not hashed.
 - Rule 5 still holds: the UI reads Drift; Google Sheets are the transport and the backup. One writer per sheet, so no conflicts.
 - Tokens live in the platform secure store (`flutter_secure_storage`), never in Drift, prefs or logs.

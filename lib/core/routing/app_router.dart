@@ -12,6 +12,7 @@ import '../../features/expenses/expense_form_screen.dart';
 import '../../features/expenses/expense_list_providers.dart'
     show searchFocusRequestProvider;
 import '../../features/expenses/expense_list_screen.dart';
+import '../../features/import/import_screen.dart';
 import '../../features/pairing/sheets_family_screen.dart';
 import '../../features/pairing/suggestions_screen.dart';
 import '../../features/privacy/privacy_screen.dart';
@@ -160,6 +161,10 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
             pageBuilder: (c, s) => _page(s, const SuggestionsScreen()),
           ),
           GoRoute(
+            path: '/import',
+            pageBuilder: (c, s) => _page(s, const ImportScreen()),
+          ),
+          GoRoute(
             path: '/privacy',
             pageBuilder: (c, s) => _page(s, const PrivacyPolicyScreen()),
           ),
@@ -206,7 +211,10 @@ class _Shell extends ConsumerWidget {
 
     final onTabRoot = AppDestination.tabs.any((d) => d.path == location);
     final isFormRoute =
-        location == '/add' || location == '/scan' || location.endsWith('/edit');
+        location == '/add' ||
+        location == '/scan' ||
+        location == '/import' ||
+        location.endsWith('/edit');
     // Keyboard: Ctrl or Cmd with N, 1 to 6, comma, F and slash; Esc goes back to Home.
     return Focus(
       autofocus: true,

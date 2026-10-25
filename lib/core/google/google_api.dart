@@ -29,6 +29,9 @@ abstract interface class SheetsApi {
   /// Creates a spreadsheet with these tabs and returns its id.
   Future<String> createSpreadsheet(String title, List<String> tabs);
 
+  /// Title of the first tab (people name tabs anything: Sheet1, Expenses, ...).
+  Future<String> firstTabTitle(String sheetId);
+
   /// Adds a tab to an existing spreadsheet (for sheets made by an older version).
   Future<void> addTab(String sheetId, String tab);
 
@@ -130,6 +133,23 @@ class HttpGoogleApi implements SheetsApi, DriveApi {
     );
     return (jsonDecode(res.body) as Map<String, dynamic>)['spreadsheetId']
         as String;
+  }
+
+  @override
+  Future<String> firstTabTitle(String sheetId) async {
+    final res = await _send(
+      'GET',
+      '$_sheets/$sheetId?fields=${Uri.encodeComponent('sheets.properties.title')}',
+    );
+    final sheets =
+        (jsonDecode(res.body) as Map<String, dynamic>)['sheets'] as List?;
+    final title = sheets == null || sheets.isEmpty
+        ? null
+        : ((sheets.first as Map<String, dynamic>)['properties']
+                  as Map<String, dynamic>)['title']
+              as String?;
+    if (title == null) throw const SheetAccessError(404);
+    return title;
   }
 
   @override
