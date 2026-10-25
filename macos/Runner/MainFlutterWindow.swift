@@ -23,6 +23,9 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
+    // The layouts start at 360 wide; do not let the window get smaller than that.
+    self.minSize = NSSize(width: 360, height: 560)
+
     RegisterGeneratedPlugins(registry: flutterViewController)
     UNUserNotificationCenter.current().delegate = ReminderNotificationDelegate.shared
 

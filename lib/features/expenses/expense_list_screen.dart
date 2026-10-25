@@ -10,6 +10,7 @@ import '../../core/money/money_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/time.dart';
+import '../../core/widgets/context_menu_region.dart';
 import '../../core/widgets/month_navigator.dart';
 import '../../core/widgets/surface_card.dart';
 import '../family/member_providers.dart';
@@ -29,9 +30,24 @@ class ExpenseListScreen extends ConsumerStatefulWidget {
 
 class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
   final _search = TextEditingController();
+  final _searchFocus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Ctrl or Cmd + F from another page opens the list and lands here.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _takeFocusRequest());
+  }
+
+  void _takeFocusRequest() {
+    if (!mounted || !ref.read(searchFocusRequestProvider)) return;
+    _searchFocus.requestFocus();
+    ref.read(searchFocusRequestProvider.notifier).clear();
+  }
 
   @override
   void dispose() {
+    _searchFocus.dispose();
     _search.dispose();
     super.dispose();
   }
@@ -60,6 +76,13 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    ref.listen(searchFocusRequestProvider, (_, wanted) {
+      if (wanted) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _takeFocusRequest(),
+        );
+      }
+    });
     final month = ref.watch(selectedMonthProvider);
     final months = ref.read(selectedMonthProvider.notifier);
     final filter = ref.watch(expenseFilterProvider);
@@ -95,6 +118,7 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
         const SizedBox(height: 12),
         _SearchField(
           controller: _search,
+          focusNode: _searchFocus,
           onChanged: filterController.setQuery,
           onClear: () {
             _search.clear();
@@ -228,12 +252,14 @@ class _AddButton extends StatelessWidget {
 class _SearchField extends StatelessWidget {
   const _SearchField({
     required this.controller,
+    required this.focusNode,
     required this.onChanged,
     required this.onClear,
     required this.hasText,
   });
 
   final TextEditingController controller;
+  final FocusNode focusNode;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
   final bool hasText;
@@ -257,12 +283,14 @@ class _SearchField extends StatelessWidget {
             child: TextField(
               key: const Key('expense-search'),
               controller: controller,
+              focusNode: focusNode,
               onChanged: onChanged,
               textInputAction: TextInputAction.search,
               style: TextStyle(fontSize: 15, color: t.text),
               cursorColor: t.primary,
               decoration: InputDecoration(
                 isDense: true,
+                constraints: const BoxConstraints(minHeight: kMinTapTarget),
                 border: InputBorder.none,
                 hintText: 'Search notes, categories or people',
                 hintStyle: TextStyle(fontSize: 15, color: t.muted),
@@ -478,17 +506,23 @@ class _ExpenseTile extends StatelessWidget {
       ),
     );
     if (!canEdit) return row;
-    return Dismissible(
-      key: ValueKey('dismiss-${expense.id}'),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete(),
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: t.rose,
-        child: Icon(Icons.delete_outline, color: t.onPrimary),
+    return ContextMenuRegion(
+      items: [
+        ContextMenuItem('Edit', onEdit),
+        ContextMenuItem('Delete', onDelete, destructive: true),
+      ],
+      child: Dismissible(
+        key: ValueKey('dismiss-${expense.id}'),
+        direction: DismissDirection.endToStart,
+        onDismissed: (_) => onDelete(),
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          color: t.rose,
+          child: Icon(Icons.delete_outline, color: t.onPrimary),
+        ),
+        child: row,
       ),
-      child: row,
     );
   }
 }

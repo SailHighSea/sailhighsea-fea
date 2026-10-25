@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:go_router/go_router.dart';
 
 import '../../features/appearance/appearance_screen.dart';
@@ -9,6 +9,8 @@ import '../../features/budgets/budgets_screen.dart';
 import '../../features/goals/goals_screen.dart';
 import '../../features/insights/insights_screen.dart';
 import '../../features/expenses/expense_form_screen.dart';
+import '../../features/expenses/expense_list_providers.dart'
+    show searchFocusRequestProvider;
 import '../../features/expenses/expense_list_screen.dart';
 import '../../features/expenses/widgets/fold_add_panel.dart';
 import '../../features/auth/app_access.dart';
@@ -21,6 +23,7 @@ import '../../features/family/member_providers.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/sync/sync_indicator.dart';
 import '../layout/adaptive_shell.dart';
+import '../shortcuts/app_shortcuts.dart';
 import '../layout/destinations.dart';
 import '../theme/app_tokens.dart';
 
@@ -174,14 +177,20 @@ class _Shell extends ConsumerWidget {
     }
 
     final onTabRoot = AppDestination.tabs.any((d) => d.path == location);
-    // Ctrl or Cmd + N adds an expense from anywhere (desktop, or any keyboard).
+    final isFormRoute = location == '/add' || location.endsWith('/edit');
+    // Keyboard: Ctrl or Cmd with N, 1 to 6, comma, F and slash; Esc goes back to Home.
     return Focus(
       autofocus: true,
-      child: CallbackShortcuts(
-        bindings: {
-          const SingleActivator(LogicalKeyboardKey.keyN, control: true):
-              openAdd,
-          const SingleActivator(LogicalKeyboardKey.keyN, meta: true): openAdd,
+      child: AppShortcuts(
+        onAdd: openAdd,
+        onGo: (d) => context.go(d.path),
+        onFind: () {
+          ref.read(searchFocusRequestProvider.notifier).request();
+          context.go('/expenses');
+        },
+        onHelp: () => showShortcutHelp(context),
+        onEscape: () {
+          if (location != '/home' && !isFormRoute) context.go('/home');
         },
         child: AdaptiveShell(
           destination: AppDestination.fromLocation(location),
@@ -189,9 +198,9 @@ class _Shell extends ConsumerWidget {
           memberInitials: ref.watch(memberInitialsProvider),
           showBottomTabs: onTabRoot,
           syncIndicator: (dense) => SyncIndicator(dense: dense),
-          foldBottom: location == '/home' && canAdd
-              ? const FoldAddPanel()
-              : null,
+          // Half-open foldable: this page above the hinge and the Add form below it, on
+          // every page except the add and edit forms themselves.
+          foldBottom: canAdd && !isFormRoute ? const FoldAddPanel() : null,
           child: child,
         ),
       ),

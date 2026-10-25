@@ -67,6 +67,9 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
 
   @override
   ExpenseFormState build() {
+    // The new-expense draft lives for the session so folding or unfolding the device
+    // (fold panel <-> Add screen) never loses what was typed.
+    if (editId == null) ref.keepAlive();
     final today = ref.read(clockProvider)().dateOnly;
     if (editId != null) {
       Future.microtask(_load);
@@ -161,7 +164,8 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
   }
 }
 
-/// One draft per expense id; `null` is the new-expense draft. Dropped when nothing watches it.
+/// One draft per expense id; `null` is the new-expense draft and is kept for the session. Edit drafts
+/// are dropped when nothing watches them.
 final expenseFormProvider = NotifierProvider.autoDispose
     .family<ExpenseFormController, ExpenseFormState, String?>(
       ExpenseFormController.new,

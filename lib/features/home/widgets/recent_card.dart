@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/money/money_format.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/time.dart';
+import '../../../core/widgets/context_menu_region.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../home_data.dart';
 
@@ -85,42 +86,57 @@ class RecentCard extends StatelessWidget {
             ),
             if (items.isEmpty) _empty(t),
             for (final e in items)
-              InkWell(
-                onTap: onOpen == null ? null : () => onOpen!(e),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border(top: BorderSide(color: t.border)),
-                  ),
-                  child: _TableRow(
-                    minHeight: 44,
-                    cells: [
-                      _cell(
-                        relativeDateLabel(e.spentOn, now),
-                        TextStyle(fontSize: 15, color: t.muted),
+              ContextMenuRegion(
+                enabled: onOpen != null,
+                items: [ContextMenuItem('Edit', () => onOpen!(e))],
+                child: Semantics(
+                  container: true,
+                  button: onOpen != null,
+                  excludeSemantics: true,
+                  onTap: onOpen == null ? null : () => onOpen!(e),
+                  label:
+                      '${e.note}, ${e.categoryName}, ${relativeDateLabel(e.spentOn, now)}, ${e.addedBy}, ${money.format(e.cents)}',
+                  child: InkWell(
+                    onTap: onOpen == null ? null : () => onOpen!(e),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border(top: BorderSide(color: t.border)),
                       ),
-                      _cell(
-                        e.note,
-                        TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: t.text,
-                        ),
+                      child: _TableRow(
+                        minHeight: 44,
+                        cells: [
+                          _cell(
+                            relativeDateLabel(e.spentOn, now),
+                            TextStyle(fontSize: 15, color: t.muted),
+                          ),
+                          _cell(
+                            e.note,
+                            TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: t.text,
+                            ),
+                          ),
+                          _cell(
+                            e.categoryName,
+                            TextStyle(fontSize: 15, color: t.text),
+                          ),
+                          _cell(
+                            e.addedBy,
+                            TextStyle(fontSize: 15, color: t.text),
+                          ),
+                          _cell(
+                            money.format(-e.cents),
+                            TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: t.text,
+                            ),
+                            right: true,
+                          ),
+                        ],
                       ),
-                      _cell(
-                        e.categoryName,
-                        TextStyle(fontSize: 15, color: t.text),
-                      ),
-                      _cell(e.addedBy, TextStyle(fontSize: 15, color: t.text)),
-                      _cell(
-                        money.format(-e.cents),
-                        TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: t.text,
-                        ),
-                        right: true,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -151,55 +167,62 @@ class RecentCard extends StatelessWidget {
           ),
           if (items.isEmpty) _empty(t),
           for (final e in items)
-            InkWell(
-              onTap: onOpen == null ? null : () => onOpen!(e),
+            ContextMenuRegion(
+              enabled: onOpen != null,
+              items: [ContextMenuItem('Edit', () => onOpen!(e))],
               child: Semantics(
                 container: true,
+                button: onOpen != null,
+                excludeSemantics: true,
+                onTap: onOpen == null ? null : () => onOpen!(e),
                 label:
                     '${e.note}, ${e.categoryName}, ${relativeDateLabel(e.spentOn, now)}, ${e.addedBy}, ${money.format(e.cents)}',
-                child: ExcludeSemantics(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      border: Border(top: BorderSide(color: t.border)),
-                    ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 52),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    e.note,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: t.text,
+                child: InkWell(
+                  onTap: onOpen == null ? null : () => onOpen!(e),
+                  child: ExcludeSemantics(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border(top: BorderSide(color: t.border)),
+                      ),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 52),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      e.note,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: t.text,
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    '${e.categoryName} · ${relativeDateLabel(e.spentOn, now)} · ${e.addedBy}',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: t.muted,
+                                    Text(
+                                      '${e.categoryName} · ${relativeDateLabel(e.spentOn, now)} · ${e.addedBy}',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: t.muted,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              money.format(-e.cents),
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: t.text,
+                              const SizedBox(width: 12),
+                              Text(
+                                money.format(-e.cents),
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: t.text,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

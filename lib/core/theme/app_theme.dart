@@ -46,6 +46,9 @@ ThemeData buildTheme(AppearanceSettings settings, ThemeVariant variant) {
     canvasColor: tokens.background,
     dividerColor: tokens.border,
     splashFactory: InkRipple.splashFactory,
+    // Visible keyboard focus and mouse hover on every tappable surface (desktop polish).
+    focusColor: tokens.primary.withValues(alpha: 0.22),
+    hoverColor: tokens.primary.withValues(alpha: 0.08),
     materialTapTargetSize: MaterialTapTargetSize.padded,
     extensions: [tokens],
   );

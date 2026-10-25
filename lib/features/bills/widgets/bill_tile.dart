@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/money/money_format.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/context_menu_region.dart';
 import '../domain/bill_calculations.dart';
 
 /// One bill: a date chip (amber when due soon), name and "Due in 5 days", the amount and, when
@@ -29,6 +30,23 @@ class BillTile extends StatelessWidget {
         ? t.amber.withValues(alpha: 0.35)
         : t.navActiveBackground;
     final chipText = soon ? t.amberText : t.navActiveText;
+    return ContextMenuRegion(
+      enabled: onTap != null || onMarkPaid != null,
+      items: [
+        if (onMarkPaid != null) ContextMenuItem('Mark paid', onMarkPaid!),
+        if (onTap != null) ContextMenuItem('Edit bill', onTap!),
+      ],
+      child: _row(context, t, soon, chipBackground, chipText),
+    );
+  }
+
+  Widget _row(
+    BuildContext context,
+    AppTokens t,
+    bool soon,
+    Color chipBackground,
+    Color chipText,
+  ) {
     return Semantics(
       container: true,
       label:

@@ -202,31 +202,52 @@ class AdaptiveTwoPane extends StatelessWidget {
         ),
       );
     }
-    return SingleChildScrollView(
-      padding: metrics.pagePadding,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: kMaxContentWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              header,
-              const SizedBox(height: 18),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final room = constraints.maxWidth - metrics.pagePadding.horizontal;
+        // Too narrow for two columns (a 600 wide window with the rail): stack them and scroll.
+        if (room < secondaryWidth + 24 + 320) {
+          return SingleChildScrollView(
+            padding: metrics.pagePadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                header,
+                const SizedBox(height: 18),
+                primary(context, PaneMode.stacked),
+                const SizedBox(height: 12),
+                secondary(context, PaneMode.stacked),
+              ],
+            ),
+          );
+        }
+        return SingleChildScrollView(
+          padding: metrics.pagePadding,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: kMaxContentWidth),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(child: primary(context, PaneMode.split)),
-                  const SizedBox(width: 24),
-                  SizedBox(
-                    width: secondaryWidth,
-                    child: secondary(context, PaneMode.split),
+                  header,
+                  const SizedBox(height: 18),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: primary(context, PaneMode.split)),
+                      const SizedBox(width: 24),
+                      SizedBox(
+                        width: secondaryWidth,
+                        child: secondary(context, PaneMode.split),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
