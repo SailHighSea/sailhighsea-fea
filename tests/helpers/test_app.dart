@@ -80,7 +80,8 @@ Future<ProviderContainer> pumpApp(
   /// Use the real router with its sign-in, household and role guards.
   bool gated = false,
 }) async {
-  SharedPreferences.setMockInitialValues(prefs);
+  // The first-run introduction is covered by its own test; everything else starts past it.
+  SharedPreferences.setMockInitialValues({'onboarding.done': true, ...prefs});
   final sp = await SharedPreferences.getInstance();
   tester.view
     ..physicalSize = size

@@ -44,6 +44,8 @@ const otherCategoryId = 'default-other';
     Goals,
     GoalContributions,
     Bills,
+    SheetPairs,
+    Suggestions,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -54,7 +56,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump when a table changes and add a step to [migration].
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -85,6 +87,11 @@ class AppDatabase extends _$AppDatabase {
         // Tables created earlier in this same upgrade already have the new columns.
         if (from >= 2) await m.addColumn(members, members.visibility);
         if (from >= 4) await m.addColumn(budgets, budgets.userId);
+      }
+      if (from < 6) {
+        // Phase 8: Google Sheets mode (paired family members and their suggestions).
+        await m.createTable(sheetPairs);
+        await m.createTable(suggestions);
       }
       // Future versions add steps here, for example:
       //   if (from < 6) await m.addColumn(expenses, expenses.someNewColumn);

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/widgets/async_placeholder.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -94,6 +97,7 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
     final now = ref.watch(clockProvider)();
     final addedByLabel = ref.watch(addedByLabelProvider);
     final permissions = ref.watch(permissionsProvider);
+    final canEdit = ref.watch(canEditExpenseProvider);
     final categoryById = {for (final c in categories) c.id: c};
 
     return AdaptivePage(
@@ -134,15 +138,11 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
         ),
         const SizedBox(height: 16),
         expenses.when(
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          error: (e, _) => Text(
-            'Could not load expenses: $e',
-            style: TextStyle(color: t.rose),
+          loading: () => const AsyncPlaceholder(what: 'expenses'),
+          error: (e, _) => AsyncPlaceholder(
+            what: 'expenses',
+            error: e,
+            onRetry: () => ref.invalidate(filteredExpensesProvider),
           ),
           data: (rows) {
             if (rows.isEmpty) {
@@ -191,7 +191,7 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                           now: now,
                           addedBy: addedByLabel(rows[i].createdBy),
                           showDivider: i > 0,
-                          canEdit: permissions.canWriteExpenses,
+                          canEdit: canEdit(rows[i].createdBy),
                           onEdit: () =>
                               context.push('/expenses/${rows[i].id}/edit'),
                           onDelete: () => _delete(rows[i]),

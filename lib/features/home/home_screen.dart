@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/widgets/async_placeholder.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -29,10 +32,10 @@ class HomeScreen extends ConsumerWidget {
     final summaryAsync = ref.watch(homeSummaryProvider);
     final summary = summaryAsync.value;
     if (summary == null) {
-      return Center(
-        child: summaryAsync.hasError
-            ? Text('Could not load expenses: ${summaryAsync.error}')
-            : const CircularProgressIndicator(),
+      return AsyncPlaceholder(
+        what: 'expenses',
+        error: summaryAsync.hasError ? summaryAsync.error : null,
+        onRetry: () => ref.invalidate(homeSummaryProvider),
       );
     }
     final money = ref.watch(moneyFormatterProvider);
@@ -120,6 +123,7 @@ class HomeScreen extends ConsumerWidget {
         onOpen: permissions.canWriteExpenses
             ? (expense) => context.push('/expenses/${expense.id}/edit')
             : null,
+        canOpen: (e) => ref.read(canEditExpenseProvider)(e.createdBy),
       ),
     );
   }

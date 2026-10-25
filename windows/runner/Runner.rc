@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "app.familyexpenses" "\0"
-            VALUE "FileDescription", "family_expenses" "\0"
+            VALUE "FileDescription", "Family Expenses" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "family_expenses" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 app.familyexpenses. All rights reserved." "\0"
             VALUE "OriginalFilename", "family_expenses.exe" "\0"
-            VALUE "ProductName", "family_expenses" "\0"
+            VALUE "ProductName", "Family Expenses" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

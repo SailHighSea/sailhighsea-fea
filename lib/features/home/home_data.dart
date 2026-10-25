@@ -86,8 +86,11 @@ class RecentExpense {
     required this.spentOn,
     required this.addedBy,
     required this.cents,
+    this.createdBy,
   });
 
+  /// Who added it (`created_by`), so the screen can tell whose expense it is.
+  final String? createdBy;
   final String id;
   final String note;
   final String categoryName;

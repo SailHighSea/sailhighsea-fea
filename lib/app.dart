@@ -7,6 +7,9 @@ import 'core/routing/app_router.dart';
 import 'features/auth/app_access.dart';
 import 'features/bills/reminders/reminder_providers.dart';
 import 'features/family/member_providers.dart';
+import 'features/onboarding/onboarding_gate.dart';
+import 'features/pairing/sheets_providers.dart';
+import 'features/privacy/lock_gate.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/appearance_provider.dart';
 import 'core/theme/color_themes.dart';
@@ -46,6 +49,8 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
     ref.listenManual(accessProvider, (_, next) => _gate.update(next));
     // Keeps bill reminders scheduled for as long as the app runs.
     ref.listenManual(reminderSyncProvider, (_, _) {});
+    // Google Sheets mode: keeps pushing and reading sheets while the app is open.
+    ref.listenManual(sheetsAutoSyncProvider, (_, _) {});
   }
 
   @override
@@ -78,7 +83,7 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
           data: media.copyWith(
             textScaler: _MultipliedScaler(media.textScaler, extra),
           ),
-          child: child!,
+          child: OnboardingGate(child: LockGate(child: child!)),
         );
       },
     );

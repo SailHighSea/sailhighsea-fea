@@ -5056,6 +5056,1103 @@ class BillsCompanion extends UpdateCompanion<BillRow> {
   }
 }
 
+class $SheetPairsTable extends SheetPairs
+    with TableInfo<$SheetPairsTable, SheetPairRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SheetPairsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _memberEmailMeta = const VerificationMeta(
+    'memberEmail',
+  );
+  @override
+  late final GeneratedColumn<String> memberEmail = GeneratedColumn<String>(
+    'member_email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sheetIdMeta = const VerificationMeta(
+    'sheetId',
+  );
+  @override
+  late final GeneratedColumn<String> sheetId = GeneratedColumn<String>(
+    'sheet_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('active'),
+  );
+  static const VerificationMeta _lastRevisionMeta = const VerificationMeta(
+    'lastRevision',
+  );
+  @override
+  late final GeneratedColumn<String> lastRevision = GeneratedColumn<String>(
+    'last_revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _lastSyncedAtMeta = const VerificationMeta(
+    'lastSyncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+    'last_synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pairedAtMeta = const VerificationMeta(
+    'pairedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> pairedAt = GeneratedColumn<DateTime>(
+    'paired_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    memberEmail,
+    name,
+    sheetId,
+    status,
+    lastRevision,
+    lastSyncedAt,
+    pairedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sheet_pairs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SheetPairRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('member_email')) {
+      context.handle(
+        _memberEmailMeta,
+        memberEmail.isAcceptableOrUnknown(
+          data['member_email']!,
+          _memberEmailMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_memberEmailMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('sheet_id')) {
+      context.handle(
+        _sheetIdMeta,
+        sheetId.isAcceptableOrUnknown(data['sheet_id']!, _sheetIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sheetIdMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('last_revision')) {
+      context.handle(
+        _lastRevisionMeta,
+        lastRevision.isAcceptableOrUnknown(
+          data['last_revision']!,
+          _lastRevisionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+        _lastSyncedAtMeta,
+        lastSyncedAt.isAcceptableOrUnknown(
+          data['last_synced_at']!,
+          _lastSyncedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('paired_at')) {
+      context.handle(
+        _pairedAtMeta,
+        pairedAt.isAcceptableOrUnknown(data['paired_at']!, _pairedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pairedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {memberEmail};
+  @override
+  SheetPairRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SheetPairRow(
+      memberEmail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}member_email'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      sheetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sheet_id'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      lastRevision: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_revision'],
+      )!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_synced_at'],
+      ),
+      pairedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}paired_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SheetPairsTable createAlias(String alias) {
+    return $SheetPairsTable(attachedDatabase, alias);
+  }
+}
+
+class SheetPairRow extends DataClass implements Insertable<SheetPairRow> {
+  final String memberEmail;
+  final String name;
+  final String sheetId;
+
+  /// `active`, `accessRemoved` (the sheet is gone or no longer shared) or `unpaired`.
+  final String status;
+
+  /// The member sheet's revision counter at the last full read, so an unchanged sheet is not
+  /// read again.
+  final String lastRevision;
+  final DateTime? lastSyncedAt;
+  final DateTime pairedAt;
+  const SheetPairRow({
+    required this.memberEmail,
+    required this.name,
+    required this.sheetId,
+    required this.status,
+    required this.lastRevision,
+    this.lastSyncedAt,
+    required this.pairedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['member_email'] = Variable<String>(memberEmail);
+    map['name'] = Variable<String>(name);
+    map['sheet_id'] = Variable<String>(sheetId);
+    map['status'] = Variable<String>(status);
+    map['last_revision'] = Variable<String>(lastRevision);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    map['paired_at'] = Variable<DateTime>(pairedAt);
+    return map;
+  }
+
+  SheetPairsCompanion toCompanion(bool nullToAbsent) {
+    return SheetPairsCompanion(
+      memberEmail: Value(memberEmail),
+      name: Value(name),
+      sheetId: Value(sheetId),
+      status: Value(status),
+      lastRevision: Value(lastRevision),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+      pairedAt: Value(pairedAt),
+    );
+  }
+
+  factory SheetPairRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SheetPairRow(
+      memberEmail: serializer.fromJson<String>(json['memberEmail']),
+      name: serializer.fromJson<String>(json['name']),
+      sheetId: serializer.fromJson<String>(json['sheetId']),
+      status: serializer.fromJson<String>(json['status']),
+      lastRevision: serializer.fromJson<String>(json['lastRevision']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+      pairedAt: serializer.fromJson<DateTime>(json['pairedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'memberEmail': serializer.toJson<String>(memberEmail),
+      'name': serializer.toJson<String>(name),
+      'sheetId': serializer.toJson<String>(sheetId),
+      'status': serializer.toJson<String>(status),
+      'lastRevision': serializer.toJson<String>(lastRevision),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+      'pairedAt': serializer.toJson<DateTime>(pairedAt),
+    };
+  }
+
+  SheetPairRow copyWith({
+    String? memberEmail,
+    String? name,
+    String? sheetId,
+    String? status,
+    String? lastRevision,
+    Value<DateTime?> lastSyncedAt = const Value.absent(),
+    DateTime? pairedAt,
+  }) => SheetPairRow(
+    memberEmail: memberEmail ?? this.memberEmail,
+    name: name ?? this.name,
+    sheetId: sheetId ?? this.sheetId,
+    status: status ?? this.status,
+    lastRevision: lastRevision ?? this.lastRevision,
+    lastSyncedAt: lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+    pairedAt: pairedAt ?? this.pairedAt,
+  );
+  SheetPairRow copyWithCompanion(SheetPairsCompanion data) {
+    return SheetPairRow(
+      memberEmail: data.memberEmail.present
+          ? data.memberEmail.value
+          : this.memberEmail,
+      name: data.name.present ? data.name.value : this.name,
+      sheetId: data.sheetId.present ? data.sheetId.value : this.sheetId,
+      status: data.status.present ? data.status.value : this.status,
+      lastRevision: data.lastRevision.present
+          ? data.lastRevision.value
+          : this.lastRevision,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+      pairedAt: data.pairedAt.present ? data.pairedAt.value : this.pairedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SheetPairRow(')
+          ..write('memberEmail: $memberEmail, ')
+          ..write('name: $name, ')
+          ..write('sheetId: $sheetId, ')
+          ..write('status: $status, ')
+          ..write('lastRevision: $lastRevision, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('pairedAt: $pairedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    memberEmail,
+    name,
+    sheetId,
+    status,
+    lastRevision,
+    lastSyncedAt,
+    pairedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SheetPairRow &&
+          other.memberEmail == this.memberEmail &&
+          other.name == this.name &&
+          other.sheetId == this.sheetId &&
+          other.status == this.status &&
+          other.lastRevision == this.lastRevision &&
+          other.lastSyncedAt == this.lastSyncedAt &&
+          other.pairedAt == this.pairedAt);
+}
+
+class SheetPairsCompanion extends UpdateCompanion<SheetPairRow> {
+  final Value<String> memberEmail;
+  final Value<String> name;
+  final Value<String> sheetId;
+  final Value<String> status;
+  final Value<String> lastRevision;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<DateTime> pairedAt;
+  final Value<int> rowid;
+  const SheetPairsCompanion({
+    this.memberEmail = const Value.absent(),
+    this.name = const Value.absent(),
+    this.sheetId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.lastRevision = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.pairedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SheetPairsCompanion.insert({
+    required String memberEmail,
+    required String name,
+    required String sheetId,
+    this.status = const Value.absent(),
+    this.lastRevision = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    required DateTime pairedAt,
+    this.rowid = const Value.absent(),
+  }) : memberEmail = Value(memberEmail),
+       name = Value(name),
+       sheetId = Value(sheetId),
+       pairedAt = Value(pairedAt);
+  static Insertable<SheetPairRow> custom({
+    Expression<String>? memberEmail,
+    Expression<String>? name,
+    Expression<String>? sheetId,
+    Expression<String>? status,
+    Expression<String>? lastRevision,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<DateTime>? pairedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (memberEmail != null) 'member_email': memberEmail,
+      if (name != null) 'name': name,
+      if (sheetId != null) 'sheet_id': sheetId,
+      if (status != null) 'status': status,
+      if (lastRevision != null) 'last_revision': lastRevision,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (pairedAt != null) 'paired_at': pairedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SheetPairsCompanion copyWith({
+    Value<String>? memberEmail,
+    Value<String>? name,
+    Value<String>? sheetId,
+    Value<String>? status,
+    Value<String>? lastRevision,
+    Value<DateTime?>? lastSyncedAt,
+    Value<DateTime>? pairedAt,
+    Value<int>? rowid,
+  }) {
+    return SheetPairsCompanion(
+      memberEmail: memberEmail ?? this.memberEmail,
+      name: name ?? this.name,
+      sheetId: sheetId ?? this.sheetId,
+      status: status ?? this.status,
+      lastRevision: lastRevision ?? this.lastRevision,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      pairedAt: pairedAt ?? this.pairedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (memberEmail.present) {
+      map['member_email'] = Variable<String>(memberEmail.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (sheetId.present) {
+      map['sheet_id'] = Variable<String>(sheetId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (lastRevision.present) {
+      map['last_revision'] = Variable<String>(lastRevision.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (pairedAt.present) {
+      map['paired_at'] = Variable<DateTime>(pairedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SheetPairsCompanion(')
+          ..write('memberEmail: $memberEmail, ')
+          ..write('name: $name, ')
+          ..write('sheetId: $sheetId, ')
+          ..write('status: $status, ')
+          ..write('lastRevision: $lastRevision, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('pairedAt: $pairedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SuggestionsTable extends Suggestions
+    with TableInfo<$SuggestionsTable, SuggestionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SuggestionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _memberEmailMeta = const VerificationMeta(
+    'memberEmail',
+  );
+  @override
+  late final GeneratedColumn<String> memberEmail = GeneratedColumn<String>(
+    'member_email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actionMeta = const VerificationMeta('action');
+  @override
+  late final GeneratedColumn<String> action = GeneratedColumn<String>(
+    'action',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetIdMeta = const VerificationMeta(
+    'targetId',
+  );
+  @override
+  late final GeneratedColumn<String> targetId = GeneratedColumn<String>(
+    'target_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _payloadJsonMeta = const VerificationMeta(
+    'payloadJson',
+  );
+  @override
+  late final GeneratedColumn<String> payloadJson = GeneratedColumn<String>(
+    'payload_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    memberEmail,
+    kind,
+    action,
+    targetId,
+    payloadJson,
+    note,
+    status,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'suggestions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SuggestionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('member_email')) {
+      context.handle(
+        _memberEmailMeta,
+        memberEmail.isAcceptableOrUnknown(
+          data['member_email']!,
+          _memberEmailMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_memberEmailMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('action')) {
+      context.handle(
+        _actionMeta,
+        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actionMeta);
+    }
+    if (data.containsKey('target_id')) {
+      context.handle(
+        _targetIdMeta,
+        targetId.isAcceptableOrUnknown(data['target_id']!, _targetIdMeta),
+      );
+    }
+    if (data.containsKey('payload_json')) {
+      context.handle(
+        _payloadJsonMeta,
+        payloadJson.isAcceptableOrUnknown(
+          data['payload_json']!,
+          _payloadJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadJsonMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SuggestionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SuggestionRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      memberEmail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}member_email'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      action: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}action'],
+      )!,
+      targetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_id'],
+      ),
+      payloadJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload_json'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SuggestionsTable createAlias(String alias) {
+    return $SuggestionsTable(attachedDatabase, alias);
+  }
+}
+
+class SuggestionRow extends DataClass implements Insertable<SuggestionRow> {
+  final String id;
+  final String memberEmail;
+
+  /// `budget`, `goal` or `bill`.
+  final String kind;
+
+  /// `add` or `change`.
+  final String action;
+  final String? targetId;
+
+  /// The proposed values as JSON (amounts in cents).
+  final String payloadJson;
+  final String note;
+
+  /// `pending`, `approved` or `declined`.
+  final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const SuggestionRow({
+    required this.id,
+    required this.memberEmail,
+    required this.kind,
+    required this.action,
+    this.targetId,
+    required this.payloadJson,
+    required this.note,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['member_email'] = Variable<String>(memberEmail);
+    map['kind'] = Variable<String>(kind);
+    map['action'] = Variable<String>(action);
+    if (!nullToAbsent || targetId != null) {
+      map['target_id'] = Variable<String>(targetId);
+    }
+    map['payload_json'] = Variable<String>(payloadJson);
+    map['note'] = Variable<String>(note);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SuggestionsCompanion toCompanion(bool nullToAbsent) {
+    return SuggestionsCompanion(
+      id: Value(id),
+      memberEmail: Value(memberEmail),
+      kind: Value(kind),
+      action: Value(action),
+      targetId: targetId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetId),
+      payloadJson: Value(payloadJson),
+      note: Value(note),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SuggestionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SuggestionRow(
+      id: serializer.fromJson<String>(json['id']),
+      memberEmail: serializer.fromJson<String>(json['memberEmail']),
+      kind: serializer.fromJson<String>(json['kind']),
+      action: serializer.fromJson<String>(json['action']),
+      targetId: serializer.fromJson<String?>(json['targetId']),
+      payloadJson: serializer.fromJson<String>(json['payloadJson']),
+      note: serializer.fromJson<String>(json['note']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'memberEmail': serializer.toJson<String>(memberEmail),
+      'kind': serializer.toJson<String>(kind),
+      'action': serializer.toJson<String>(action),
+      'targetId': serializer.toJson<String?>(targetId),
+      'payloadJson': serializer.toJson<String>(payloadJson),
+      'note': serializer.toJson<String>(note),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SuggestionRow copyWith({
+    String? id,
+    String? memberEmail,
+    String? kind,
+    String? action,
+    Value<String?> targetId = const Value.absent(),
+    String? payloadJson,
+    String? note,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => SuggestionRow(
+    id: id ?? this.id,
+    memberEmail: memberEmail ?? this.memberEmail,
+    kind: kind ?? this.kind,
+    action: action ?? this.action,
+    targetId: targetId.present ? targetId.value : this.targetId,
+    payloadJson: payloadJson ?? this.payloadJson,
+    note: note ?? this.note,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SuggestionRow copyWithCompanion(SuggestionsCompanion data) {
+    return SuggestionRow(
+      id: data.id.present ? data.id.value : this.id,
+      memberEmail: data.memberEmail.present
+          ? data.memberEmail.value
+          : this.memberEmail,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      action: data.action.present ? data.action.value : this.action,
+      targetId: data.targetId.present ? data.targetId.value : this.targetId,
+      payloadJson: data.payloadJson.present
+          ? data.payloadJson.value
+          : this.payloadJson,
+      note: data.note.present ? data.note.value : this.note,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SuggestionRow(')
+          ..write('id: $id, ')
+          ..write('memberEmail: $memberEmail, ')
+          ..write('kind: $kind, ')
+          ..write('action: $action, ')
+          ..write('targetId: $targetId, ')
+          ..write('payloadJson: $payloadJson, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    memberEmail,
+    kind,
+    action,
+    targetId,
+    payloadJson,
+    note,
+    status,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SuggestionRow &&
+          other.id == this.id &&
+          other.memberEmail == this.memberEmail &&
+          other.kind == this.kind &&
+          other.action == this.action &&
+          other.targetId == this.targetId &&
+          other.payloadJson == this.payloadJson &&
+          other.note == this.note &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SuggestionsCompanion extends UpdateCompanion<SuggestionRow> {
+  final Value<String> id;
+  final Value<String> memberEmail;
+  final Value<String> kind;
+  final Value<String> action;
+  final Value<String?> targetId;
+  final Value<String> payloadJson;
+  final Value<String> note;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SuggestionsCompanion({
+    this.id = const Value.absent(),
+    this.memberEmail = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.action = const Value.absent(),
+    this.targetId = const Value.absent(),
+    this.payloadJson = const Value.absent(),
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SuggestionsCompanion.insert({
+    required String id,
+    required String memberEmail,
+    required String kind,
+    required String action,
+    this.targetId = const Value.absent(),
+    required String payloadJson,
+    this.note = const Value.absent(),
+    this.status = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       memberEmail = Value(memberEmail),
+       kind = Value(kind),
+       action = Value(action),
+       payloadJson = Value(payloadJson),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<SuggestionRow> custom({
+    Expression<String>? id,
+    Expression<String>? memberEmail,
+    Expression<String>? kind,
+    Expression<String>? action,
+    Expression<String>? targetId,
+    Expression<String>? payloadJson,
+    Expression<String>? note,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (memberEmail != null) 'member_email': memberEmail,
+      if (kind != null) 'kind': kind,
+      if (action != null) 'action': action,
+      if (targetId != null) 'target_id': targetId,
+      if (payloadJson != null) 'payload_json': payloadJson,
+      if (note != null) 'note': note,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SuggestionsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? memberEmail,
+    Value<String>? kind,
+    Value<String>? action,
+    Value<String?>? targetId,
+    Value<String>? payloadJson,
+    Value<String>? note,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SuggestionsCompanion(
+      id: id ?? this.id,
+      memberEmail: memberEmail ?? this.memberEmail,
+      kind: kind ?? this.kind,
+      action: action ?? this.action,
+      targetId: targetId ?? this.targetId,
+      payloadJson: payloadJson ?? this.payloadJson,
+      note: note ?? this.note,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (memberEmail.present) {
+      map['member_email'] = Variable<String>(memberEmail.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (action.present) {
+      map['action'] = Variable<String>(action.value);
+    }
+    if (targetId.present) {
+      map['target_id'] = Variable<String>(targetId.value);
+    }
+    if (payloadJson.present) {
+      map['payload_json'] = Variable<String>(payloadJson.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SuggestionsCompanion(')
+          ..write('id: $id, ')
+          ..write('memberEmail: $memberEmail, ')
+          ..write('kind: $kind, ')
+          ..write('action: $action, ')
+          ..write('targetId: $targetId, ')
+          ..write('payloadJson: $payloadJson, ')
+          ..write('note: $note, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5070,6 +6167,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $GoalContributionsTable goalContributions =
       $GoalContributionsTable(this);
   late final $BillsTable bills = $BillsTable(this);
+  late final $SheetPairsTable sheetPairs = $SheetPairsTable(this);
+  late final $SuggestionsTable suggestions = $SuggestionsTable(this);
   late final Index expensesSpentOn = Index(
     'expenses_spent_on',
     'CREATE INDEX expenses_spent_on ON expenses (spent_on)',
@@ -5097,6 +6196,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     goals,
     goalContributions,
     bills,
+    sheetPairs,
+    suggestions,
     expensesSpentOn,
     expensesCategory,
     goalContributionsGoal,
@@ -7921,6 +9022,565 @@ typedef $$BillsTableProcessedTableManager =
       BillRow,
       PrefetchHooks Function()
     >;
+typedef $$SheetPairsTableCreateCompanionBuilder = SheetPairsCompanion Function({
+  required String memberEmail,
+  required String name,
+  required String sheetId,
+  Value<String> status,
+  Value<String> lastRevision,
+  Value<DateTime?> lastSyncedAt,
+  required DateTime pairedAt,
+  Value<int> rowid,
+});
+typedef $$SheetPairsTableUpdateCompanionBuilder = SheetPairsCompanion Function({
+  Value<String> memberEmail,
+  Value<String> name,
+  Value<String> sheetId,
+  Value<String> status,
+  Value<String> lastRevision,
+  Value<DateTime?> lastSyncedAt,
+  Value<DateTime> pairedAt,
+  Value<int> rowid,
+});
+
+class $$SheetPairsTableFilterComposer
+    extends Composer<_$AppDatabase, $SheetPairsTable> {
+  $$SheetPairsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get memberEmail => $composableBuilder(
+    column: $table.memberEmail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sheetId => $composableBuilder(
+    column: $table.sheetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastRevision => $composableBuilder(
+    column: $table.lastRevision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get pairedAt => $composableBuilder(
+    column: $table.pairedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SheetPairsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SheetPairsTable> {
+  $$SheetPairsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get memberEmail => $composableBuilder(
+    column: $table.memberEmail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sheetId => $composableBuilder(
+    column: $table.sheetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastRevision => $composableBuilder(
+    column: $table.lastRevision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get pairedAt => $composableBuilder(
+    column: $table.pairedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SheetPairsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SheetPairsTable> {
+  $$SheetPairsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get memberEmail => $composableBuilder(
+    column: $table.memberEmail,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get sheetId =>
+      $composableBuilder(column: $table.sheetId, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get lastRevision => $composableBuilder(
+    column: $table.lastRevision,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+    column: $table.lastSyncedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get pairedAt =>
+      $composableBuilder(column: $table.pairedAt, builder: (column) => column);
+}
+
+class $$SheetPairsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SheetPairsTable,
+          SheetPairRow,
+          $$SheetPairsTableFilterComposer,
+          $$SheetPairsTableOrderingComposer,
+          $$SheetPairsTableAnnotationComposer,
+          $$SheetPairsTableCreateCompanionBuilder,
+          $$SheetPairsTableUpdateCompanionBuilder,
+          (
+            SheetPairRow,
+            BaseReferences<_$AppDatabase, $SheetPairsTable, SheetPairRow>,
+          ),
+          SheetPairRow,
+          PrefetchHooks Function()
+        > {
+  $$SheetPairsTableTableManager(_$AppDatabase db, $SheetPairsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SheetPairsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SheetPairsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SheetPairsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> memberEmail = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> sheetId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> lastRevision = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                Value<DateTime> pairedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SheetPairsCompanion(
+                memberEmail: memberEmail,
+                name: name,
+                sheetId: sheetId,
+                status: status,
+                lastRevision: lastRevision,
+                lastSyncedAt: lastSyncedAt,
+                pairedAt: pairedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String memberEmail,
+                required String name,
+                required String sheetId,
+                Value<String> status = const Value.absent(),
+                Value<String> lastRevision = const Value.absent(),
+                Value<DateTime?> lastSyncedAt = const Value.absent(),
+                required DateTime pairedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SheetPairsCompanion.insert(
+                memberEmail: memberEmail,
+                name: name,
+                sheetId: sheetId,
+                status: status,
+                lastRevision: lastRevision,
+                lastSyncedAt: lastSyncedAt,
+                pairedAt: pairedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SheetPairsTable, SheetPairRow>(table),
+                  BaseReferences<_$AppDatabase, $SheetPairsTable, SheetPairRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SheetPairsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SheetPairsTable,
+      SheetPairRow,
+      $$SheetPairsTableFilterComposer,
+      $$SheetPairsTableOrderingComposer,
+      $$SheetPairsTableAnnotationComposer,
+      $$SheetPairsTableCreateCompanionBuilder,
+      $$SheetPairsTableUpdateCompanionBuilder,
+      (
+        SheetPairRow,
+        BaseReferences<_$AppDatabase, $SheetPairsTable, SheetPairRow>,
+      ),
+      SheetPairRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SuggestionsTableCreateCompanionBuilder =
+    SuggestionsCompanion Function({
+      required String id,
+      required String memberEmail,
+      required String kind,
+      required String action,
+      Value<String?> targetId,
+      required String payloadJson,
+      Value<String> note,
+      Value<String> status,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SuggestionsTableUpdateCompanionBuilder =
+    SuggestionsCompanion Function({
+      Value<String> id,
+      Value<String> memberEmail,
+      Value<String> kind,
+      Value<String> action,
+      Value<String?> targetId,
+      Value<String> payloadJson,
+      Value<String> note,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SuggestionsTableFilterComposer
+    extends Composer<_$AppDatabase, $SuggestionsTable> {
+  $$SuggestionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get memberEmail => $composableBuilder(
+    column: $table.memberEmail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get action => $composableBuilder(
+    column: $table.action,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetId => $composableBuilder(
+    column: $table.targetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SuggestionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SuggestionsTable> {
+  $$SuggestionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get memberEmail => $composableBuilder(
+    column: $table.memberEmail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get action => $composableBuilder(
+    column: $table.action,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetId => $composableBuilder(
+    column: $table.targetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SuggestionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SuggestionsTable> {
+  $$SuggestionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get memberEmail => $composableBuilder(
+    column: $table.memberEmail,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get action =>
+      $composableBuilder(column: $table.action, builder: (column) => column);
+
+  GeneratedColumn<String> get targetId =>
+      $composableBuilder(column: $table.targetId, builder: (column) => column);
+
+  GeneratedColumn<String> get payloadJson => $composableBuilder(
+    column: $table.payloadJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SuggestionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SuggestionsTable,
+          SuggestionRow,
+          $$SuggestionsTableFilterComposer,
+          $$SuggestionsTableOrderingComposer,
+          $$SuggestionsTableAnnotationComposer,
+          $$SuggestionsTableCreateCompanionBuilder,
+          $$SuggestionsTableUpdateCompanionBuilder,
+          (
+            SuggestionRow,
+            BaseReferences<_$AppDatabase, $SuggestionsTable, SuggestionRow>,
+          ),
+          SuggestionRow,
+          PrefetchHooks Function()
+        > {
+  $$SuggestionsTableTableManager(_$AppDatabase db, $SuggestionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SuggestionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SuggestionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SuggestionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> memberEmail = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> action = const Value.absent(),
+                Value<String?> targetId = const Value.absent(),
+                Value<String> payloadJson = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SuggestionsCompanion(
+                id: id,
+                memberEmail: memberEmail,
+                kind: kind,
+                action: action,
+                targetId: targetId,
+                payloadJson: payloadJson,
+                note: note,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String memberEmail,
+                required String kind,
+                required String action,
+                Value<String?> targetId = const Value.absent(),
+                required String payloadJson,
+                Value<String> note = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SuggestionsCompanion.insert(
+                id: id,
+                memberEmail: memberEmail,
+                kind: kind,
+                action: action,
+                targetId: targetId,
+                payloadJson: payloadJson,
+                note: note,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SuggestionsTable, SuggestionRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SuggestionsTable,
+                    SuggestionRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SuggestionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SuggestionsTable,
+      SuggestionRow,
+      $$SuggestionsTableFilterComposer,
+      $$SuggestionsTableOrderingComposer,
+      $$SuggestionsTableAnnotationComposer,
+      $$SuggestionsTableCreateCompanionBuilder,
+      $$SuggestionsTableUpdateCompanionBuilder,
+      (
+        SuggestionRow,
+        BaseReferences<_$AppDatabase, $SuggestionsTable, SuggestionRow>,
+      ),
+      SuggestionRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7945,4 +9605,8 @@ class $AppDatabaseManager {
       $$GoalContributionsTableTableManager(_db, _db.goalContributions);
   $$BillsTableTableManager get bills =>
       $$BillsTableTableManager(_db, _db.bills);
+  $$SheetPairsTableTableManager get sheetPairs =>
+      $$SheetPairsTableTableManager(_db, _db.sheetPairs);
+  $$SuggestionsTableTableManager get suggestions =>
+      $$SuggestionsTableTableManager(_db, _db.suggestions);
 }

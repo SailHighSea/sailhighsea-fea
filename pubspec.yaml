@@ -31,7 +31,13 @@ dependencies:
   timezone: ^0.11.2
   image_picker: ^1.2.4
   google_mlkit_text_recognition: ^0.17.1
+  http: ^1.6.0
+  flutter_secure_storage: ^11.2.0
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.4.2
+  crypto: ^3.0.7
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.4
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
@@ -47,3 +53,16 @@ flutter:
     - family: DM Sans
       fonts:
         - asset: assets/fonts/DMSans.ttf
+
+flutter_launcher_icons:
+  image_path: assets/icon/icon.png
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  adaptive_icon_background: "#0F6B4F"
+  adaptive_icon_foreground: assets/icon/icon_foreground.png
+  macos:
+    generate: true
+  windows:
+    generate: true
+    icon_size: 256

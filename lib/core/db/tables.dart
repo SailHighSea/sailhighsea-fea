@@ -201,3 +201,51 @@ class Bills extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// Google Sheets mode: a family member paired with this (organiser's) device. The organiser's app
+/// reads that member's sheet.
+@DataClassName('SheetPairRow')
+class SheetPairs extends Table {
+  TextColumn get memberEmail => text()();
+  TextColumn get name => text()();
+  TextColumn get sheetId => text()();
+
+  /// `active`, `accessRemoved` (the sheet is gone or no longer shared) or `unpaired`.
+  TextColumn get status => text().withDefault(const Constant('active'))();
+
+  /// The member sheet's revision counter at the last full read, so an unchanged sheet is not
+  /// read again.
+  TextColumn get lastRevision => text().withDefault(const Constant(''))();
+  DateTimeColumn get lastSyncedAt => dateTime().nullable()();
+  DateTimeColumn get pairedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {memberEmail};
+}
+
+/// Google Sheets mode: a member's proposal to add or change a budget, goal or bill. The organiser
+/// approves or declines it.
+@DataClassName('SuggestionRow')
+class Suggestions extends Table {
+  TextColumn get id => text()();
+  TextColumn get memberEmail => text()();
+
+  /// `budget`, `goal` or `bill`.
+  TextColumn get kind => text()();
+
+  /// `add` or `change`.
+  TextColumn get action => text()();
+  TextColumn get targetId => text().nullable()();
+
+  /// The proposed values as JSON (amounts in cents).
+  TextColumn get payloadJson => text()();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// `pending`, `approved` or `declined`.
+  TextColumn get status => text().withDefault(const Constant('pending'))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}

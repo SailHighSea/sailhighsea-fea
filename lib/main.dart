@@ -18,6 +18,8 @@ import 'features/bills/reminders/reminder_scheduler.dart';
 import 'features/family/member_providers.dart';
 import 'features/integrations/data/supabase_sheets_remote.dart';
 import 'features/integrations/sheets_providers.dart';
+import 'core/google/google_auth.dart';
+import 'core/sheets_sync/sheets_settings.dart';
 import 'features/scan/receipt_services.dart';
 import 'features/sync/sync_providers.dart';
 import 'core/sync/supabase_sync_backend.dart';
@@ -32,8 +34,14 @@ Future<void> main() async {
   // Accounts need a Supabase project (`--dart-define-from-file=.env.json`). Without one the
   // app runs local-only: no sign-in, one person, everything stays on this device.
   const config = SupabaseConfig.fromEnvironment();
+  // `--dart-define=BACKEND=sheets|supabase|local` picks the mode. Without it: Supabase when it is
+  // configured, otherwise local only (as before).
+  final mode = BackendMode.parse(
+    const String.fromEnvironment('BACKEND'),
+    supabaseConfigured: config.isConfigured,
+  );
   SupabaseClient? client;
-  if (config.isConfigured) {
+  if (mode == BackendMode.supabase && config.isConfigured) {
     await Supabase.initialize(url: config.url, publishableKey: config.anonKey);
     client = Supabase.instance.client;
   }
@@ -41,6 +49,14 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [
+        backendModeProvider.overrideWithValue(mode),
+        if (mode == BackendMode.sheets)
+          googleAuthProvider.overrideWithValue(
+            LoopbackGoogleAuth(
+              config: const GoogleOAuthConfig.fromEnvironment(),
+              store: SecureTokenStore(),
+            ),
+          ),
         sharedPreferencesProvider.overrideWithValue(prefs),
         databaseProvider.overrideWithValue(database),
         reminderSchedulerProvider.overrideWithValue(

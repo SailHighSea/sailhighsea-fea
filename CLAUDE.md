@@ -17,6 +17,13 @@ Flutter (stable) + Dart, Riverpod, go_router, Drift (SQLite, local-first), Supab
 9. Write tests with each feature. Run `flutter analyze` and `flutter test` before saying a phase is done.
 10. Never commit secrets. Supabase URL and anon key come from `--dart-define` or `.env` (gitignored).
 
+## Backend modes (Phase 8)
+`--dart-define=BACKEND=sheets|supabase|local` picks the data source; without it the app uses Supabase when it is configured, otherwise local only. **Supabase and local modes behave exactly as above.** In `sheets` mode there is no server, so some rules above do not apply:
+- Rule 6 (RLS) and rule 7 (hashed, rate-limited invite codes) do not apply: Google Drive sharing is the only access control, roles are reduced to organiser (owner) and member (editor who may suggest changes), and pairing codes are checked by the apps (24-hour expiry, single use) and are not hashed.
+- Rule 5 still holds: the UI reads Drift; Google Sheets are the transport and the backup. One writer per sheet, so no conflicts.
+- Tokens live in the platform secure store (`flutter_secure_storage`), never in Drift, prefs or logs.
+- One implementation per feature still holds: only the data source changes (`lib/core/google`, `lib/core/sheets_sync`, `lib/features/pairing`); no screen forks by mode except the Family page.
+
 ## Working style
 - Work one phase at a time from docs/phases. Do not start the next phase unprompted.
 - At the end of each phase: run analyze and tests, build every target this machine supports using `scripts/build_test.sh` (or `.ps1` on Windows), put outputs in `test/`, and report what was built, what was skipped and why, and how to run each build.

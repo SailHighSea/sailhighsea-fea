@@ -1,6 +1,6 @@
 # Phase 7: Polish and release (weeks 13 to 14)
 
-**Status:** Not started.
+**Status:** Done on this branch (see CHANGELOG.md, Phase 7). Nothing was published.
 
 ## Do
 1. Accessibility pass: screen reader labels, large text, contrast checks in all three modes, reduced motion.

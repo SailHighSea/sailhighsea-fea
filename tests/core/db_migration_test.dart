@@ -81,4 +81,56 @@ void main() {
     expect(await db.select(db.budgets).get(), isEmpty);
     expect(await db.select(db.members).get(), isEmpty);
   });
+
+  test(
+    'a version 5 database gains the Google Sheets tables and keeps its data',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('migration5');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final file = File('${dir.path}/app.db');
+
+      var db = AppDatabase(NativeDatabase(file));
+      await db.select(db.categories).get();
+      await db
+          .into(db.expenses)
+          .insert(
+            ExpensesCompanion.insert(
+              id: 'e1',
+              amountCents: 500,
+              categoryId: 'default-food',
+              spentOn: '2026-10-01',
+              updatedAt: DateTime(2026, 10, 1),
+            ),
+          );
+      await db.close();
+
+      // What Phase 4c shipped: no sheet_pairs, no suggestions, user_version 5.
+      db = AppDatabase(
+        NativeDatabase(
+          file,
+          setup: (raw) => raw
+            ..execute('DROP TABLE sheet_pairs')
+            ..execute('DROP TABLE suggestions')
+            ..execute('PRAGMA user_version = 5'),
+        ),
+      );
+      addTearDown(db.close);
+      expect((await db.select(db.expenses).get()).single.id, 'e1');
+      expect(await db.select(db.sheetPairs).get(), isEmpty);
+      await db
+          .into(db.suggestions)
+          .insert(
+            SuggestionsCompanion.insert(
+              id: 's1',
+              memberEmail: 'm@x.test',
+              kind: 'budget',
+              action: 'add',
+              payloadJson: '{}',
+              createdAt: DateTime(2026, 10, 1),
+              updatedAt: DateTime(2026, 10, 1),
+            ),
+          );
+      expect(await db.select(db.suggestions).get(), hasLength(1));
+    },
+  );
 }

@@ -17,6 +17,7 @@ class RecentCard extends StatelessWidget {
     required this.table,
     required this.onSeeAll,
     this.onOpen,
+    this.canOpen,
   });
 
   final List<RecentExpense> items;
@@ -27,6 +28,11 @@ class RecentCard extends StatelessWidget {
 
   /// `null` for members who cannot edit: rows are shown but do not open.
   final ValueChanged<RecentExpense>? onOpen;
+
+  /// Rows that may not be opened (another member's expense in Google Sheets mode).
+  final bool Function(RecentExpense)? canOpen;
+
+  bool _open(RecentExpense e) => onOpen != null && (canOpen?.call(e) ?? true);
 
   @override
   Widget build(BuildContext context) {
@@ -87,17 +93,17 @@ class RecentCard extends StatelessWidget {
             if (items.isEmpty) _empty(t),
             for (final e in items)
               ContextMenuRegion(
-                enabled: onOpen != null,
+                enabled: _open(e),
                 items: [ContextMenuItem('Edit', () => onOpen!(e))],
                 child: Semantics(
                   container: true,
-                  button: onOpen != null,
+                  button: _open(e),
                   excludeSemantics: true,
-                  onTap: onOpen == null ? null : () => onOpen!(e),
+                  onTap: !_open(e) ? null : () => onOpen!(e),
                   label:
                       '${e.note}, ${e.categoryName}, ${relativeDateLabel(e.spentOn, now)}, ${e.addedBy}, ${money.format(e.cents)}',
                   child: InkWell(
-                    onTap: onOpen == null ? null : () => onOpen!(e),
+                    onTap: !_open(e) ? null : () => onOpen!(e),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         border: Border(top: BorderSide(color: t.border)),
@@ -168,17 +174,17 @@ class RecentCard extends StatelessWidget {
           if (items.isEmpty) _empty(t),
           for (final e in items)
             ContextMenuRegion(
-              enabled: onOpen != null,
+              enabled: _open(e),
               items: [ContextMenuItem('Edit', () => onOpen!(e))],
               child: Semantics(
                 container: true,
-                button: onOpen != null,
+                button: _open(e),
                 excludeSemantics: true,
-                onTap: onOpen == null ? null : () => onOpen!(e),
+                onTap: !_open(e) ? null : () => onOpen!(e),
                 label:
                     '${e.note}, ${e.categoryName}, ${relativeDateLabel(e.spentOn, now)}, ${e.addedBy}, ${money.format(e.cents)}',
                 child: InkWell(
-                  onTap: onOpen == null ? null : () => onOpen!(e),
+                  onTap: !_open(e) ? null : () => onOpen!(e),
                   child: ExcludeSemantics(
                     child: DecoratedBox(
                       decoration: BoxDecoration(

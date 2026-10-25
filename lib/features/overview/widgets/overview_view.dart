@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/widgets/async_placeholder.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -31,10 +34,10 @@ class OverviewView extends ConsumerWidget {
     final data = async.value;
     final t = context.tokens;
     if (data == null) {
-      return Center(
-        child: async.hasError
-            ? Text('Could not load the overview: ${async.error}')
-            : const CircularProgressIndicator(),
+      return AsyncPlaceholder(
+        what: 'the overview',
+        error: async.hasError ? async.error : null,
+        onRetry: () => ref.invalidate(overviewProvider),
       );
     }
     final money = ref.watch(moneyFormatterProvider);

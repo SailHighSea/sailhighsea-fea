@@ -14,6 +14,7 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/theme/appearance_provider.dart';
 import '../../core/theme/appearance_settings.dart';
 import '../../core/theme/color_themes.dart';
+import '../privacy/privacy_screen.dart';
 
 /// Appearance settings (Themes, TabAppearance and DeskAppearance mockups). Every control
 /// is wired to the real theme switch, so changes apply live and persist.
@@ -62,6 +63,10 @@ class AppearanceScreen extends ConsumerWidget {
               onTap: () => showShortcutHelp(context),
             ),
           ),
+          const SizedBox(height: 8),
+          const _SectionLabel('Privacy and data'),
+          const SizedBox(height: 10),
+          const PrivacyCard(),
           if (mode == PaneMode.stacked) const SizedBox(height: 16),
         ],
       ),
