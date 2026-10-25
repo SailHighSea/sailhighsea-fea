@@ -18,6 +18,7 @@ import 'features/bills/reminders/reminder_scheduler.dart';
 import 'features/family/member_providers.dart';
 import 'features/integrations/data/supabase_sheets_remote.dart';
 import 'features/integrations/sheets_providers.dart';
+import 'features/scan/receipt_services.dart';
 import 'features/sync/sync_providers.dart';
 import 'core/sync/supabase_sync_backend.dart';
 
@@ -53,6 +54,9 @@ Future<void> main() async {
             SupabaseHouseholdRemote(client),
           ),
           syncBackendProvider.overrideWithValue(SupabaseSyncBackend(client)),
+          receiptStorageProvider.overrideWithValue(
+            SupabaseReceiptStorage(client),
+          ),
           sheetsRemoteProvider.overrideWithValue(SupabaseSheetsRemote(client)),
         ],
       ],

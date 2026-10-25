@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/money/money_format.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/context_menu_region.dart';
 import '../../../core/widgets/percent_ring.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../domain/goal_calculations.dart';
@@ -27,40 +28,48 @@ class GoalCard extends StatelessWidget {
         : doneByLabel(goal);
     final progress =
         '${money.formatWhole(goal.savedCents)} of ${money.formatWhole(goal.targetCents)}';
-    return SurfaceCard(
-      padding: const EdgeInsets.all(16),
-      onTap: onTap,
-      semanticLabel: '${goal.goal.name}: $progress, ${goal.percent}%. $monthly',
-      child: ExcludeSemantics(
-        child: Row(
-          children: [
-            PercentRing(fraction: goal.fraction, percent: goal.percent),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    goal.goal.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: t.text,
+    return ContextMenuRegion(
+      enabled: onTap != null,
+      items: [ContextMenuItem('Edit goal', () => onTap!())],
+      child: SurfaceCard(
+        padding: const EdgeInsets.all(16),
+        onTap: onTap,
+        semanticLabel:
+            '${goal.goal.name}: $progress, ${goal.percent}%. $monthly',
+        child: ExcludeSemantics(
+          child: Row(
+            children: [
+              PercentRing(fraction: goal.fraction, percent: goal.percent),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      goal.goal.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: t.text,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    progress,
-                    style: TextStyle(fontSize: 14, color: t.muted),
-                  ),
-                  Text(monthly, style: TextStyle(fontSize: 14, color: t.muted)),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      progress,
+                      style: TextStyle(fontSize: 14, color: t.muted),
+                    ),
+                    Text(
+                      monthly,
+                      style: TextStyle(fontSize: 14, color: t.muted),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -8,6 +8,8 @@ import '../../core/theme/appearance_provider.dart';
 import '../auth/auth_providers.dart';
 import 'amount_entry.dart';
 import 'data/day_format.dart';
+import '../family/member_providers.dart';
+import '../scan/receipt_services.dart';
 import 'expense_providers.dart';
 
 @immutable
@@ -20,6 +22,8 @@ class ExpenseFormState {
     this.loaded = true,
     this.saving = false,
     this.error,
+    this.receiptImagePath,
+    this.shareReceipt = false,
   });
 
   final AmountEntry amount;
@@ -34,6 +38,12 @@ class ExpenseFormState {
   final bool saving;
   final String? error;
 
+  /// A photo picked in the scan flow, on this device.
+  final String? receiptImagePath;
+
+  /// Upload the photo for the household when saving. Off by default: the photo stays on the device.
+  final bool shareReceipt;
+
   ExpenseFormState copyWith({
     AmountEntry? amount,
     DateTime? spentOn,
@@ -42,7 +52,10 @@ class ExpenseFormState {
     bool? loaded,
     bool? saving,
     String? error,
+    String? receiptImagePath,
+    bool? shareReceipt,
     bool clearError = false,
+    bool clearReceipt = false,
   }) {
     return ExpenseFormState(
       amount: amount ?? this.amount,
@@ -52,6 +65,10 @@ class ExpenseFormState {
       loaded: loaded ?? this.loaded,
       saving: saving ?? this.saving,
       error: clearError ? null : (error ?? this.error),
+      receiptImagePath: clearReceipt
+          ? null
+          : (receiptImagePath ?? this.receiptImagePath),
+      shareReceipt: clearReceipt ? false : (shareReceipt ?? this.shareReceipt),
     );
   }
 }
@@ -67,6 +84,9 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
 
   @override
   ExpenseFormState build() {
+    // The new-expense draft lives for the session so folding or unfolding the device
+    // (fold panel <-> Add screen) never loses what was typed.
+    if (editId == null) ref.keepAlive();
     final today = ref.read(clockProvider)().dateOnly;
     if (editId != null) {
       Future.microtask(_load);
@@ -113,6 +133,33 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
   void setNote(String note) => state = state.copyWith(note: note);
   void setDate(DateTime date) => state = state.copyWith(spentOn: date.dateOnly);
 
+  /// Fills the draft from a scanned receipt. Only fields that were read are touched, so anything
+  /// already typed is kept when the scan found nothing for it.
+  void applyReceipt({
+    required String imagePath,
+    int? cents,
+    DateTime? date,
+    String? categoryId,
+    String? note,
+    bool share = false,
+  }) {
+    state = state.copyWith(
+      amount: cents == null
+          ? null
+          : AmountEntry.fromCents(cents, minorDigits: _minorDigits),
+      spentOn: date?.dateOnly,
+      categoryId: categoryId,
+      note: note,
+      receiptImagePath: imagePath,
+      shareReceipt: share,
+      clearError: true,
+    );
+  }
+
+  void setShareReceipt(bool share) =>
+      state = state.copyWith(shareReceipt: share);
+  void clearReceipt() => state = state.copyWith(clearReceipt: true);
+
   /// Adds a category, selects it, and returns its id.
   Future<String> addCategory(String name) async {
     final row = await ref.read(categoryRepositoryProvider).add(name);
@@ -122,6 +169,24 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
 
   /// Back to an empty draft (used after saving from the always-open fold panel).
   void reset() => state = build();
+
+  /// Uploads the scanned photo when the person chose to share it. The expense is already saved,
+  /// so a failed upload (offline) only means the photo stays on this device.
+  Future<void> _shareReceipt(String expenseId, ExpenseFormState s) async {
+    final local = s.receiptImagePath;
+    final storage = ref.read(receiptStorageProvider);
+    if (local == null || !s.shareReceipt || storage == null) return;
+    try {
+      final path = await storage.upload(
+        householdId: ref.read(activeHouseholdIdProvider),
+        expenseId: expenseId,
+        localPath: local,
+      );
+      await ref.read(expenseRepositoryProvider).setReceiptPath(expenseId, path);
+    } catch (_) {
+      // Stays on the device; the expense itself is safe.
+    }
+  }
 
   /// Saves the expense. Returns false (and sets [ExpenseFormState.error]) when the amount is zero.
   Future<bool> save() async {
@@ -140,13 +205,14 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
     final categoryId = chosen?.id ?? otherCategoryId;
     final repo = ref.read(expenseRepositoryProvider);
     if (editId == null) {
-      await repo.add(
+      final id = await repo.add(
         amountCents: cents,
         categoryId: categoryId,
         spentOn: s.spentOn,
         note: s.note,
         createdBy: ref.read(currentUserIdProvider) ?? 'You',
       );
+      await _shareReceipt(id, s);
     } else {
       await repo.update(
         editId!,
@@ -161,7 +227,8 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
   }
 }
 
-/// One draft per expense id; `null` is the new-expense draft. Dropped when nothing watches it.
+/// One draft per expense id; `null` is the new-expense draft and is kept for the session. Edit drafts
+/// are dropped when nothing watches them.
 final expenseFormProvider = NotifierProvider.autoDispose
     .family<ExpenseFormController, ExpenseFormState, String?>(
       ExpenseFormController.new,

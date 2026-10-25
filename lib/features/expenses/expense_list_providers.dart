@@ -73,3 +73,17 @@ List<ExpenseRow> filterExpenses(
         e,
   ];
 }
+
+/// Ctrl or Cmd + F asks the expense list to focus its search box (also when the list was not
+/// open yet). The list clears the request once it has focused the box.
+class SearchFocusRequest extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void request() => state = true;
+  void clear() => state = false;
+}
+
+final searchFocusRequestProvider = NotifierProvider<SearchFocusRequest, bool>(
+  SearchFocusRequest.new,
+);

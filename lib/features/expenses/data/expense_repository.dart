@@ -96,6 +96,16 @@ class ExpenseRepository {
     );
   }
 
+  /// Records where the shared receipt photo was uploaded.
+  Future<void> setReceiptPath(String id, String? path) =>
+      (_db.update(_db.expenses)..where((e) => e.id.equals(id))).write(
+        ExpensesCompanion(
+          receiptPath: Value(path),
+          updatedAt: Value(_clock()),
+          dirty: const Value(true),
+        ),
+      );
+
   /// Soft delete: the row stays so the delete can sync and be undone.
   Future<void> softDelete(String id) =>
       (_db.update(_db.expenses)..where((e) => e.id.equals(id))).write(

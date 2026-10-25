@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/layout/page_layout.dart';
 import '../../core/layout/window_class.dart';
 import '../../core/money/currency.dart';
+import '../../core/shortcuts/app_shortcuts.dart';
+import '../../core/widgets/surface_card.dart' show TextLinkButton;
 import '../../core/money/money_format.dart';
 import '../../core/money/money_provider.dart';
 import '../../core/theme/app_theme.dart';
@@ -50,6 +52,15 @@ class AppearanceScreen extends ConsumerWidget {
             settings: settings,
             controller: controller,
             money: money,
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextLinkButton(
+              key: const ValueKey('keyboard-shortcuts'),
+              label: 'Keyboard shortcuts',
+              onTap: () => showShortcutHelp(context),
+            ),
           ),
           if (mode == PaneMode.stacked) const SizedBox(height: 16),
         ],

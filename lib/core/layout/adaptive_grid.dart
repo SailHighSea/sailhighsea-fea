@@ -75,27 +75,38 @@ class PrimarySideLayout extends StatelessWidget {
   final bool sideFirstWhenStacked;
   final double gap;
 
+  /// The main column needs at least this much room beside the side column; narrower
+  /// windows (a 600 wide tablet with its rail) stack them instead of squeezing the list.
+  static const double minPrimaryWidth = 360;
+
   @override
   Widget build(BuildContext context) {
-    if (context.layout.isCompact) {
-      final first = sideFirstWhenStacked ? side : primary;
-      final second = sideFirstWhenStacked ? primary : side;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          first,
-          SizedBox(height: gap),
-          second,
-        ],
-      );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: primary),
-        SizedBox(width: gap + 8),
-        SizedBox(width: sideWidth, child: side),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stacked =
+            context.layout.isCompact ||
+            constraints.maxWidth < sideWidth + gap + 8 + minPrimaryWidth;
+        if (stacked) {
+          final first = sideFirstWhenStacked ? side : primary;
+          final second = sideFirstWhenStacked ? primary : side;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              first,
+              SizedBox(height: gap),
+              second,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: primary),
+            SizedBox(width: gap + 8),
+            SizedBox(width: sideWidth, child: side),
+          ],
+        );
+      },
     );
   }
 }
@@ -120,22 +131,29 @@ class HeroGridLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (context.layout.isCompact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (!hideHeroWhenStacked) ...[hero, SizedBox(height: gap)],
-          grid,
-        ],
-      );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(width: heroWidth, child: hero),
-        SizedBox(width: gap),
-        Expanded(child: grid),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stacked =
+            context.layout.isCompact ||
+            constraints.maxWidth < heroWidth + gap + 300;
+        if (stacked) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!hideHeroWhenStacked) ...[hero, SizedBox(height: gap)],
+              grid,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(width: heroWidth, child: hero),
+            SizedBox(width: gap),
+            Expanded(child: grid),
+          ],
+        );
+      },
     );
   }
 }

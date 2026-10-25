@@ -1,6 +1,6 @@
 # Phase 5: Budgets, insights, goals, bills (weeks 8 to 9)
 
-**Status:** Built (2026-10-28). Still to do: `supabase test db`, Android/iOS/macOS builds and a real notification, and Windows pixel goldens (`PHASE5_GOLDENS=1`). All six items below are done; see CHANGELOG.md.
+**Status:** Done and merged (PR #2). Still to do: `supabase test db`, Android/iOS/macOS builds and a real notification, and Windows pixel goldens (`PHASE5_GOLDENS=1`). All six items below are done; see CHANGELOG.md.
 
 ## Do
 1. Budgets (overall and per category) matching Budgets, TabBudgets, DeskBudgets, with progress bars and over-budget states.

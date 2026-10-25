@@ -76,6 +76,7 @@ class AppTextField extends StatelessWidget {
                   : TextStyle(fontSize: 17, color: t.text),
               decoration: const InputDecoration(
                 isDense: true,
+                constraints: BoxConstraints(minHeight: kMinTapTarget),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,

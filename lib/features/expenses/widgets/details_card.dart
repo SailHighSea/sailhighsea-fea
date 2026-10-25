@@ -64,6 +64,7 @@ class DetailsCard extends StatelessWidget {
                     cursorColor: t.primary,
                     decoration: InputDecoration(
                       isDense: true,
+                      constraints: const BoxConstraints(minHeight: 44),
                       counterText: '',
                       border: InputBorder.none,
                       hintText: 'Add a note',
