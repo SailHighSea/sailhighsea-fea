@@ -34,6 +34,9 @@ const supportedCurrencies = <CurrencyInfo>[
   CurrencyInfo('MYR', 'RM', 'Malaysian ringgit'),
   CurrencyInfo('INR', '₹', 'Indian rupee'),
   CurrencyInfo('JPY', '¥', 'Japanese yen', minorDigits: 0),
+  CurrencyInfo('QAR', 'QR', 'Qatari riyal'),
+  CurrencyInfo('AED', 'AED', 'UAE dirham'),
+  CurrencyInfo('SAR', 'SAR', 'Saudi riyal'),
 ];
 
 CurrencyInfo currencyByCode(String code) => supportedCurrencies.firstWhere(

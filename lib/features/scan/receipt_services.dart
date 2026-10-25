@@ -51,6 +51,25 @@ abstract interface class ReceiptOcr {
   bool get isAvailable;
 
   Future<String> recognise(String imagePath);
+
+  /// Every recognised line with where it is on the picture, so a table (a bank statement) can be
+  /// put back together row by row.
+  Future<List<OcrLine>> recogniseLines(String imagePath);
+}
+
+/// One recognised line of text and its box on the picture.
+class OcrLine {
+  const OcrLine(
+    this.text, {
+    required this.left,
+    required this.top,
+    required this.right,
+    required this.bottom,
+  });
+  final String text;
+  final double left, top, right, bottom;
+  double get centerY => (top + bottom) / 2;
+  double get height => bottom - top;
 }
 
 /// On-device Google ML Kit (Android and iOS). The image never leaves the phone for recognition.
@@ -70,6 +89,29 @@ class MlKitReceiptOcr implements ReceiptOcr {
       await recogniser.close();
     }
   }
+
+  @override
+  Future<List<OcrLine>> recogniseLines(String imagePath) async {
+    final recogniser = TextRecognizer(script: TextRecognitionScript.latin);
+    try {
+      final result = await recogniser.processImage(
+        InputImage.fromFilePath(imagePath),
+      );
+      return [
+        for (final b in result.blocks)
+          for (final l in b.lines)
+            OcrLine(
+              l.text,
+              left: l.boundingBox.left,
+              top: l.boundingBox.top,
+              right: l.boundingBox.right,
+              bottom: l.boundingBox.bottom,
+            ),
+      ];
+    } finally {
+      await recogniser.close();
+    }
+  }
 }
 
 class NoReceiptOcr implements ReceiptOcr {
@@ -80,6 +122,9 @@ class NoReceiptOcr implements ReceiptOcr {
 
   @override
   Future<String> recognise(String imagePath) async => '';
+
+  @override
+  Future<List<OcrLine>> recogniseLines(String imagePath) async => const [];
 }
 
 /// Shared receipts, one private object per expense: `<household id>/<expense id>.jpg`.
