@@ -1967,6 +1967,621 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
   }
 }
 
+class $SyncStateTable extends SyncState
+    with TableInfo<$SyncStateTable, SyncStateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [key, value];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_state';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncStateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  SyncStateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncStateRow(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncStateTable createAlias(String alias) {
+    return $SyncStateTable(attachedDatabase, alias);
+  }
+}
+
+class SyncStateRow extends DataClass implements Insertable<SyncStateRow> {
+  final String key;
+  final String value;
+  const SyncStateRow({required this.key, required this.value});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['value'] = Variable<String>(value);
+    return map;
+  }
+
+  SyncStateCompanion toCompanion(bool nullToAbsent) {
+    return SyncStateCompanion(key: Value(key), value: Value(value));
+  }
+
+  factory SyncStateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncStateRow(
+      key: serializer.fromJson<String>(json['key']),
+      value: serializer.fromJson<String>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'value': serializer.toJson<String>(value),
+    };
+  }
+
+  SyncStateRow copyWith({String? key, String? value}) =>
+      SyncStateRow(key: key ?? this.key, value: value ?? this.value);
+  SyncStateRow copyWithCompanion(SyncStateCompanion data) {
+    return SyncStateRow(
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateRow(')
+          ..write('key: $key, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncStateRow &&
+          other.key == this.key &&
+          other.value == this.value);
+}
+
+class SyncStateCompanion extends UpdateCompanion<SyncStateRow> {
+  final Value<String> key;
+  final Value<String> value;
+  final Value<int> rowid;
+  const SyncStateCompanion({
+    this.key = const Value.absent(),
+    this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncStateCompanion.insert({
+    required String key,
+    required String value,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       value = Value(value);
+  static Insertable<SyncStateRow> custom({
+    Expression<String>? key,
+    Expression<String>? value,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncStateCompanion copyWith({
+    Value<String>? key,
+    Value<String>? value,
+    Value<int>? rowid,
+  }) {
+    return SyncStateCompanion(
+      key: key ?? this.key,
+      value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateCompanion(')
+          ..write('key: $key, ')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncIssuesTable extends SyncIssues
+    with TableInfo<$SyncIssuesTable, SyncIssueRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncIssuesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncTableMeta = const VerificationMeta(
+    'syncTable',
+  );
+  @override
+  late final GeneratedColumn<String> syncTable = GeneratedColumn<String>(
+    'sync_table',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rowIdMeta = const VerificationMeta('rowId');
+  @override
+  late final GeneratedColumn<String> rowId = GeneratedColumn<String>(
+    'row_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _summaryMeta = const VerificationMeta(
+    'summary',
+  );
+  @override
+  late final GeneratedColumn<String> summary = GeneratedColumn<String>(
+    'summary',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    householdId,
+    syncTable,
+    rowId,
+    summary,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_issues';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncIssueRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('sync_table')) {
+      context.handle(
+        _syncTableMeta,
+        syncTable.isAcceptableOrUnknown(data['sync_table']!, _syncTableMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncTableMeta);
+    }
+    if (data.containsKey('row_id')) {
+      context.handle(
+        _rowIdMeta,
+        rowId.isAcceptableOrUnknown(data['row_id']!, _rowIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rowIdMeta);
+    }
+    if (data.containsKey('summary')) {
+      context.handle(
+        _summaryMeta,
+        summary.isAcceptableOrUnknown(data['summary']!, _summaryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_summaryMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SyncIssueRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncIssueRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      syncTable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_table'],
+      )!,
+      rowId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}row_id'],
+      )!,
+      summary: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summary'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncIssuesTable createAlias(String alias) {
+    return $SyncIssuesTable(attachedDatabase, alias);
+  }
+}
+
+class SyncIssueRow extends DataClass implements Insertable<SyncIssueRow> {
+  final int id;
+  final String householdId;
+
+  /// `expenses` or `categories`.
+  final String syncTable;
+  final String rowId;
+
+  /// What the change was, in words ("Lunch, S$12.00").
+  final String summary;
+  final DateTime createdAt;
+  const SyncIssueRow({
+    required this.id,
+    required this.householdId,
+    required this.syncTable,
+    required this.rowId,
+    required this.summary,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['household_id'] = Variable<String>(householdId);
+    map['sync_table'] = Variable<String>(syncTable);
+    map['row_id'] = Variable<String>(rowId);
+    map['summary'] = Variable<String>(summary);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SyncIssuesCompanion toCompanion(bool nullToAbsent) {
+    return SyncIssuesCompanion(
+      id: Value(id),
+      householdId: Value(householdId),
+      syncTable: Value(syncTable),
+      rowId: Value(rowId),
+      summary: Value(summary),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SyncIssueRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncIssueRow(
+      id: serializer.fromJson<int>(json['id']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      syncTable: serializer.fromJson<String>(json['syncTable']),
+      rowId: serializer.fromJson<String>(json['rowId']),
+      summary: serializer.fromJson<String>(json['summary']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'householdId': serializer.toJson<String>(householdId),
+      'syncTable': serializer.toJson<String>(syncTable),
+      'rowId': serializer.toJson<String>(rowId),
+      'summary': serializer.toJson<String>(summary),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SyncIssueRow copyWith({
+    int? id,
+    String? householdId,
+    String? syncTable,
+    String? rowId,
+    String? summary,
+    DateTime? createdAt,
+  }) => SyncIssueRow(
+    id: id ?? this.id,
+    householdId: householdId ?? this.householdId,
+    syncTable: syncTable ?? this.syncTable,
+    rowId: rowId ?? this.rowId,
+    summary: summary ?? this.summary,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SyncIssueRow copyWithCompanion(SyncIssuesCompanion data) {
+    return SyncIssueRow(
+      id: data.id.present ? data.id.value : this.id,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      syncTable: data.syncTable.present ? data.syncTable.value : this.syncTable,
+      rowId: data.rowId.present ? data.rowId.value : this.rowId,
+      summary: data.summary.present ? data.summary.value : this.summary,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncIssueRow(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('syncTable: $syncTable, ')
+          ..write('rowId: $rowId, ')
+          ..write('summary: $summary, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, householdId, syncTable, rowId, summary, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncIssueRow &&
+          other.id == this.id &&
+          other.householdId == this.householdId &&
+          other.syncTable == this.syncTable &&
+          other.rowId == this.rowId &&
+          other.summary == this.summary &&
+          other.createdAt == this.createdAt);
+}
+
+class SyncIssuesCompanion extends UpdateCompanion<SyncIssueRow> {
+  final Value<int> id;
+  final Value<String> householdId;
+  final Value<String> syncTable;
+  final Value<String> rowId;
+  final Value<String> summary;
+  final Value<DateTime> createdAt;
+  const SyncIssuesCompanion({
+    this.id = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.syncTable = const Value.absent(),
+    this.rowId = const Value.absent(),
+    this.summary = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SyncIssuesCompanion.insert({
+    this.id = const Value.absent(),
+    required String householdId,
+    required String syncTable,
+    required String rowId,
+    required String summary,
+    required DateTime createdAt,
+  }) : householdId = Value(householdId),
+       syncTable = Value(syncTable),
+       rowId = Value(rowId),
+       summary = Value(summary),
+       createdAt = Value(createdAt);
+  static Insertable<SyncIssueRow> custom({
+    Expression<int>? id,
+    Expression<String>? householdId,
+    Expression<String>? syncTable,
+    Expression<String>? rowId,
+    Expression<String>? summary,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (householdId != null) 'household_id': householdId,
+      if (syncTable != null) 'sync_table': syncTable,
+      if (rowId != null) 'row_id': rowId,
+      if (summary != null) 'summary': summary,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SyncIssuesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? householdId,
+    Value<String>? syncTable,
+    Value<String>? rowId,
+    Value<String>? summary,
+    Value<DateTime>? createdAt,
+  }) {
+    return SyncIssuesCompanion(
+      id: id ?? this.id,
+      householdId: householdId ?? this.householdId,
+      syncTable: syncTable ?? this.syncTable,
+      rowId: rowId ?? this.rowId,
+      summary: summary ?? this.summary,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (syncTable.present) {
+      map['sync_table'] = Variable<String>(syncTable.value);
+    }
+    if (rowId.present) {
+      map['row_id'] = Variable<String>(rowId.value);
+    }
+    if (summary.present) {
+      map['summary'] = Variable<String>(summary.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncIssuesCompanion(')
+          ..write('id: $id, ')
+          ..write('householdId: $householdId, ')
+          ..write('syncTable: $syncTable, ')
+          ..write('rowId: $rowId, ')
+          ..write('summary: $summary, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1974,6 +2589,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ExpensesTable expenses = $ExpensesTable(this);
   late final $HouseholdsTable households = $HouseholdsTable(this);
   late final $MembersTable members = $MembersTable(this);
+  late final $SyncStateTable syncState = $SyncStateTable(this);
+  late final $SyncIssuesTable syncIssues = $SyncIssuesTable(this);
   late final Index expensesSpentOn = Index(
     'expenses_spent_on',
     'CREATE INDEX expenses_spent_on ON expenses (spent_on)',
@@ -1991,6 +2608,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     expenses,
     households,
     members,
+    syncState,
+    syncIssues,
     expensesSpentOn,
     expensesCategory,
   ];
@@ -3219,6 +3838,368 @@ typedef $$MembersTableProcessedTableManager =
       MemberRow,
       PrefetchHooks Function()
     >;
+typedef $$SyncStateTableCreateCompanionBuilder = SyncStateCompanion Function({
+  required String key,
+  required String value,
+  Value<int> rowid,
+});
+typedef $$SyncStateTableUpdateCompanionBuilder = SyncStateCompanion Function({
+  Value<String> key,
+  Value<String> value,
+  Value<int> rowid,
+});
+
+class $$SyncStateTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncStateTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncStateTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+}
+
+class $$SyncStateTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncStateTable,
+          SyncStateRow,
+          $$SyncStateTableFilterComposer,
+          $$SyncStateTableOrderingComposer,
+          $$SyncStateTableAnnotationComposer,
+          $$SyncStateTableCreateCompanionBuilder,
+          $$SyncStateTableUpdateCompanionBuilder,
+          (
+            SyncStateRow,
+            BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRow>,
+          ),
+          SyncStateRow,
+          PrefetchHooks Function()
+        > {
+  $$SyncStateTableTableManager(_$AppDatabase db, $SyncStateTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncStateTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> key = const Value.absent(),
+            Value<String> value = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => SyncStateCompanion(key: key, value: value, rowid: rowid),
+          createCompanionCallback: ({
+            required String key,
+            required String value,
+            Value<int> rowid = const Value.absent(),
+          }) => SyncStateCompanion.insert(key: key, value: value, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SyncStateTable, SyncStateRow>(table),
+                  BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncStateTable,
+      SyncStateRow,
+      $$SyncStateTableFilterComposer,
+      $$SyncStateTableOrderingComposer,
+      $$SyncStateTableAnnotationComposer,
+      $$SyncStateTableCreateCompanionBuilder,
+      $$SyncStateTableUpdateCompanionBuilder,
+      (
+        SyncStateRow,
+        BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRow>,
+      ),
+      SyncStateRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SyncIssuesTableCreateCompanionBuilder = SyncIssuesCompanion Function({
+  Value<int> id,
+  required String householdId,
+  required String syncTable,
+  required String rowId,
+  required String summary,
+  required DateTime createdAt,
+});
+typedef $$SyncIssuesTableUpdateCompanionBuilder = SyncIssuesCompanion Function({
+  Value<int> id,
+  Value<String> householdId,
+  Value<String> syncTable,
+  Value<String> rowId,
+  Value<String> summary,
+  Value<DateTime> createdAt,
+});
+
+class $$SyncIssuesTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncIssuesTable> {
+  $$SyncIssuesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncTable => $composableBuilder(
+    column: $table.syncTable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncIssuesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncIssuesTable> {
+  $$SyncIssuesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncTable => $composableBuilder(
+    column: $table.syncTable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rowId => $composableBuilder(
+    column: $table.rowId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncIssuesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncIssuesTable> {
+  $$SyncIssuesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncTable =>
+      $composableBuilder(column: $table.syncTable, builder: (column) => column);
+
+  GeneratedColumn<String> get rowId =>
+      $composableBuilder(column: $table.rowId, builder: (column) => column);
+
+  GeneratedColumn<String> get summary =>
+      $composableBuilder(column: $table.summary, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SyncIssuesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncIssuesTable,
+          SyncIssueRow,
+          $$SyncIssuesTableFilterComposer,
+          $$SyncIssuesTableOrderingComposer,
+          $$SyncIssuesTableAnnotationComposer,
+          $$SyncIssuesTableCreateCompanionBuilder,
+          $$SyncIssuesTableUpdateCompanionBuilder,
+          (
+            SyncIssueRow,
+            BaseReferences<_$AppDatabase, $SyncIssuesTable, SyncIssueRow>,
+          ),
+          SyncIssueRow,
+          PrefetchHooks Function()
+        > {
+  $$SyncIssuesTableTableManager(_$AppDatabase db, $SyncIssuesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncIssuesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncIssuesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncIssuesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> syncTable = const Value.absent(),
+                Value<String> rowId = const Value.absent(),
+                Value<String> summary = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => SyncIssuesCompanion(
+                id: id,
+                householdId: householdId,
+                syncTable: syncTable,
+                rowId: rowId,
+                summary: summary,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String householdId,
+                required String syncTable,
+                required String rowId,
+                required String summary,
+                required DateTime createdAt,
+              }) => SyncIssuesCompanion.insert(
+                id: id,
+                householdId: householdId,
+                syncTable: syncTable,
+                rowId: rowId,
+                summary: summary,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SyncIssuesTable, SyncIssueRow>(table),
+                  BaseReferences<_$AppDatabase, $SyncIssuesTable, SyncIssueRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncIssuesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncIssuesTable,
+      SyncIssueRow,
+      $$SyncIssuesTableFilterComposer,
+      $$SyncIssuesTableOrderingComposer,
+      $$SyncIssuesTableAnnotationComposer,
+      $$SyncIssuesTableCreateCompanionBuilder,
+      $$SyncIssuesTableUpdateCompanionBuilder,
+      (
+        SyncIssueRow,
+        BaseReferences<_$AppDatabase, $SyncIssuesTable, SyncIssueRow>,
+      ),
+      SyncIssueRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3231,4 +4212,8 @@ class $AppDatabaseManager {
       $$HouseholdsTableTableManager(_db, _db.households);
   $$MembersTableTableManager get members =>
       $$MembersTableTableManager(_db, _db.members);
+  $$SyncStateTableTableManager get syncState =>
+      $$SyncStateTableTableManager(_db, _db.syncState);
+  $$SyncIssuesTableTableManager get syncIssues =>
+      $$SyncIssuesTableTableManager(_db, _db.syncIssues);
 }

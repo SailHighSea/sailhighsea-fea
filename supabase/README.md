@@ -31,6 +31,11 @@ supabase test db                      # RLS + invite function tests (pgTAP)
 deno test supabase/functions/_shared  # code generation and hashing
 ```
 
+## Sync (Phase 4)
+- `20261026000003_sync.sql`: a trigger stamps `updated_at` (and the moment of a soft delete) with server time on expenses, categories, budgets, goals and bills. Clients cannot choose it. Realtime is switched on for `expenses`, `categories` and `members`.
+- The app pulls rows with `updated_at >= cursor` per table and pushes with update-then-insert. A role that may not write gets `42501` and the app shows the refused change.
+- For Phase 4b: build the Google Sheets queue trigger on `public.expenses` AFTER INSERT OR UPDATE; `deleted_at is not null` means the row was deleted.
+
 ## Model in short
 - One household per person. `create_household()` makes the caller the owner and seeds the default categories.
 - Clients cannot insert into `households`, `members` or `invites`; only `create_household`, `create-invite` and `redeem-invite` do.

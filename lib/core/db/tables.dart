@@ -80,3 +80,31 @@ class Members extends Table {
   @override
   Set<Column> get primaryKey => {householdId, userId};
 }
+
+/// Where sync stopped last time, per household and table. `value` is the newest `updated_at`
+/// the server sent, kept as the server's own text so no precision is lost.
+@DataClassName('SyncStateRow')
+class SyncState extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+/// A local change the server refused (for example the person was demoted while offline). The
+/// local row is put back to the server's version; this row remembers what was lost so the app
+/// can say so clearly.
+@DataClassName('SyncIssueRow')
+class SyncIssues extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get householdId => text()();
+
+  /// `expenses` or `categories`.
+  TextColumn get syncTable => text()();
+  TextColumn get rowId => text()();
+
+  /// What the change was, in words ("Lunch, S$12.00").
+  TextColumn get summary => text()();
+  DateTimeColumn get createdAt => dateTime()();
+}
