@@ -41,6 +41,7 @@ Status is kept current at the end of every phase (and when a phase starts). "Bui
 | 5 | Budgets and insights | Budgets, charts, goals, bills, reminders | Built. Server tests, Android/iOS/macOS builds with notifications, and Windows pixel goldens still to do |
 | 6 | Adaptive layouts and scan | Tablet, desktop, fold half-open polish; receipt scan | Not started |
 | 7 | Polish and release | Accessibility, app lock, export, CI for all platforms, store prep | Not started |
+| 8 | Google Sheets mode | The app runs on Google Drive and Sheets with no server: each member has their own sheet, the owner pairs by code and reads them, members can suggest budget, goal and bill changes; Supabase stays in the code, switched off | Planned (docs/phases/phase-8-google-sheets-mode.md); start after the 4c pull request is merged |
 
 ## Open decisions (defaults in brackets)
 1. Admin vs owner differences [Admin cannot remove owner, delete household or transfer ownership].
@@ -53,3 +54,6 @@ Status is kept current at the end of every phase (and when a phase starts). "Bui
 8. Google Sheet scope [app-created sheet only, `drive.file` + `spreadsheets`; refresh token kept server-side in Supabase Vault].
 9. Member visibility [everyone sees all spending by default; owner can set a member to "own only"; owner and admin always see everything].
 10. Per-person allowances [owner and admin set them; arrives with Phase 5 budgets].
+11. Sheets mode and Supabase [Supabase stays in the code and is off in Sheets mode; a build flag picks the mode].
+12. Budgets, goals and bills in Sheets mode [the owner owns them; members suggest changes and the owner approves].
+13. Visibility in Sheets mode [only the owner sees other members' spending; the owner cannot edit members' expenses].
