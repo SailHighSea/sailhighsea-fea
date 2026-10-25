@@ -1,6 +1,7 @@
 # Changelog
 
 ## Fixes after Phase 8
+- **Google Sheets mode is now the default build.** Without `--dart-define=BACKEND=...` the app starts in Sheets mode; `BACKEND=supabase` or `BACKEND=local` select the others. CI writes `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (repository secrets) into `.env.json` for every target. Until those secrets exist, the Google sign-in button says it is not set up in this build.
 - Android release build: R8 failed on ML Kit's optional script recognisers; `android/app/proguard-rules.pro` adds the keep rules and the release build now shrinks code with them.
 - The three Appearance image tests failed on Windows CI because Phase 7 added the Privacy and data card to that page. They now run only with `APPEARANCE_GOLDENS=1` (recreate them on Windows with `APPEARANCE_GOLDENS=1 flutter test --update-goldens tests/goldens/appearance_golden_test.dart`), like the Phase 5 ones.
 

@@ -1,6 +1,6 @@
 # Google Cloud setup for Google Sheets mode
 
-Only needed for a build with `--dart-define=BACKEND=sheets`. One Google Cloud project serves the whole family; nobody else needs to do anything but sign in.
+Google Sheets mode is the default build (`BACKEND` unset or `sheets`); use `--dart-define=BACKEND=supabase` or `local` for the other modes. One Google Cloud project serves the whole family; nobody else needs to do anything but sign in.
 
 ## 1. Create the project and enable two APIs
 1. https://console.cloud.google.com, create a project (for example "Family Expenses").
@@ -25,12 +25,12 @@ Only needed for a build with `--dart-define=BACKEND=sheets`. One Google Cloud pr
 Put them in `.env.json` (gitignored) next to your other defines, or pass them directly:
 
 ```
-flutter run --dart-define=BACKEND=sheets \
+flutter run \
   --dart-define=GOOGLE_CLIENT_ID=1234-abc.apps.googleusercontent.com \
   --dart-define=GOOGLE_CLIENT_SECRET=GOCSPX-xxxx
 ```
 
-In CI add them as repository secrets and pass them the same way (see `.github/workflows/build.yml`, which already passes the Supabase ones).
+In CI add them as repository secrets named `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (Settings, Secrets and variables, Actions); `.github/workflows/build.yml` writes them into `.env.json` for every build.
 
 ## 5. First use
 1. Everyone installs the app and opens **Family**, then **Sign in with Google**.

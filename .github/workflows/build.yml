@@ -4,7 +4,10 @@ name: Build
 # installed on your PC. Every push to main also refreshes the "latest" release with all the
 # files. Run it by hand from the Actions tab ("Run workflow") if you like.
 #
-# Supabase: add repository secrets SUPABASE_URL and SUPABASE_ANON_KEY (Settings, Secrets and
+# Google Sheets mode is the default. Add repository secrets GOOGLE_CLIENT_ID and
+# GOOGLE_CLIENT_SECRET (docs/GOOGLE_SETUP.md) so Google sign-in works in these builds.
+#
+# Supabase (only with BACKEND=supabase): add repository secrets SUPABASE_URL and SUPABASE_ANON_KEY (Settings, Secrets and
 # variables, Actions). Without them the builds are local-only (no sign-in). Never commit
 # .env.json.
 on:
@@ -31,6 +34,8 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -50,9 +55,7 @@ jobs:
       - name: Write .env.json
         shell: pwsh
         run: |
-          if ($env:SUPABASE_URL) {
-            @{ SUPABASE_URL = $env:SUPABASE_URL; SUPABASE_ANON_KEY = $env:SUPABASE_ANON_KEY } | ConvertTo-Json | Set-Content .env.json
-          } else { '{}' | Set-Content .env.json }
+          @{ SUPABASE_URL = $env:SUPABASE_URL; SUPABASE_ANON_KEY = $env:SUPABASE_ANON_KEY; GOOGLE_CLIENT_ID = $env:GOOGLE_CLIENT_ID; GOOGLE_CLIENT_SECRET = $env:GOOGLE_CLIENT_SECRET } | ConvertTo-Json | Set-Content .env.json
 
       - name: Build Windows release
         run: flutter build windows --release --dart-define-from-file=.env.json
@@ -81,6 +84,8 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -99,9 +104,7 @@ jobs:
 
       - name: Write .env.json
         run: |
-          if [ -n "$SUPABASE_URL" ]; then
-            printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s"}' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > .env.json
-          else echo '{}' > .env.json; fi
+          printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s","GOOGLE_CLIENT_ID":"%s","GOOGLE_CLIENT_SECRET":"%s"}' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" > .env.json
 
       - name: Build release APK
         run: flutter build apk --release --dart-define-from-file=.env.json
@@ -120,6 +123,8 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -133,9 +138,7 @@ jobs:
 
       - name: Write .env.json
         run: |
-          if [ -n "$SUPABASE_URL" ]; then
-            printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s"}' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > .env.json
-          else echo '{}' > .env.json; fi
+          printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s","GOOGLE_CLIENT_ID":"%s","GOOGLE_CLIENT_SECRET":"%s"}' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" > .env.json
 
       - name: Build macOS release
         run: flutter build macos --release --dart-define-from-file=.env.json
@@ -171,6 +174,8 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -189,9 +194,7 @@ jobs:
 
       - name: Write .env.json
         run: |
-          if [ -n "$SUPABASE_URL" ]; then
-            printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s"}' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > .env.json
-          else echo '{}' > .env.json; fi
+          printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s","GOOGLE_CLIENT_ID":"%s","GOOGLE_CLIENT_SECRET":"%s"}' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" > .env.json
 
       - name: Build Linux release
         run: flutter build linux --release --dart-define-from-file=.env.json

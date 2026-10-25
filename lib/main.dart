@@ -34,8 +34,7 @@ Future<void> main() async {
   // Accounts need a Supabase project (`--dart-define-from-file=.env.json`). Without one the
   // app runs local-only: no sign-in, one person, everything stays on this device.
   const config = SupabaseConfig.fromEnvironment();
-  // `--dart-define=BACKEND=sheets|supabase|local` picks the mode. Without it: Supabase when it is
-  // configured, otherwise local only (as before).
+  // `--dart-define=BACKEND=sheets|supabase|local` picks the mode. Without it: Google Sheets mode.
   final mode = BackendMode.parse(
     const String.fromEnvironment('BACKEND'),
     supabaseConfigured: config.isConfigured,

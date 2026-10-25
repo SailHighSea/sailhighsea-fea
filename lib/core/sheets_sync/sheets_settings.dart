@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/appearance_provider.dart';
 
 /// How this install is built: `--dart-define=BACKEND=sheets|supabase|local`. Without the define the
-/// app behaves as before (Supabase when it is configured, otherwise local only).
+/// app runs in Google Sheets mode (no server). Supabase and local-only stay available.
 enum BackendMode {
   local,
   supabase,
@@ -21,7 +21,7 @@ enum BackendMode {
       case 'local':
         return BackendMode.local;
     }
-    return supabaseConfigured ? BackendMode.supabase : BackendMode.local;
+    return BackendMode.sheets;
   }
 }
 
