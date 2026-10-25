@@ -26,6 +26,11 @@ class Permissions {
   bool get canInvite => _isManager;
   bool get canManageMembers => _isManager;
 
+  /// Google Sheet: only the owner connects, changes or disconnects it. Owner and admins can
+  /// open it and press Sync now. Everyone else sees the state.
+  bool get canConnectSheet => role == Role.owner;
+  bool get canSyncSheet => _isManager;
+
   bool get canTransferOwnership => role == Role.owner;
   bool get canDeleteHousehold => role == Role.owner;
 

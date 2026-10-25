@@ -51,3 +51,11 @@ export function displayNameFor(user: User, requested?: unknown): string {
   const candidate = fromBody || meta.full_name || meta.name || user.email?.split("@")[0] || "Member";
   return String(candidate).slice(0, 60);
 }
+
+export function requiredEnv(name: string): string {
+  return env(name);
+}
+
+export function redirectUri(): string {
+  return `${env("SUPABASE_URL")}/functions/v1/sheets-callback`;
+}

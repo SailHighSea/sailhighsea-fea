@@ -20,3 +20,16 @@ verify_jwt = true
 
 [functions.redeem-invite]
 verify_jwt = true
+
+[functions.sheets-connect]
+verify_jwt = true
+
+# Google calls this one from the browser, without a bearer token. It is protected by the
+# single-use `state` row created for the signed-in owner.
+[functions.sheets-callback]
+verify_jwt = false
+
+# The scheduled call carries a shared secret; "Sync now" carries the user's token. Both are
+# checked inside the function.
+[functions.sheets-sync]
+verify_jwt = false

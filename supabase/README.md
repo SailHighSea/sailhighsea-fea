@@ -36,6 +36,9 @@ deno test supabase/functions/_shared  # code generation and hashing
 - The app pulls rows with `updated_at >= cursor` per table and pushes with update-then-insert. A role that may not write gets `42501` and the app shows the refused change.
 - For Phase 4b: build the Google Sheets queue trigger on `public.expenses` AFTER INSERT OR UPDATE; `deleted_at is not null` means the row was deleted.
 
+## Google Sheets mirror (Phase 4b)
+Functions `sheets-connect` (owner: start and disconnect), `sheets-callback` (Google's redirect), `sheets-sync` (scheduled worker and Sync now). Tables `sheet_connections`, `sheet_oauth_states`, `sheet_sync_queue` and view `sheet_status` are in `20261027000004_google_sheets.sql`. The refresh token lives in Vault and is read only by edge functions. Setup steps: `docs/BUILD_AND_TEST.md`.
+
 ## Model in short
 - One household per person. `create_household()` makes the caller the owner and seeds the default categories.
 - Clients cannot insert into `households`, `members` or `invites`; only `create_household`, `create-invite` and `redeem-invite` do.
