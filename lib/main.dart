@@ -13,7 +13,11 @@ import 'core/theme/appearance_provider.dart';
 import 'features/auth/auth_providers.dart';
 import 'features/auth/supabase_auth_service.dart';
 import 'features/family/data/supabase_household_remote.dart';
+import 'features/bills/reminders/reminder_providers.dart';
+import 'features/bills/reminders/reminder_scheduler.dart';
 import 'features/family/member_providers.dart';
+import 'features/integrations/data/supabase_sheets_remote.dart';
+import 'features/integrations/sheets_providers.dart';
 import 'features/sync/sync_providers.dart';
 import 'core/sync/supabase_sync_backend.dart';
 
@@ -38,6 +42,9 @@ Future<void> main() async {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         databaseProvider.overrideWithValue(database),
+        reminderSchedulerProvider.overrideWithValue(
+          LocalNotificationsScheduler(),
+        ),
         if (client != null) ...[
           authServiceProvider.overrideWithValue(
             SupabaseAuthService(client.auth),
@@ -46,6 +53,7 @@ Future<void> main() async {
             SupabaseHouseholdRemote(client),
           ),
           syncBackendProvider.overrideWithValue(SupabaseSyncBackend(client)),
+          sheetsRemoteProvider.overrideWithValue(SupabaseSheetsRemote(client)),
         ],
       ],
       child: const FamilyExpensesApp(),

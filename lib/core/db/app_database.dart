@@ -33,7 +33,18 @@ const defaultCategories = <DefaultCategory>[
 const otherCategoryId = 'default-other';
 
 @DriftDatabase(
-  tables: [Categories, Expenses, Households, Members, SyncState, SyncIssues],
+  tables: [
+    Categories,
+    Expenses,
+    Households,
+    Members,
+    SyncState,
+    SyncIssues,
+    Budgets,
+    Goals,
+    GoalContributions,
+    Bills,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor, {DateTime Function()? clock})
@@ -43,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump when a table changes and add a step to [migration].
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -62,8 +73,15 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(syncState);
         await m.createTable(syncIssues);
       }
+      if (from < 4) {
+        // Phase 5: budgets, goals (with contributions) and bills.
+        await m.createTable(budgets);
+        await m.createTable(goals);
+        await m.createTable(goalContributions);
+        await m.createTable(bills);
+      }
       // Future versions add steps here, for example:
-      //   if (from < 4) await m.addColumn(expenses, expenses.someNewColumn);
+      //   if (from < 5) await m.addColumn(expenses, expenses.someNewColumn);
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');

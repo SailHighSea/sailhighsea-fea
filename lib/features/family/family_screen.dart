@@ -9,6 +9,8 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/widgets/pill_button.dart';
 import '../../core/widgets/surface_card.dart';
 import '../auth/auth_providers.dart';
+import '../integrations/sheets_providers.dart';
+import '../integrations/widgets/sheet_card.dart';
 import 'data/household_remote.dart';
 import 'domain/role.dart';
 import 'member_providers.dart';
@@ -207,6 +209,10 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
               InviteCard(showTitle: !stacked),
             ] else
               _CannotInviteCard(role: myRole),
+            if (ref.watch(sheetsRemoteProvider) != null) ...[
+              const SizedBox(height: 14),
+              const SheetCard(),
+            ],
             if (stacked) ...[
               const SizedBox(height: 16),
               Center(

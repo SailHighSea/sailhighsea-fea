@@ -23,6 +23,25 @@ class SupabaseSyncBackend implements SyncBackend {
       'receipt_path',
       'deleted_at',
     ],
+    'budgets': ['month', 'category_id', 'amount_cents', 'deleted_at'],
+    'goals': [
+      'name',
+      'target_cents',
+      'saved_cents',
+      'monthly_cents',
+      'due_on',
+      'deleted_at',
+    ],
+    'goal_contributions': ['amount_cents', 'contributed_on', 'deleted_at'],
+    'bills': [
+      'name',
+      'amount_cents',
+      'due_day',
+      'repeat',
+      'next_due_on',
+      'last_paid_on',
+      'deleted_at',
+    ],
   };
 
   Future<T> _guard<T>(Future<T> Function() run) async {
@@ -92,7 +111,15 @@ class SupabaseSyncBackend implements SyncBackend {
     controller = StreamController<SyncSignal>(
       onListen: () {
         final c = _client.channel('household-$householdId');
-        for (final table in const ['expenses', 'categories', 'members']) {
+        for (final table in const [
+          'expenses',
+          'categories',
+          'budgets',
+          'goals',
+          'goal_contributions',
+          'bills',
+          'members',
+        ]) {
           c.onPostgresChanges(
             event: sb.PostgresChangeEvent.all,
             schema: 'public',

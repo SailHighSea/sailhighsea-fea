@@ -1,5 +1,7 @@
 # Phase 4: Sync (weeks 6 to 7)
 
+**Status:** Built (2026-10-26) against a fake server. Still to do: run it with two real devices against Supabase.
+
 ## Do
 1. Sync engine in `lib/core/sync`: push dirty rows, pull changes since last cursor, Supabase Realtime for live updates, exponential backoff, offline queue.
 2. Last-write-wins by `updated_at` (server time). Soft deletes propagate. Handle clock skew by trusting server timestamps.

@@ -121,6 +121,43 @@ class HouseholdRepository {
           dirty: const Value(true),
         ),
       );
+      // Budgets, goals and bills set up before sign-in come along too.
+      await (_db.update(
+        _db.budgets,
+      )..where((b) => b.householdId.equals(localHouseholdId))).write(
+        BudgetsCompanion(
+          householdId: Value(householdId),
+          updatedAt: Value(now),
+          dirty: const Value(true),
+        ),
+      );
+      await (_db.update(
+        _db.goals,
+      )..where((g) => g.householdId.equals(localHouseholdId))).write(
+        GoalsCompanion(
+          householdId: Value(householdId),
+          updatedAt: Value(now),
+          dirty: const Value(true),
+        ),
+      );
+      await (_db.update(
+        _db.goalContributions,
+      )..where((c) => c.householdId.equals(localHouseholdId))).write(
+        GoalContributionsCompanion(
+          householdId: Value(householdId),
+          updatedAt: Value(now),
+          dirty: const Value(true),
+        ),
+      );
+      await (_db.update(
+        _db.bills,
+      )..where((b) => b.householdId.equals(localHouseholdId))).write(
+        BillsCompanion(
+          householdId: Value(householdId),
+          updatedAt: Value(now),
+          dirty: const Value(true),
+        ),
+      );
     } else {
       await (_db.update(_db.categories)..where(
             (c) =>
@@ -135,5 +172,11 @@ class HouseholdRepository {
               (e.createdBy.isNull() | e.createdBy.equals('You')),
         ))
         .write(ExpensesCompanion(createdBy: Value(userId)));
+    await (_db.update(_db.goalContributions)..where(
+          (c) =>
+              c.householdId.equals(householdId) &
+              (c.addedBy.isNull() | c.addedBy.equals('You')),
+        ))
+        .write(GoalContributionsCompanion(addedBy: Value(userId)));
   });
 }

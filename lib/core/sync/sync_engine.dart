@@ -24,21 +24,23 @@ class SyncEngine {
     required this._backend,
     required this.householdId,
     required this.userId,
-    this.tables = syncedTables,
+    List<SyncedTable>? tables,
     this.pageSize = 500,
     this.pullOverlap = const Duration(seconds: 5),
     this.debounce = const Duration(milliseconds: 300),
     this.refreshEvery = const Duration(minutes: 1),
     DateTime Function()? clock,
     this.onRoleChanged,
-  }) : _clock = clock ?? DateTime.now;
+  }) : _clock = clock ?? DateTime.now {
+    this.tables = tables ?? buildSyncedTables();
+  }
 
   final AppDatabase _db;
   final SyncBackend _backend;
   final DateTime Function() _clock;
   final String householdId;
   final String userId;
-  final List<SyncedTable> tables;
+  late final List<SyncedTable> tables;
   final int pageSize;
 
   /// Pulls start this far before the cursor, so rows whose transaction committed late are
@@ -88,7 +90,9 @@ class SyncEngine {
         );
     _localChanges = _db
         .tableUpdates(
-          TableUpdateQuery.onAllTables([_db.expenses, _db.categories]),
+          TableUpdateQuery.onAllTables([
+            for (final t in tables) ...t.watched(_db),
+          ]),
         )
         .listen((_) => _onLocalChange());
     _refreshTimer = Timer.periodic(refreshEvery, (_) => _schedule());
@@ -214,23 +218,13 @@ class SyncEngine {
     } on SyncOfflineException {
       // Cannot tell; stop retrying the refused write but fix the row on the next pull.
       server = null;
-      await _markClean(table, change);
+      await table.markClean(_db, change);
       return;
     }
     if (server == null) {
       await table.discard(_db, change);
     } else {
       await table.applyRemote(_db, [server], force: true);
-    }
-  }
-
-  Future<void> _markClean(SyncedTable table, PendingChange change) async {
-    if (table.name == 'expenses') {
-      await (_db.update(_db.expenses)..where((e) => e.id.equals(change.id)))
-          .write(const ExpensesCompanion(dirty: Value(false)));
-    } else {
-      await (_db.update(_db.categories)..where((c) => c.id.equals(change.id)))
-          .write(const CategoriesCompanion(dirty: Value(false)));
     }
   }
 

@@ -108,3 +108,88 @@ class SyncIssues extends Table {
   TextColumn get summary => text()();
   DateTimeColumn get createdAt => dateTime()();
 }
+
+/// Budget for one month: overall (`categoryId` null) or for one category. The id is fixed
+/// (`b:2026-10:overall`, `b:2026-10:<categoryId>`) so two devices that set the same budget
+/// offline end up with one row. A month without a row uses the latest earlier month's budget.
+@DataClassName('BudgetRow')
+class Budgets extends Table {
+  TextColumn get id => text()();
+  TextColumn get householdId =>
+      text().withDefault(const Constant(localHouseholdId))();
+
+  /// First day of the month as `yyyy-MM-01`.
+  TextColumn get month => text()();
+  TextColumn get categoryId => text().nullable()();
+  IntColumn get amountCents => integer()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  BoolColumn get dirty => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// A savings goal. `savedCents` is the opening balance; money added later is a row in
+/// [GoalContributions], so two people adding at once never overwrite each other.
+@DataClassName('GoalRow')
+class Goals extends Table {
+  TextColumn get id => text()();
+  TextColumn get householdId =>
+      text().withDefault(const Constant(localHouseholdId))();
+  TextColumn get name => text()();
+  IntColumn get targetCents => integer()();
+  IntColumn get savedCents => integer().withDefault(const Constant(0))();
+  IntColumn get monthlyCents => integer().withDefault(const Constant(0))();
+
+  /// Optional date the person wants to be done by (`yyyy-MM-dd`).
+  TextColumn get dueOn => text().nullable()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  BoolColumn get dirty => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DataClassName('GoalContributionRow')
+@TableIndex(name: 'goal_contributions_goal', columns: {#goalId})
+class GoalContributions extends Table {
+  TextColumn get id => text()();
+  TextColumn get householdId =>
+      text().withDefault(const Constant(localHouseholdId))();
+  TextColumn get goalId => text()();
+  IntColumn get amountCents => integer()();
+  TextColumn get contributedOn => text()();
+  TextColumn get addedBy => text().nullable()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  BoolColumn get dirty => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// A recurring bill. `nextDueOn` is the next date it is due; "mark paid" moves it forward by
+/// one period and records `lastPaidOn`. `dueDay` is the day of the month it started on, kept
+/// so monthly and yearly bills snap back after a short month.
+@DataClassName('BillRow')
+class Bills extends Table {
+  TextColumn get id => text()();
+  TextColumn get householdId =>
+      text().withDefault(const Constant(localHouseholdId))();
+  TextColumn get name => text()();
+  IntColumn get amountCents => integer()();
+  IntColumn get dueDay => integer()();
+
+  /// `monthly`, `weekly`, `yearly` or `once`.
+  TextColumn get repeat => text().withDefault(const Constant('monthly'))();
+  TextColumn get nextDueOn => text()();
+  TextColumn get lastPaidOn => text().nullable()();
+  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+  BoolColumn get dirty => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
