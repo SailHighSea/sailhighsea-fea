@@ -14,7 +14,7 @@ A family shares one household and tracks monthly spending together. The owner in
 The owner can promote any member to Admin and change roles at any time.
 
 ## Feature list (identical on every device)
-Home dashboard (ring, 7-day or month bars, top categories, next bill, goal, recent) · Add expense (manual) · Scan receipt · Budgets (overall and per category) · Insights (bar charts, trends, category breakdown, who spent what) · Savings goals · Recurring bills with reminders · Family and invites · Appearance (System, Light, Dark, Pure black; colour themes Forest, Ocean, Sunset, Graphite; larger text; colour-blind charts; currency) · Export CSV · Google Sheet sync (owner connects a sheet, expenses mirror into it) · App lock.
+Family overview (owner sees every member's spending, per-person drill-down) · Home dashboard (ring, 7-day or month bars, top categories, next bill, goal, recent) · Add expense (manual) · Scan receipt · Budgets (overall and per category) · Insights (bar charts, trends, category breakdown, who spent what) · Savings goals · Recurring bills with reminders · Family and invites · Appearance (System, Light, Dark, Pure black; colour themes Forest, Ocean, Sunset, Graphite; larger text; colour-blind charts; currency) · Export CSV · Google Sheet sync (owner connects a sheet, expenses mirror into it) · App lock.
 
 ## Architecture
 ```
@@ -37,6 +37,7 @@ Status is kept current at the end of every phase (and when a phase starts). "Bui
 | 3 | Accounts and household | Sign-in, household, roles, invite codes, RLS | Built. Server tests (`supabase test db`, `deno test`) and a real two-account run still to do |
 | 4 | Sync | Realtime sync, offline queue, conflict handling | Built (fake-server tests). Not yet tried on two real devices against Supabase |
 | 4b | Google Sheets connection | Owner links a Google Sheet; all household expenses mirror into it automatically (one-way, server-side) | Built (fake-Google tests). Google Cloud setup and a real connect still to do |
+| 4c | Family overview | "See all" overview for the owner with per-person spending, member filter, optional own-only visibility for some members (needs sync) | Not started |
 | 5 | Budgets and insights | Budgets, charts, goals, bills, reminders | Built. Server tests, Android/iOS/macOS builds with notifications, and Windows pixel goldens still to do |
 | 6 | Adaptive layouts and scan | Tablet, desktop, fold half-open polish; receipt scan | Not started |
 | 7 | Polish and release | Accessibility, app lock, export, CI for all platforms, store prep | Not started |
@@ -50,3 +51,5 @@ Status is kept current at the end of every phase (and when a phase starts). "Bui
 6. Google Sheet: who can connect [Owner only; Admins view status and Sync now].
 7. Google Sheet direction [one-way, app to Sheet; Sheet edits are overwritten, never read back].
 8. Google Sheet scope [app-created sheet only, `drive.file` + `spreadsheets`; refresh token kept server-side in Supabase Vault].
+9. Member visibility [everyone sees all spending by default; owner can set a member to "own only"; owner and admin always see everything].
+10. Per-person allowances [owner and admin set them; arrives with Phase 5 budgets].
