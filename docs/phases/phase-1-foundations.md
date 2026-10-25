@@ -1,6 +1,6 @@
 # Phase 1: Foundations (about 1 week)
 
-**Status:** Built (2026-10-25). Tests: `flutter test tests/`.
+**Status:** Done and merged. Built (2026-10-25). Tests: `flutter test tests/`.
 
 Read CLAUDE.md, PLAN.md, docs/SPEC.md and look at design/screenshots first.
 

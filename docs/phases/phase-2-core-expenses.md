@@ -1,6 +1,6 @@
 # Phase 2: Core expenses (weeks 2 to 3)
 
-**Status:** Built (2026-10-25).
+**Status:** Done and merged. Built (2026-10-25).
 
 ## Do
 1. Drift schema for categories and expenses (SPEC section 5) with migrations, `updated_at`, `deleted_at`, `dirty`. Money in cents.
