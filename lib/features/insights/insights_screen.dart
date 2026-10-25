@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/widgets/async_placeholder.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -54,10 +57,10 @@ class InsightsScreen extends ConsumerWidget {
       );
     }
     if (data == null) {
-      return Center(
-        child: async.hasError
-            ? Text('Could not load insights: ${async.error}')
-            : const CircularProgressIndicator(),
+      return AsyncPlaceholder(
+        what: 'insights',
+        error: async.hasError ? async.error : null,
+        onRetry: () => ref.invalidate(insightsProvider),
       );
     }
     final money = ref.watch(moneyFormatterProvider);

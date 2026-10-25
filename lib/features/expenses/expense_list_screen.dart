@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/widgets/async_placeholder.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -134,15 +137,11 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
         ),
         const SizedBox(height: 16),
         expenses.when(
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          error: (e, _) => Text(
-            'Could not load expenses: $e',
-            style: TextStyle(color: t.rose),
+          loading: () => const AsyncPlaceholder(what: 'expenses'),
+          error: (e, _) => AsyncPlaceholder(
+            what: 'expenses',
+            error: e,
+            onRetry: () => ref.invalidate(filteredExpensesProvider),
           ),
           data: (rows) {
             if (rows.isEmpty) {

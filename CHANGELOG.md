@@ -1,5 +1,23 @@
 # Changelog
 
+## Phase 7: Polish and release (2026-10-31)
+- **Accessibility**: a contrast test (`tests/core/contrast_test.dart`) checks every text colour on its real background in all four colour themes and all three modes (4.5:1 for text, 3:1 for links); it passes with the existing tokens, so no colours changed. Every control has a label and 44px target (checked by the audit and the new screens). Large text and the "larger text" setting are covered on the new screens. Reduced motion: the app has no animations of its own (page changes are instant, charts draw without animation), so nothing needed turning off; only the system spinner moves.
+- **App lock** (`lib/features/privacy`): Appearance, Privacy and data, "Lock the app". Turning it on asks the device to confirm first (so nobody is locked out). The app starts locked, hides everything while locked, and locks again after 30 seconds in the background. Uses `local_auth` (Android, iOS, macOS, Windows Hello); not offered on Linux or where the device has no screen lock. The app never sees biometric data.
+- **Export CSV**: "Export expenses (CSV)" shares `family-expenses.csv` (Date, Amount, Currency, Category, Note, Added by). Amounts are written from integer cents as plain decimals; text that starts with `=`, `+`, `-` or `@` gets a quote in front so a spreadsheet cannot run it as a formula; RFC 4180 quoting.
+- **Empty, loading and error states**: one shared placeholder (`lib/core/widgets/async_placeholder.dart`): a spinner announced as "Loading bills", or "Could not load bills. Your data on this device is safe." with Try again. It replaces the raw exception text that Home, Budgets, Insights, Goals, Bills, the overview and the expense list used to show. Empty lists already had their own text.
+- **First-run introduction**: three cards (add, see, yours), Skip, shown once; "Show the introduction again" in Appearance.
+- **Names and icons**: display name "Family Expenses" on Android, iOS, macOS, Windows and Linux; icons for Android (adaptive), iOS, macOS and Windows generated from `assets/icon/icon.png` with `flutter_launcher_icons` (a simple placeholder design: replace the file and regenerate).
+- **Privacy policy**: in the app (Appearance, Privacy policy) and `docs/PRIVACY.md`; a test keeps them identical. It still needs the publisher name and a contact email before a store submission.
+- **CI** (`.github/workflows/build.yml`): Windows x64 and Arm64 (`windows-11-arm`, optional), macOS dmg plus an unsigned iOS build, Linux tar.gz plus `.deb` and AppImage (`scripts/package_linux.sh`), Android APK, all uploaded as artifacts. The `.deb` was built and inspected here.
+- **Release checklist**: `docs/RELEASE.md` (Play Console, App Store Connect, MSIX, notarised macOS, deb and AppImage). Nothing was published or signed.
+- Tests added: contrast (108), CSV, privacy policy file, first run, app lock, privacy card, error and loading states.
+- **Not run here**: real biometrics, the Windows Arm64 job, the iOS and AppImage steps, Store submissions, `flutter_launcher_icons` output on a device.
+
+### Decisions and deviations (change here if you disagree)
+- The app lock grace period is 30 seconds in the background.
+- The introduction is outside the router, so it also shows before the sign-in page on a Supabase build.
+- Icon artwork is a placeholder (a coin with three bars on the brand green).
+
 ## Phase 6: Adaptive layouts and receipt scan (2026-10-30)
 - **Size audit** (`tests/features/audit_sizes_test.dart`): every page at 360, 600, 840, 1024, 1280 and 1920 wide (and the signed-in family page) is checked for overflow, 44px tap targets and labelled tap targets. Fixes it forced: `PrimarySideLayout`, `HeroGridLayout` and `AdaptiveTwoPane` now stack when the room is too narrow instead of squeezing (bills and family at 600 wide), rows in Recent are labelled buttons, and text fields are at least 44px tall.
 - **Fold** (`lib/core/routing/app_router.dart`, `fold_add_panel.dart`): with a half-open horizontal hinge every page (Home, Budgets, Insights, Goals, Bills, Family, Appearance, Expenses) sits above the hinge and the Add form below it, for people who may add expenses. No panel on the Add, Edit or Scan screens. The new-expense draft is now kept for the session, so what is typed in the panel is still there after unfolding into the full Add screen (this was a real bug found by the new test: the draft was dropped when nothing watched it).

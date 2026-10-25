@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/widgets/async_placeholder.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -31,10 +34,10 @@ class GoalsScreen extends ConsumerWidget {
     final goals = async.value;
     final t = context.tokens;
     if (goals == null) {
-      return Center(
-        child: async.hasError
-            ? Text('Could not load goals: ${async.error}')
-            : const CircularProgressIndicator(),
+      return AsyncPlaceholder(
+        what: 'goals',
+        error: async.hasError ? async.error : null,
+        onRetry: () => ref.invalidate(goalViewsProvider),
       );
     }
     final money = ref.watch(moneyFormatterProvider);

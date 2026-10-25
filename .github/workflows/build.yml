@@ -18,8 +18,17 @@ env:
 
 jobs:
   windows:
-    name: Windows exe (analyze, test, build)
-    runs-on: windows-latest
+    name: Windows ${{ matrix.arch }} (analyze, test, build)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, arch: x64 }
+          # Arm64 builds on GitHub's Windows 11 Arm runner. Not verified yet, so it never blocks
+          # the other builds (see docs/RELEASE.md).
+          - { os: windows-11-arm, arch: arm64 }
+    continue-on-error: ${{ matrix.arch == 'arm64' }}
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -33,9 +42,11 @@ jobs:
           cache: true
 
       - run: flutter pub get
-      - run: flutter analyze
+      - if: matrix.arch == 'x64'
+        run: flutter analyze
       # Golden images were made on Windows, so tests run here and not on Linux.
-      - run: flutter test tests/
+      - if: matrix.arch == 'x64'
+        run: flutter test tests/
 
       - name: Write .env.json
         shell: pwsh
@@ -49,16 +60,16 @@ jobs:
 
       - name: Zip
         shell: pwsh
-        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath windows-x64.zip
+        run: Compress-Archive -Path build\windows\${{ matrix.arch }}\runner\Release\* -DestinationPath windows-${{ matrix.arch }}.zip
 
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-x64
-          path: windows-x64.zip
+          name: windows-${{ matrix.arch }}
+          path: windows-${{ matrix.arch }}.zip
           if-no-files-found: error
 
       - name: Keep golden diffs when tests fail
-        if: failure()
+        if: failure() && matrix.arch == 'x64'
         uses: actions/upload-artifact@v4
         with:
           name: golden-failures
@@ -130,6 +141,13 @@ jobs:
       - name: Build macOS release
         run: flutter build macos --release --dart-define-from-file=.env.json
 
+      # iOS: built without code signing, so it proves the target compiles. A signed build for
+      # TestFlight needs the Apple certificates (docs/RELEASE.md).
+      - name: Build iOS (no code signing)
+        run: |
+          flutter build ios --release --no-codesign --dart-define-from-file=.env.json
+          ditto -c -k --keepParent build/ios/iphoneos/Runner.app family-expenses-ios-unsigned.zip
+
       # Unsigned: on first open, right-click the app and choose Open.
       - name: Make dmg
         run: |
@@ -140,6 +158,12 @@ jobs:
         with:
           name: macos-dmg
           path: family-expenses-macos.dmg
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned
+          path: family-expenses-ios-unsigned.zip
           if-no-files-found: error
 
   linux:
@@ -175,10 +199,21 @@ jobs:
 
       - run: tar -czf family-expenses-linux-x64.tar.gz -C build/linux/x64/release/bundle .
 
+      - name: Make the .deb
+        run: bash scripts/package_linux.sh deb build/linux/x64/release/bundle
+
+      # AppImage needs a download of appimagetool, so it never blocks the build.
+      - name: Make the AppImage
+        continue-on-error: true
+        run: bash scripts/package_linux.sh appimage build/linux/x64/release/bundle
+
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
-          path: family-expenses-linux-x64.tar.gz
+          path: |
+            family-expenses-linux-x64.tar.gz
+            family-expenses_*.deb
+            Family_Expenses-*.AppImage
           if-no-files-found: error
 
   release:

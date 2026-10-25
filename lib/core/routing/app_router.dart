@@ -12,6 +12,7 @@ import '../../features/expenses/expense_form_screen.dart';
 import '../../features/expenses/expense_list_providers.dart'
     show searchFocusRequestProvider;
 import '../../features/expenses/expense_list_screen.dart';
+import '../../features/privacy/privacy_screen.dart';
 import '../../features/scan/scan_screen.dart';
 import '../../features/expenses/widgets/fold_add_panel.dart';
 import '../../features/auth/app_access.dart';
@@ -150,6 +151,10 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
                 editId: s.pathParameters['id'],
               ),
             ),
+          ),
+          GoRoute(
+            path: '/privacy',
+            pageBuilder: (c, s) => _page(s, const PrivacyPolicyScreen()),
           ),
           GoRoute(
             path: '/scan',

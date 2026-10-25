@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/widgets/async_placeholder.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -31,10 +34,10 @@ class BudgetsScreen extends ConsumerWidget {
     final summary = async.value;
     final t = context.tokens;
     if (summary == null) {
-      return Center(
-        child: async.hasError
-            ? Text('Could not load budgets: ${async.error}')
-            : const CircularProgressIndicator(),
+      return AsyncPlaceholder(
+        what: 'budgets',
+        error: async.hasError ? async.error : null,
+        onRetry: () => ref.invalidate(budgetsSummaryProvider),
       );
     }
     final money = ref.watch(moneyFormatterProvider);

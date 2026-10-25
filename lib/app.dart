@@ -7,6 +7,8 @@ import 'core/routing/app_router.dart';
 import 'features/auth/app_access.dart';
 import 'features/bills/reminders/reminder_providers.dart';
 import 'features/family/member_providers.dart';
+import 'features/onboarding/onboarding_gate.dart';
+import 'features/privacy/lock_gate.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/appearance_provider.dart';
 import 'core/theme/color_themes.dart';
@@ -78,7 +80,7 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
           data: media.copyWith(
             textScaler: _MultipliedScaler(media.textScaler, extra),
           ),
-          child: child!,
+          child: OnboardingGate(child: LockGate(child: child!)),
         );
       },
     );
