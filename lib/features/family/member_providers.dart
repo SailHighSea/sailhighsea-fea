@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/db/app_database.dart';
 import '../../core/db/db_providers.dart';
 import '../../core/db/tables.dart';
+import '../../core/sheets_sync/sheets_settings.dart';
 import '../../core/time.dart';
 import '../auth/auth_providers.dart';
 import 'data/household_remote.dart';
@@ -47,6 +48,12 @@ final activeHouseholdIdProvider = Provider<String>((ref) {
 });
 
 final membersProvider = StreamProvider<List<MemberRow>>((ref) {
+  // Google Sheets mode: the people paired with this device, kept in the local database.
+  if (ref.watch(isSheetsModeProvider)) {
+    return ref
+        .watch(householdRepositoryProvider)
+        .watchMembers(localHouseholdId);
+  }
   final household = ref.watch(activeHouseholdProvider).value;
   if (household == null) return Stream.value(const []);
   return ref.watch(householdRepositoryProvider).watchMembers(household.id);
@@ -55,6 +62,14 @@ final membersProvider = StreamProvider<List<MemberRow>>((ref) {
 /// My role. Local-only (no Supabase configured) means one person who can do everything;
 /// signed in without a membership yet is treated as view only.
 final currentRoleProvider = Provider<Role>((ref) {
+  // Google Sheets mode: the organiser is the owner; a family member can add expenses and suggest
+  // changes, but cannot change budgets, goals or bills. Before a role is chosen the app is local.
+  if (ref.watch(isSheetsModeProvider)) {
+    return ref.watch(sheetsSettingsProvider.select((s) => s.role)) ==
+            SheetsRole.member
+        ? Role.editor
+        : Role.owner;
+  }
   if (ref.watch(authServiceProvider) == null) return Role.owner;
   final mine = ref.watch(myMemberProvider).value;
   return mine == null ? Role.viewer : Role.fromDb(mine.role);
@@ -103,6 +118,7 @@ final memberInitialsProvider = Provider<List<String>>((ref) {
 
 /// What I see of other people's spending (local-only: everything).
 final currentVisibilityProvider = Provider<MemberVisibility>((ref) {
+  if (ref.watch(isSheetsModeProvider)) return MemberVisibility.household;
   if (ref.watch(authServiceProvider) == null) return MemberVisibility.household;
   final mine = ref.watch(myMemberProvider).value;
   return MemberVisibility.fromDb(mine?.visibility);
@@ -111,9 +127,27 @@ final currentVisibilityProvider = Provider<MemberVisibility>((ref) {
 /// Whether this person may see the overview of everyone and use the member filter: there must
 /// also be someone else to look at.
 final canSeeEveryoneProvider = Provider<bool>((ref) {
+  if (ref.watch(isSheetsModeProvider)) {
+    // Only the organiser sees other people's spending; members never do.
+    return ref.watch(sheetsSettingsProvider.select((s) => s.role)) ==
+            SheetsRole.organiser &&
+        (ref.watch(membersProvider).value ?? const <MemberRow>[]).isNotEmpty;
+  }
   if (ref.watch(authServiceProvider) == null) return false;
   final permissions = ref.watch(permissionsProvider);
   final members = ref.watch(membersProvider).value ?? const <MemberRow>[];
   return members.length > 1 &&
       permissions.canSeeEveryone(ref.watch(currentVisibilityProvider));
+});
+
+/// Whether an expense (by who added it) may be edited or deleted here. In Google Sheets mode the
+/// organiser reads members' expenses but never changes them (the member does, in their own app).
+final canEditExpenseProvider = Provider<bool Function(String? createdBy)>((
+  ref,
+) {
+  final canWrite = ref.watch(permissionsProvider).canWriteExpenses;
+  if (!ref.watch(isSheetsModeProvider)) return (_) => canWrite;
+  return (createdBy) =>
+      canWrite &&
+      (createdBy == null || createdBy == 'You' || !createdBy.startsWith('g:'));
 });

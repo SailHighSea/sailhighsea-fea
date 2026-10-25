@@ -123,6 +123,7 @@ class HomeScreen extends ConsumerWidget {
         onOpen: permissions.canWriteExpenses
             ? (expense) => context.push('/expenses/${expense.id}/edit')
             : null,
+        canOpen: (e) => ref.read(canEditExpenseProvider)(e.createdBy),
       ),
     );
   }

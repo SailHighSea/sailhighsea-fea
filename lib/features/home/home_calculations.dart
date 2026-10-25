@@ -199,6 +199,7 @@ List<RecentExpense> _recent(
         spentOn: parseDay(e.spentOn),
         addedBy: addedByLabel(e.createdBy),
         cents: e.amountCents,
+        createdBy: e.createdBy,
       ),
   ];
 }

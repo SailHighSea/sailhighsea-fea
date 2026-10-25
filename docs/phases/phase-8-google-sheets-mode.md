@@ -1,6 +1,6 @@
 # Phase 8: Google Sheets mode (no server)
 
-**Status:** Not started. Planned 2026-10-25 from the design agreed in chat. Do not start before the Phase 4c pull request is merged.
+**Status:** Built on this branch (see CHANGELOG.md, Phase 8), tested against a fake Google only. The Phase 4c pull request was already merged.
 
 ## Goal
 The app can run entirely on Google Drive and Google Sheets, with no Supabase project. Each family member signs in with their own Google account and keeps their own expense sheet. The father (the household owner) pairs with each member using a code, gets read access to that member's sheet, and the app brings those expenses in. Supabase stays in the code, switched off, so the server mode can come back (see "Switching modes").

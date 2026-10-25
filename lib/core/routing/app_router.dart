@@ -12,7 +12,10 @@ import '../../features/expenses/expense_form_screen.dart';
 import '../../features/expenses/expense_list_providers.dart'
     show searchFocusRequestProvider;
 import '../../features/expenses/expense_list_screen.dart';
+import '../../features/pairing/sheets_family_screen.dart';
+import '../../features/pairing/suggestions_screen.dart';
 import '../../features/privacy/privacy_screen.dart';
+import '../sheets_sync/sheets_settings.dart';
 import '../../features/scan/scan_screen.dart';
 import '../../features/expenses/widgets/fold_add_panel.dart';
 import '../../features/auth/app_access.dart';
@@ -132,7 +135,7 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
           ),
           GoRoute(
             path: '/family',
-            pageBuilder: (c, s) => _page(s, const FamilyScreen()),
+            pageBuilder: (c, s) => _page(s, const _FamilyEntry()),
           ),
           GoRoute(
             path: '/appearance',
@@ -153,6 +156,10 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
             ),
           ),
           GoRoute(
+            path: '/suggestions',
+            pageBuilder: (c, s) => _page(s, const SuggestionsScreen()),
+          ),
+          GoRoute(
             path: '/privacy',
             pageBuilder: (c, s) => _page(s, const PrivacyPolicyScreen()),
           ),
@@ -168,6 +175,17 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
       ),
     ],
   );
+}
+
+/// The Family page: the server version, or the Google Sheets pairing page in Sheets mode.
+class _FamilyEntry extends ConsumerWidget {
+  const _FamilyEntry();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) =>
+      ref.watch(isSheetsModeProvider)
+      ? const SheetsFamilyScreen()
+      : const FamilyScreen();
 }
 
 Page<void> _page(GoRouterState state, Widget child) =>

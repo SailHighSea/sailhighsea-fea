@@ -97,6 +97,7 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
     final now = ref.watch(clockProvider)();
     final addedByLabel = ref.watch(addedByLabelProvider);
     final permissions = ref.watch(permissionsProvider);
+    final canEdit = ref.watch(canEditExpenseProvider);
     final categoryById = {for (final c in categories) c.id: c};
 
     return AdaptivePage(
@@ -190,7 +191,7 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                           now: now,
                           addedBy: addedByLabel(rows[i].createdBy),
                           showDivider: i > 0,
-                          canEdit: permissions.canWriteExpenses,
+                          canEdit: canEdit(rows[i].createdBy),
                           onEdit: () =>
                               context.push('/expenses/${rows[i].id}/edit'),
                           onDelete: () => _delete(rows[i]),

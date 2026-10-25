@@ -41,7 +41,7 @@ Updated 2026-10-25. **Done** = the code and its automated tests are finished and
 | 5 | Budgets and insights | Done (merged, PR #2) | `supabase test db`; a real bill reminder on a phone; Windows image tests (`PHASE5_GOLDENS=1`); Android, iOS and macOS builds with notifications. The macOS build failed in CI and two fixes are waiting for the next pull request |
 | 6 | Adaptive layouts and scan | Done (this branch, not merged) | `supabase test db` for the receipts bucket; a real phone camera and ML Kit read; a real upload to Supabase Storage; window minimum size on Windows and macOS; fold on a real foldable; Android, iOS and macOS builds (new plugins `image_picker`, `google_mlkit_text_recognition`) |
 | 7 | Polish and release | Done (this branch, not merged) | Real biometrics; the Windows Arm64 and iOS CI steps; final icon artwork; publisher name and contact in the privacy policy; every store step in `docs/RELEASE.md` (nothing was published) |
-| 8 | Google Sheets mode (no server) | **Not started** (plan written: `docs/phases/phase-8-google-sheets-mode.md`) | Begins after the pull request with the macOS fixes and this plan is merged |
+| 8 | Google Sheets mode (no server) | Done (this branch, not merged; plan: `docs/phases/phase-8-google-sheets-mode.md`) | One real Google Cloud project and two real Google accounts pairing (everything was tested against a fake Google); the sign-in flow in a real browser on each platform; QR scan on a phone; the Android, iOS and macOS builds with `flutter_secure_storage` and `mobile_scanner`; Windows and macOS runs |
 
 ## Open decisions (defaults in brackets)
 1. Admin vs owner differences [Admin cannot remove owner, delete household or transfer ownership].

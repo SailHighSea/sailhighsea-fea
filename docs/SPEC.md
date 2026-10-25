@@ -71,3 +71,15 @@ Everything keyed by `household_id`. Read: any member. Insert/update/delete on ex
 
 ## 8. Receipt scan
 Mobile: camera + on-device text recognition. Desktop: webcam or file picker. Result opens the Add form pre-filled (amount, date, merchant) for confirmation. Same screen and fields everywhere.
+
+
+## 9. Google Sheets mode (no server)
+Selected with `--dart-define=BACKEND=sheets` (docs/phases/phase-8-google-sheets-mode.md, docs/GOOGLE_SETUP.md). Supabase stays in the code, switched off.
+- **Access control**: Google Drive sharing only. No Row Level Security, no server-side roles. The organiser (owner) pairs with each member; a member's app is the only writer of that member's sheet and the organiser's app only reads it.
+- **Roles**: organiser (everything, sees every member) and member (adds own expenses, reads the household sheet, suggests budget, goal and bill changes). Members never see each other. The organiser cannot edit a member's expenses.
+- **Sheets**: member sheet `Family Expenses - <name>` (tabs Expenses, Categories, Suggestions, Pairing, Meta); household sheet `Family Household - <name>` (Members, Budgets, Goals, Bills, Categories, Decisions, Meta). A sheet is a mirror of the app; hand edits are overwritten. `Meta` holds a revision counter so a reader skips an unchanged sheet.
+- **Money**: written from integer cents (`amount_cents` is the source; `amount` is for people), text cells that start with `=`, `+`, `-` or `@` are quoted.
+- **Pairing**: organiser code (email, household sheet id, random value, issue time) -> member confirms "share read only with <email>" -> member code (email, name, sheet id, same value) -> organiser enters it, the app checks the member's `Pairing` tab, shares the household sheet read-only with the member, and the value is used up. Invite codes expire after 24 hours.
+- **Tokens**: Google OAuth with a loopback redirect and PKCE on every platform, refresh token in the secure store; a revoked or expired grant shows "Reconnect".
+- **Not applicable here**: RLS, Edge Functions, Realtime, server-side invite hashing and rate limits, the Supabase Storage receipts bucket (receipts stay on the device).
+- **Limits**: updates reach the organiser after the next sync (every 5 minutes while the app is open, on open, on "Sync now"); nothing stops a member editing their own sheet by hand; Google API quotas apply.
