@@ -137,11 +137,14 @@ void main() {
             );
           }
           await tester.pumpAndSettle();
-          expect(
-            find.text(d == AppDestination.appearance ? 'Appearance' : d.label),
-            findsWidgets,
-            reason: d.label,
-          );
+          // The pages are titled like the mockups, which differ from the nav labels for two.
+          final title = switch (d) {
+            AppDestination.appearance => 'Appearance',
+            AppDestination.goals => 'Savings goals',
+            AppDestination.bills => 'Upcoming bills',
+            _ => d.label,
+          };
+          expect(find.text(title), findsWidgets, reason: d.label);
           expect(tester.takeException(), isNull);
 
           // Back to Home for the next destination.

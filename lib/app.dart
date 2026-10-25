@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'core/routing/app_router.dart';
 import 'features/auth/app_access.dart';
+import 'features/bills/reminders/reminder_providers.dart';
 import 'features/family/member_providers.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/appearance_provider.dart';
@@ -43,6 +44,8 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
     // The router re-checks its guards whenever sign-in, household or role changes.
     ref.listenManual(permissionsProvider, (_, _) => _gate.recheck());
     ref.listenManual(accessProvider, (_, next) => _gate.update(next));
+    // Keeps bill reminders scheduled for as long as the app runs.
+    ref.listenManual(reminderSyncProvider, (_, _) {});
   }
 
   @override

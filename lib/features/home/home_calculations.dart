@@ -44,6 +44,8 @@ HomeSummary buildHomeSummary({
   String Function(String?)? addedByLabel,
   int topCategoryCount = 4,
   int recentCount = 4,
+  UpcomingBill? nextBill,
+  GoalProgress? goal,
 }) {
   final today = now.dateOnly;
   final monthIndex = month.year * 12 + month.month;
@@ -111,6 +113,8 @@ HomeSummary buildHomeSummary({
     categories: _topCategories(monthExpenses, categoryById, topCategoryCount),
     last7: last7,
     monthDaily: monthDaily,
+    nextBill: nextBill,
+    goal: goal,
     recent: _recent(
       monthExpenses,
       categoryById,

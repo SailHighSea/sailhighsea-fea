@@ -345,11 +345,7 @@ void main() {
         await phone.engine.syncNow();
 
         // Simulate: snapshot taken, then edited before acknowledge.
-        final pending = await const ExpensesSync().pending(
-          phone.db,
-          _hid,
-          'maya',
-        );
+        final pending = await ExpensesSync().pending(phone.db, _hid, 'maya');
         expect(pending, isEmpty);
         await phone.expenses.update(
           id,
@@ -358,11 +354,7 @@ void main() {
           spentOn: DateTime(2026, 10, 20),
           note: 'v2',
         );
-        final dirty = await const ExpensesSync().pending(
-          phone.db,
-          _hid,
-          'maya',
-        );
+        final dirty = await ExpensesSync().pending(phone.db, _hid, 'maya');
         await phone.expenses.update(
           id,
           amountCents: 100,
@@ -370,7 +362,7 @@ void main() {
           spentOn: DateTime(2026, 10, 20),
           note: 'v3',
         );
-        await const ExpensesSync().acknowledge(phone.db, dirty.single, {
+        await ExpensesSync().acknowledge(phone.db, dirty.single, {
           ...server.row('expenses', id)!,
           'note': 'v2',
         });
@@ -528,7 +520,7 @@ void main() {
     expect(await phone.categories.getAll(), isEmpty);
     expect(
       await phone.db.select(phone.db.syncState).get(),
-      hasLength(2),
+      hasLength(6),
       reason: 'a cursor is remembered per table',
     );
   });

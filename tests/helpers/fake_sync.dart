@@ -14,6 +14,10 @@ class FakeSyncServer {
   final Map<String, Map<String, RemoteRow>> tables = {
     'categories': {},
     'expenses': {},
+    'budgets': {},
+    'goals': {},
+    'goal_contributions': {},
+    'bills': {},
   };
 
   /// Role per user id: `owner`, `admin`, `editor`, `viewer`. A user not listed has left.
@@ -95,7 +99,12 @@ class _FakeBackend implements SyncBackend {
   }
 
   String? get _role => _server.roles[_userId];
-  bool get _canWrite => const {'owner', 'admin', 'editor'}.contains(_role);
+
+  /// Expenses: owner, admin, editor. Everything else (categories, budgets, goals, bills):
+  /// owner and admin, like the Row Level Security policies.
+  bool _canWrite(String table) => table == 'expenses'
+      ? const {'owner', 'admin', 'editor'}.contains(_role)
+      : const {'owner', 'admin'}.contains(_role);
 
   @override
   Future<List<RemoteRow>> pull(
@@ -140,7 +149,7 @@ class _FakeBackend implements SyncBackend {
   @override
   Future<RemoteRow> push(String table, RemoteRow row) async {
     _checkOnline();
-    if (!_canWrite) throw const SyncRejectedException('42501');
+    if (!_canWrite(table)) throw const SyncRejectedException('42501');
     final id = row['id'] as String;
     if (table == 'expenses' && _server.row(table, id) == null) {
       if (row['created_by'] != _userId) {

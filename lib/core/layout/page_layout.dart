@@ -13,20 +13,32 @@ class PageHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.onBack,
+    this.onBackWhenCompact,
     this.trailing,
+    this.trailingBelowWhenCompact = false,
   });
 
   final String title;
   final VoidCallback? onBack;
+
+  /// A back arrow on the phone only (pages that the wide layouts reach from the rail).
+  final VoidCallback? onBackWhenCompact;
   final Widget? trailing;
+
+  /// On the phone the trailing widget goes under the title, full width (a segmented switch
+  /// is too wide to sit beside it).
+  final bool trailingBelowWhenCompact;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final below = trailingBelowWhenCompact && context.layout.isCompact;
+    final onBack =
+        this.onBack ?? (context.layout.isCompact ? onBackWhenCompact : null);
     final size = context.layout.titleSize < 24
         ? 24.0
         : context.layout.titleSize;
-    return Row(
+    final row = Row(
       children: [
         if (onBack != null)
           Transform.translate(
@@ -34,7 +46,7 @@ class PageHeader extends StatelessWidget {
             child: _HeaderIconButton(
               icon: Icons.chevron_left_rounded,
               label: 'Back',
-              onTap: onBack!,
+              onTap: onBack,
             ),
           ),
         Expanded(
@@ -53,8 +65,13 @@ class PageHeader extends StatelessWidget {
             ),
           ),
         ),
-        ?trailing,
+        if (!below) ?trailing,
       ],
+    );
+    if (!below || trailing == null) return row;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [row, const SizedBox(height: 12), trailing!],
     );
   }
 }

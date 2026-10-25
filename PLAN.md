@@ -28,16 +28,18 @@ test/ (project root `test/` is for BUILD OUTPUTS, unit tests live in `tests/`)
 Note: Flutter normally uses `test/` for unit tests. In this project **`test/` holds compiled builds** as requested, so put automated tests in `tests/` and set the test path accordingly (`flutter test tests/`).
 
 ## Phases
-| # | Phase | Result |
-|---|---|---|
-| 1 | Foundations | Project, theme tokens, three themes, adaptive shell on all sizes, first builds in test/ |
-| 2 | Core expenses | Local DB, add/edit/list, Home with real data, categories, month navigation |
-| 3 | Accounts and household | Sign-in, household, roles, invite codes, RLS |
-| 4 | Sync | Realtime sync, offline queue, conflict handling |
-| 4b | Google Sheets connection | Owner links a Google Sheet; all household expenses mirror into it automatically (one-way, server-side) |
-| 5 | Budgets and insights | Budgets, charts, goals, bills, reminders |
-| 6 | Adaptive layouts and scan | Tablet, desktop, fold half-open polish; receipt scan |
-| 7 | Polish and release | Accessibility, app lock, export, CI for all platforms, store prep |
+Status is kept current at the end of every phase (and when a phase starts). "Built" means the code and automated tests exist and pass here; "Verified" means it was also run against the real services or on real devices. Details and open items per phase are in `CHANGELOG.md` and `docs/phases/`.
+
+| # | Phase | Result | Status |
+|---|---|---|---|
+| 1 | Foundations | Project, theme tokens, three themes, adaptive shell on all sizes, first builds in test/ | Built |
+| 2 | Core expenses | Local DB, add/edit/list, Home with real data, categories, month navigation | Built |
+| 3 | Accounts and household | Sign-in, household, roles, invite codes, RLS | Built. Server tests (`supabase test db`, `deno test`) and a real two-account run still to do |
+| 4 | Sync | Realtime sync, offline queue, conflict handling | Built (fake-server tests). Not yet tried on two real devices against Supabase |
+| 4b | Google Sheets connection | Owner links a Google Sheet; all household expenses mirror into it automatically (one-way, server-side) | Built (fake-Google tests). Google Cloud setup and a real connect still to do |
+| 5 | Budgets and insights | Budgets, charts, goals, bills, reminders | Built. Server tests, Android/iOS/macOS builds with notifications, and Windows pixel goldens still to do |
+| 6 | Adaptive layouts and scan | Tablet, desktop, fold half-open polish; receipt scan | Not started |
+| 7 | Polish and release | Accessibility, app lock, export, CI for all platforms, store prep | Not started |
 
 ## Open decisions (defaults in brackets)
 1. Admin vs owner differences [Admin cannot remove owner, delete household or transfer ownership].

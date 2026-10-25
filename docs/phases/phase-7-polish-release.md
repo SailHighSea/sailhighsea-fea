@@ -1,5 +1,7 @@
 # Phase 7: Polish and release (weeks 13 to 14)
 
+**Status:** Not started.
+
 ## Do
 1. Accessibility pass: screen reader labels, large text, contrast checks in all three modes, reduced motion.
 2. App lock (biometrics on mobile and macOS/Windows where supported). Export CSV.

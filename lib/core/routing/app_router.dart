@@ -4,6 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/appearance/appearance_screen.dart';
+import '../../features/bills/bills_screen.dart';
+import '../../features/budgets/budgets_screen.dart';
+import '../../features/goals/goals_screen.dart';
+import '../../features/insights/insights_screen.dart';
 import '../../features/expenses/expense_form_screen.dart';
 import '../../features/expenses/expense_list_screen.dart';
 import '../../features/expenses/widgets/fold_add_panel.dart';
@@ -18,18 +22,7 @@ import '../../features/home/home_screen.dart';
 import '../../features/sync/sync_indicator.dart';
 import '../layout/adaptive_shell.dart';
 import '../layout/destinations.dart';
-import '../layout/page_layout.dart';
-import '../layout/window_class.dart';
 import '../theme/app_tokens.dart';
-
-/// Pages that open full screen on the phone get a back button to Home.
-Widget _placeholder(BuildContext context, String title, String phase) {
-  return ComingSoonPage(
-    title: title,
-    phase: phase,
-    onBack: context.layout.isCompact ? () => context.go('/home') : null,
-  );
-}
 
 /// Routes that sit outside the shell (no tabs, rail or sidebar): sign-in and joining.
 const _gateRoutes = {'/sign-in', '/welcome', '/starting'};
@@ -118,23 +111,19 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
           ),
           GoRoute(
             path: '/budgets',
-            pageBuilder: (c, s) =>
-                _page(s, _placeholder(c, 'Budgets', 'Phase 5')),
+            pageBuilder: (c, s) => _page(s, const BudgetsScreen()),
           ),
           GoRoute(
             path: '/insights',
-            pageBuilder: (c, s) =>
-                _page(s, _placeholder(c, 'Insights', 'Phase 5')),
+            pageBuilder: (c, s) => _page(s, const InsightsScreen()),
           ),
           GoRoute(
             path: '/goals',
-            pageBuilder: (c, s) =>
-                _page(s, _placeholder(c, 'Goals', 'Phase 5')),
+            pageBuilder: (c, s) => _page(s, const GoalsScreen()),
           ),
           GoRoute(
             path: '/bills',
-            pageBuilder: (c, s) =>
-                _page(s, _placeholder(c, 'Bills', 'Phase 5')),
+            pageBuilder: (c, s) => _page(s, const BillsScreen()),
           ),
           GoRoute(
             path: '/family',
