@@ -40,7 +40,7 @@ final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
       budgetCents: ref.watch(monthlyBudgetCentsProvider),
       expenses: expenses.requireValue,
       categories: categories.requireValue,
-      currentUser: ref.watch(currentUserNameProvider),
+      addedByLabel: ref.watch(addedByLabelProvider),
     ),
   );
 });

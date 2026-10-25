@@ -5,7 +5,7 @@ import '../../core/db/app_database.dart';
 import '../../core/money/currency.dart';
 import '../../core/time.dart';
 import '../../core/theme/appearance_provider.dart';
-import '../family/member_providers.dart';
+import '../auth/auth_providers.dart';
 import 'amount_entry.dart';
 import 'data/day_format.dart';
 import 'expense_providers.dart';
@@ -145,7 +145,7 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
         categoryId: categoryId,
         spentOn: s.spentOn,
         note: s.note,
-        createdBy: ref.read(currentUserNameProvider),
+        createdBy: ref.read(currentUserIdProvider) ?? 'You',
       );
     } else {
       await repo.update(

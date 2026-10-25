@@ -5,6 +5,7 @@ import '../../../core/money/money_provider.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../expense_form_controller.dart';
 import '../expense_form_screen.dart' show PrimaryPillButton;
+import '../../family/member_providers.dart';
 import '../expense_providers.dart';
 import 'amount_widgets.dart';
 import 'category_picker.dart';
@@ -21,6 +22,9 @@ class FoldAddPanel extends ConsumerWidget {
     final controller = ref.read(expenseFormProvider(null).notifier);
     final categories = ref.watch(categoriesProvider).value ?? const [];
     final money = ref.watch(moneyFormatterProvider);
+    final canManageCategories = ref
+        .watch(permissionsProvider)
+        .canManageCategories;
     final selectedId =
         form.categoryId ?? (categories.isEmpty ? null : categories.first.id);
 
@@ -72,7 +76,7 @@ class FoldAddPanel extends ConsumerWidget {
                 categories: categories,
                 selectedId: selectedId,
                 onSelect: controller.setCategory,
-                onAdd: () {},
+                onAdd: canManageCategories ? () {} : null,
                 scrollable: true,
                 tileColor: t.background,
               ),

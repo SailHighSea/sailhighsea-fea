@@ -129,6 +129,7 @@ class AdaptiveTwoPane extends StatelessWidget {
     required this.primary,
     required this.secondary,
     this.secondaryWidth = 300,
+    this.scrollWhenStacked = false,
   });
 
   final Widget header;
@@ -136,9 +137,28 @@ class AdaptiveTwoPane extends StatelessWidget {
   final Widget Function(BuildContext, PaneMode) secondary;
   final double secondaryWidth;
 
+  /// On the phone, scroll both panes together instead of pinning the secondary one under
+  /// the primary (the Family screen is a plain scrolling page).
+  final bool scrollWhenStacked;
+
   @override
   Widget build(BuildContext context) {
     final metrics = context.layout;
+    if (metrics.isCompact && scrollWhenStacked) {
+      return SingleChildScrollView(
+        padding: metrics.pagePadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            header,
+            const SizedBox(height: 18),
+            primary(context, PaneMode.stacked),
+            const SizedBox(height: 12),
+            secondary(context, PaneMode.stacked),
+          ],
+        ),
+      );
+    }
     if (metrics.isCompact) {
       return Padding(
         padding: EdgeInsets.fromLTRB(

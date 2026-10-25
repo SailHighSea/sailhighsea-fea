@@ -2,15 +2,22 @@ import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
 import '../../../core/db/ids.dart';
+import '../../../core/db/tables.dart' show localHouseholdId;
 import 'day_format.dart';
 
 /// Reads and writes expenses in the local database (the UI never touches Drift directly).
 /// Writes mark the row `dirty` and bump `updated_at`; deletes are soft (rule 5).
 class ExpenseRepository {
-  ExpenseRepository(this._db, {DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+  ExpenseRepository(
+    this._db, {
+    DateTime Function()? clock,
+    this.householdId = localHouseholdId,
+  }) : _clock = clock ?? DateTime.now;
 
   final AppDatabase _db;
+
+  /// Only this household's expenses are read and written.
+  final String householdId;
   final DateTime Function() _clock;
 
   /// Live expenses with `spentOn` from [from] to [to], both inclusive, newest first.
@@ -18,6 +25,7 @@ class ExpenseRepository {
     final query = _db.select(_db.expenses)
       ..where(
         (e) =>
+            e.householdId.equals(householdId) &
             e.deletedAt.isNull() &
             e.spentOn.isBiggerOrEqualValue(formatDay(from)) &
             e.spentOn.isSmallerOrEqualValue(formatDay(to)),
@@ -55,6 +63,7 @@ class ExpenseRepository {
         .insert(
           ExpensesCompanion.insert(
             id: id,
+            householdId: Value(householdId),
             amountCents: amountCents,
             categoryId: categoryId,
             note: Value(note.trim()),

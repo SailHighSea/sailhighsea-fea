@@ -1,0 +1,22 @@
+# Local Supabase stack (`supabase start`). Hosted projects take these from the dashboard.
+project_id = "family-expenses"
+
+[api]
+schemas = ["public"]
+
+[auth]
+site_url = "app.familyexpenses://login-callback"
+additional_redirect_urls = ["app.familyexpenses://login-callback"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+otp_length = 6
+otp_expiry = 3600
+
+[functions.create-invite]
+verify_jwt = true
+
+[functions.redeem-invite]
+verify_jwt = true

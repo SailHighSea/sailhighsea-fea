@@ -50,3 +50,33 @@ class Expenses extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// The household this device belongs to. Read-only copy of the server row (the server is the
+/// authority for ownership, roles and names), so no `dirty` flag.
+@DataClassName('HouseholdRow')
+class Households extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get currency => text().withDefault(const Constant('SGD'))();
+  TextColumn get ownerId => text()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Members of a household with their role. Read-only copy of the server rows; the app uses it
+/// offline for "who added" names and to decide which buttons to show.
+@DataClassName('MemberRow')
+class Members extends Table {
+  TextColumn get householdId => text()();
+  TextColumn get userId => text()();
+
+  /// `owner`, `admin`, `editor` or `viewer`.
+  TextColumn get role => text()();
+  TextColumn get displayName => text()();
+  DateTimeColumn get joinedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {householdId, userId};
+}

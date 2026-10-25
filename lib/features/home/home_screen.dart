@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/layout/dashboard_layout.dart';
 import '../../core/layout/destinations.dart';
 import '../../core/money/money_provider.dart';
+import '../family/member_providers.dart';
 import '../../core/time.dart';
 import 'home_providers.dart';
 import 'widgets/bill_goal_cards.dart';
@@ -32,6 +33,7 @@ class HomeScreen extends ConsumerWidget {
       );
     }
     final money = ref.watch(moneyFormatterProvider);
+    final permissions = ref.watch(permissionsProvider);
     final now = ref.watch(clockProvider)();
     final month = ref.watch(selectedMonthProvider);
     final months = ref.read(selectedMonthProvider.notifier);
@@ -48,7 +50,7 @@ class HomeScreen extends ConsumerWidget {
         month: month,
         onPrevious: months.previous,
         onNext: months.next,
-        onAdd: () => context.push('/add'),
+        onAdd: permissions.canWriteExpenses ? () => context.push('/add') : null,
         onSelectDestination: goTo,
         mode: mode,
       ),
@@ -98,7 +100,9 @@ class HomeScreen extends ConsumerWidget {
         now: now,
         table: mode == DashboardMode.wide,
         onSeeAll: () => context.go('/expenses'),
-        onOpen: (expense) => context.push('/expenses/${expense.id}/edit'),
+        onOpen: permissions.canWriteExpenses
+            ? (expense) => context.push('/expenses/${expense.id}/edit')
+            : null,
       ),
     );
   }

@@ -9,6 +9,7 @@ import '../../core/money/money_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/time.dart';
+import '../family/member_providers.dart';
 import 'expense_form_controller.dart';
 import 'expense_providers.dart';
 import 'widgets/amount_widgets.dart';
@@ -96,6 +97,9 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
     final controller = ref.read(expenseFormProvider(widget.editId).notifier);
     final categories = ref.watch(categoriesProvider).value ?? const [];
     final money = ref.watch(moneyFormatterProvider);
+    final canManageCategories = ref
+        .watch(permissionsProvider)
+        .canManageCategories;
     final currency = money.currency;
     final now = ref.watch(clockProvider)();
     final t = context.tokens;
@@ -133,7 +137,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
             categories: categories,
             selectedId: selectedId,
             onSelect: controller.setCategory,
-            onAdd: () => _addCategory(context),
+            onAdd: canManageCategories ? () => _addCategory(context) : null,
           ),
           details: DetailsCard(
             note: form.note,

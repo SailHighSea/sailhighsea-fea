@@ -15,7 +15,7 @@ class HomeHeader extends StatelessWidget {
     required this.month,
     required this.onPrevious,
     required this.onNext,
-    required this.onAdd,
+    this.onAdd,
     required this.onSelectDestination,
     required this.mode,
   });
@@ -23,7 +23,9 @@ class HomeHeader extends StatelessWidget {
   final DateTime month;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
-  final VoidCallback onAdd;
+
+  /// `null` hides the button (view-only members cannot add expenses).
+  final VoidCallback? onAdd;
   final ValueChanged<AppDestination> onSelectDestination;
 
   /// Phone stacks get the short "+ Add"; wider layouts the full "+ Add expense".
@@ -43,33 +45,35 @@ class HomeHeader extends StatelessWidget {
             onNext: onNext,
           ),
         ),
-        const SizedBox(width: 8),
-        Semantics(
-          button: true,
-          label: 'Add expense',
-          excludeSemantics: true,
-          child: Material(
-            color: t.primary,
-            borderRadius: BorderRadius.circular(AppRadii.button),
-            child: InkWell(
+        if (onAdd != null) ...[
+          const SizedBox(width: 8),
+          Semantics(
+            button: true,
+            label: 'Add expense',
+            excludeSemantics: true,
+            child: Material(
+              color: t.primary,
               borderRadius: BorderRadius.circular(AppRadii.button),
-              onTap: onAdd,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: tall ? 48 : kMinTapTarget,
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tall ? 24 : (longAddLabel ? 20 : 16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppRadii.button),
+                onTap: onAdd,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: tall ? 48 : kMinTapTarget,
                   ),
-                  child: Center(
-                    widthFactor: 1,
-                    child: Text(
-                      longAddLabel ? '+ Add expense' : '+ Add',
-                      style: TextStyle(
-                        fontSize: longAddLabel ? 15 : 14,
-                        fontWeight: FontWeight.w700,
-                        color: t.onPrimary,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tall ? 24 : (longAddLabel ? 20 : 16),
+                    ),
+                    child: Center(
+                      widthFactor: 1,
+                      child: Text(
+                        longAddLabel ? '+ Add expense' : '+ Add',
+                        style: TextStyle(
+                          fontSize: longAddLabel ? 15 : 14,
+                          fontWeight: FontWeight.w700,
+                          color: t.onPrimary,
+                        ),
                       ),
                     ),
                   ),
@@ -77,7 +81,7 @@ class HomeHeader extends StatelessWidget {
               ),
             ),
           ),
-        ),
+        ],
         if (context.layout.isCompact) ...[
           const SizedBox(width: 8),
           OverflowMenuButton(onSelect: onSelectDestination),

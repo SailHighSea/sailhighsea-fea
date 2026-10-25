@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/db/app_database.dart';
 import '../../core/db/db_providers.dart';
 import '../../core/time.dart';
+import '../family/member_providers.dart';
 import 'data/category_repository.dart';
 import 'data/expense_repository.dart';
 
@@ -10,6 +11,7 @@ final expenseRepositoryProvider = Provider<ExpenseRepository>(
   (ref) => ExpenseRepository(
     ref.watch(databaseProvider),
     clock: ref.watch(clockProvider),
+    householdId: ref.watch(activeHouseholdIdProvider),
   ),
 );
 
@@ -17,6 +19,7 @@ final categoryRepositoryProvider = Provider<CategoryRepository>(
   (ref) => CategoryRepository(
     ref.watch(databaseProvider),
     clock: ref.watch(clockProvider),
+    householdId: ref.watch(activeHouseholdIdProvider),
   ),
 );
 

@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/db/app_database.dart';
 import '../../../core/db/ids.dart';
+import '../../../core/db/tables.dart' show localHouseholdId;
 
 /// Colour keys handed to new categories in turn; the theme turns a key into a colour.
 const newCategoryColorKeys = [
@@ -14,15 +15,21 @@ const newCategoryColorKeys = [
 ];
 
 class CategoryRepository {
-  CategoryRepository(this._db, {DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+  CategoryRepository(
+    this._db, {
+    DateTime Function()? clock,
+    this.householdId = localHouseholdId,
+  }) : _clock = clock ?? DateTime.now;
 
   final AppDatabase _db;
+
+  /// Only this household's categories are read and written.
+  final String householdId;
   final DateTime Function() _clock;
 
   Stream<List<CategoryRow>> watchAll() {
     final query = _db.select(_db.categories)
-      ..where((c) => c.deletedAt.isNull())
+      ..where((c) => c.householdId.equals(householdId) & c.deletedAt.isNull())
       ..orderBy([
         (c) => OrderingTerm.asc(c.sort),
         (c) => OrderingTerm.asc(c.name),
@@ -32,7 +39,9 @@ class CategoryRepository {
 
   Future<List<CategoryRow>> getAll() =>
       (_db.select(_db.categories)
-            ..where((c) => c.deletedAt.isNull())
+            ..where(
+              (c) => c.householdId.equals(householdId) & c.deletedAt.isNull(),
+            )
             ..orderBy([(c) => OrderingTerm.asc(c.sort)]))
           .get();
 
@@ -49,6 +58,7 @@ class CategoryRepository {
     final custom = existing.where((c) => !c.id.startsWith('default-')).length;
     final row = CategoriesCompanion.insert(
       id: newId(),
+      householdId: Value(householdId),
       name: trimmed,
       color: newCategoryColorKeys[custom % newCategoryColorKeys.length],
       sort: Value(existing.isEmpty ? 0 : existing.last.sort + 1),

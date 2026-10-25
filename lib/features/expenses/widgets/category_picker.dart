@@ -11,7 +11,7 @@ class CategoryPicker extends StatelessWidget {
     required this.categories,
     required this.selectedId,
     required this.onSelect,
-    required this.onAdd,
+    this.onAdd,
     this.columns = 3,
     this.scrollable = false,
     this.tileColor,
@@ -20,7 +20,9 @@ class CategoryPicker extends StatelessWidget {
   final List<CategoryRow> categories;
   final String? selectedId;
   final ValueChanged<String> onSelect;
-  final VoidCallback onAdd;
+
+  /// `null` hides the "+ New" tile (only owner and admin manage categories).
+  final VoidCallback? onAdd;
   final int columns;
 
   /// One horizontally scrolling row (the fold panel) instead of a grid.
@@ -40,13 +42,14 @@ class CategoryPicker extends StatelessWidget {
           background: tileColor,
           onTap: () => onSelect(c.id),
         ),
-      (w) => _Tile(
-        width: w,
-        label: '+ New',
-        selected: false,
-        dashed: true,
-        onTap: onAdd,
-      ),
+      if (onAdd != null)
+        (w) => _Tile(
+          width: w,
+          label: '+ New',
+          selected: false,
+          dashed: true,
+          onTap: onAdd!,
+        ),
     ];
     if (scrollable) {
       return SizedBox(

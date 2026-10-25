@@ -16,7 +16,8 @@ const _phone = Size(390, 844);
 const _tablet = Size(1024, 720);
 const _desktop = Size(1280, 800);
 
-Finder _key(String label) => find.descendant(of: find.byType(AmountKeypad), matching: find.text(label));
+Finder _key(String label) =>
+    find.descendant(of: find.byType(AmountKeypad), matching: find.text(label));
 
 Future<void> _typeAmount(WidgetTester tester, String amount) async {
   for (final ch in amount.split('')) {
@@ -25,10 +26,19 @@ Future<void> _typeAmount(WidgetTester tester, String amount) async {
   }
 }
 
-String _amountShown(WidgetTester tester) => tester.widget<Text>(find.byKey(const Key('amount-text'))).data!;
+String _amountShown(WidgetTester tester) =>
+    tester.widget<Text>(find.byKey(const Key('amount-text'))).data!;
 
-Future<List<ExpenseRow>> _expenses(WidgetTester tester, ProviderContainer c) async {
-  final rows = await tester.runAsync(() => c.read(databaseProvider).select(c.read(databaseProvider).expenses).get());
+Future<List<ExpenseRow>> _expenses(
+  WidgetTester tester,
+  ProviderContainer c,
+) async {
+  final rows = await tester.runAsync(
+    () => c
+        .read(databaseProvider)
+        .select(c.read(databaseProvider).expenses)
+        .get(),
+  );
   return rows!;
 }
 
@@ -44,7 +54,13 @@ Future<String> _seed(
   final id = await tester.runAsync(
     () => c
         .read(expenseRepositoryProvider)
-        .add(amountCents: cents, categoryId: category, spentOn: parseDay(day), note: note, createdBy: by),
+        .add(
+          amountCents: cents,
+          categoryId: category,
+          spentOn: parseDay(day),
+          note: note,
+          createdBy: by,
+        ),
   );
   await tester.pumpAndSettle();
   return id!;
@@ -61,10 +77,16 @@ void main() {
   setUpAll(loadTestFonts);
 
   group('add an expense (same flow on every size)', () {
-    for (final entry in {'phone': _phone, 'tablet': _tablet, 'desktop': _desktop}.entries) {
+    for (final entry in {
+      'phone': _phone,
+      'tablet': _tablet,
+      'desktop': _desktop,
+    }.entries) {
       testWidgets('${entry.key}: keypad, category, note, save', (tester) async {
         final c = await pumpApp(tester, size: entry.value);
-        await tester.tap(find.text(entry.key == 'phone' ? '+ Add' : '+ Add expense'));
+        await tester.tap(
+          find.text(entry.key == 'phone' ? '+ Add' : '+ Add expense'),
+        );
         await tester.pumpAndSettle();
 
         expect(find.text('Add expense'), findsOneWidget, reason: 'form title');
@@ -75,7 +97,10 @@ void main() {
 
         await tester.tap(find.text('Transport'));
         await tester.pump();
-        await tester.enterText(find.byKey(const Key('note-field')), 'Groceries');
+        await tester.enterText(
+          find.byKey(const Key('note-field')),
+          'Groceries',
+        );
         await tester.pump();
         await tester.tap(find.text('Save expense'));
         await tester.pumpAndSettle();
@@ -97,7 +122,9 @@ void main() {
     }
   });
 
-  testWidgets('saving without an amount shows an error and saves nothing', (tester) async {
+  testWidgets('saving without an amount shows an error and saves nothing', (
+    tester,
+  ) async {
     final c = await pumpApp(tester, size: _phone, location: '/add');
     await tester.tap(find.text('Save expense'));
     await tester.pumpAndSettle();
@@ -106,7 +133,11 @@ void main() {
     expect(find.text('Add expense'), findsWidgets, reason: 'still on the form');
 
     await _typeAmount(tester, '5');
-    expect(find.text('Enter an amount'), findsNothing, reason: 'typing clears the error');
+    expect(
+      find.text('Enter an amount'),
+      findsNothing,
+      reason: 'typing clears the error',
+    );
   });
 
   testWidgets('the first category is used when none is picked', (tester) async {
@@ -151,7 +182,11 @@ void main() {
     expect(find.text('Add expense'), findsNothing);
     await _pressCtrlN(tester);
     expect(find.text('Add expense'), findsOneWidget);
-    expect(find.textContaining('Ctrl or Cmd + N'), findsOneWidget, reason: 'desktop shows the shortcut tip');
+    expect(
+      find.textContaining('Ctrl or Cmd + N'),
+      findsOneWidget,
+      reason: 'desktop shows the shortcut tip',
+    );
 
     // Esc closes it again.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -178,7 +213,11 @@ void main() {
     await tester.tap(find.text('Save expense'));
     await tester.pumpAndSettle();
     final db = c.read(databaseProvider);
-    final pets = await tester.runAsync(() => (db.select(db.categories)..where((x) => x.name.equals('Pets'))).getSingle());
+    final pets = await tester.runAsync(
+      () => (db.select(
+        db.categories,
+      )..where((x) => x.name.equals('Pets'))).getSingle(),
+    );
     expect((await _expenses(tester, c)).single.categoryId, pets!.id);
   });
 
@@ -200,20 +239,40 @@ void main() {
   });
 
   group('edit', () {
-    testWidgets('opens with the saved values and saves changes', (tester) async {
+    testWidgets('opens with the saved values and saves changes', (
+      tester,
+    ) async {
       final c = await pumpApp(tester, size: _tablet, location: '/expenses');
-      final id = await _seed(tester, c, cents: 4820, day: '2026-10-22', category: 'default-bills', note: 'Phone bill');
+      final id = await _seed(
+        tester,
+        c,
+        cents: 4820,
+        day: '2026-10-22',
+        category: 'default-bills',
+        note: 'Phone bill',
+      );
 
       await tester.tap(find.text('Phone bill').first);
       await tester.pumpAndSettle();
       expect(find.text('Edit expense'), findsOneWidget);
       expect(_amountShown(tester), '48.20');
-      expect(tester.widget<TextField>(find.byKey(const Key('note-field'))).controller!.text, 'Phone bill');
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('note-field')))
+            .controller!
+            .text,
+        'Phone bill',
+      );
       expect(find.text('Yesterday, 22 Oct'), findsOneWidget);
 
       // Replace the amount: backspace everything, then type 60.
       for (var i = 0; i < 5; i++) {
-        await tester.tap(find.descendant(of: find.byType(AmountKeypad), matching: find.byIcon(Icons.backspace_outlined)));
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AmountKeypad),
+            matching: find.byIcon(Icons.backspace_outlined),
+          ),
+        );
         await tester.pump();
       }
       await _typeAmount(tester, '60');
@@ -228,7 +287,11 @@ void main() {
       expect(row.categoryId, 'default-fun');
       expect(row.note, 'Phone bill');
       expect(row.updatedAt, kTestNow);
-      expect(find.text('Edit expense'), findsNothing, reason: 'closed after saving');
+      expect(
+        find.text('Edit expense'),
+        findsNothing,
+        reason: 'closed after saving',
+      );
       expect(find.text('Expenses'), findsWidgets, reason: 'back on the list');
     });
 
@@ -248,9 +311,29 @@ void main() {
     testWidgets('shows the month, total and who added each', (tester) async {
       final c = await pumpApp(tester, size: _tablet, location: '/expenses');
       expect(find.text('No expenses this month'), findsOneWidget);
-      await _seed(tester, c, cents: 4820, day: '2026-10-23', note: 'Groceries', by: 'Maya');
-      await _seed(tester, c, cents: 2000, day: '2026-10-22', category: 'default-transport', note: 'MRT top-up');
-      await _seed(tester, c, cents: 999, day: '2026-09-15', note: 'September lunch');
+      await _seed(
+        tester,
+        c,
+        cents: 4820,
+        day: '2026-10-23',
+        note: 'Groceries',
+        by: 'Maya',
+      );
+      await _seed(
+        tester,
+        c,
+        cents: 2000,
+        day: '2026-10-22',
+        category: 'default-transport',
+        note: 'MRT top-up',
+      );
+      await _seed(
+        tester,
+        c,
+        cents: 999,
+        day: '2026-09-15',
+        note: 'September lunch',
+      );
 
       expect(find.text('October 2026'), findsOneWidget);
       expect(find.text('Groceries'), findsOneWidget);
@@ -264,8 +347,22 @@ void main() {
     testWidgets('search and category filter', (tester) async {
       final c = await pumpApp(tester, size: _phone, location: '/expenses');
       await _seed(tester, c, cents: 4820, day: '2026-10-23', note: 'Groceries');
-      await _seed(tester, c, cents: 2000, day: '2026-10-22', category: 'default-transport', note: 'MRT top-up');
-      await _seed(tester, c, cents: 1998, day: '2026-10-21', category: 'default-fun', note: 'Streaming plan');
+      await _seed(
+        tester,
+        c,
+        cents: 2000,
+        day: '2026-10-22',
+        category: 'default-transport',
+        note: 'MRT top-up',
+      );
+      await _seed(
+        tester,
+        c,
+        cents: 1998,
+        day: '2026-10-21',
+        category: 'default-fun',
+        note: 'Streaming plan',
+      );
 
       await tester.enterText(find.byKey(const Key('expense-search')), 'groc');
       await tester.pumpAndSettle();
@@ -273,7 +370,10 @@ void main() {
       expect(find.text('MRT top-up'), findsNothing);
 
       // Search also matches the category name.
-      await tester.enterText(find.byKey(const Key('expense-search')), 'transport');
+      await tester.enterText(
+        find.byKey(const Key('expense-search')),
+        'transport',
+      );
       await tester.pumpAndSettle();
       expect(find.text('MRT top-up'), findsOneWidget);
       expect(find.text('Groceries'), findsNothing);
@@ -299,8 +399,20 @@ void main() {
 
     testWidgets('month navigation changes what is listed', (tester) async {
       final c = await pumpApp(tester, size: _tablet, location: '/expenses');
-      await _seed(tester, c, cents: 999, day: '2026-09-15', note: 'September lunch');
-      await _seed(tester, c, cents: 500, day: '2026-10-01', note: 'October lunch');
+      await _seed(
+        tester,
+        c,
+        cents: 999,
+        day: '2026-09-15',
+        note: 'September lunch',
+      );
+      await _seed(
+        tester,
+        c,
+        cents: 500,
+        day: '2026-10-01',
+        note: 'October lunch',
+      );
       expect(find.text('October lunch'), findsOneWidget);
 
       await tester.tap(find.bySemanticsLabel('Previous month'));
@@ -310,9 +422,17 @@ void main() {
       expect(find.text('October lunch'), findsNothing);
     });
 
-    testWidgets('delete from the menu is soft and can be undone', (tester) async {
+    testWidgets('delete from the menu is soft and can be undone', (
+      tester,
+    ) async {
       final c = await pumpApp(tester, size: _desktop, location: '/expenses');
-      final id = await _seed(tester, c, cents: 4820, day: '2026-10-23', note: 'Groceries');
+      final id = await _seed(
+        tester,
+        c,
+        cents: 4820,
+        day: '2026-10-23',
+        note: 'Groceries',
+      );
 
       await tester.tap(find.byIcon(Icons.more_vert));
       await tester.pumpAndSettle();
@@ -347,27 +467,54 @@ void main() {
   });
 
   group('Home with real data', () {
-    testWidgets('shows totals from the database and updates live', (tester) async {
+    testWidgets('shows totals from the database and updates live', (
+      tester,
+    ) async {
       final c = await pumpApp(tester, size: _tablet);
       expect(find.text('No spending yet this month'), findsOneWidget);
 
       await _seed(tester, c, cents: 61200, day: '2026-10-05', note: 'Big shop');
-      await _seed(tester, c, cents: 7200, day: '2026-10-23', category: 'default-bills', note: 'Phone');
+      await _seed(
+        tester,
+        c,
+        cents: 7200,
+        day: '2026-10-23',
+        category: 'default-bills',
+        note: 'Phone',
+      );
 
       // Spent 684, today 72, budget 2,500.
       expect(find.text('S\$684'), findsOneWidget);
       expect(find.text('of S\$2,500 · S\$1,816 left'), findsOneWidget);
       expect(find.text('27%'), findsOneWidget);
-      expect(find.text('S\$72'), findsOneWidget, reason: 'today');
+      expect(find.text('S\$72'), findsWidgets, reason: 'today');
       expect(find.text('Food'), findsWidgets);
       expect(find.text('Big shop'), findsOneWidget);
-      expect(find.text('Nothing due'), findsOneWidget, reason: 'bills arrive in Phase 5');
+      expect(
+        find.text('Nothing due'),
+        findsOneWidget,
+        reason: 'bills arrive in Phase 5',
+      );
     });
 
-    testWidgets('month navigation moves between months and back', (tester) async {
+    testWidgets('month navigation moves between months and back', (
+      tester,
+    ) async {
       final c = await pumpApp(tester, size: _phone);
-      await _seed(tester, c, cents: 12300, day: '2026-09-10', note: 'September shop');
-      await _seed(tester, c, cents: 4500, day: '2026-10-10', note: 'October shop');
+      await _seed(
+        tester,
+        c,
+        cents: 12300,
+        day: '2026-09-10',
+        note: 'September shop',
+      );
+      await _seed(
+        tester,
+        c,
+        cents: 4500,
+        day: '2026-10-10',
+        note: 'October shop',
+      );
       expect(find.text('October 2026'), findsOneWidget);
       expect(find.text('S\$45'), findsWidgets);
 
@@ -394,10 +541,19 @@ void main() {
       state: DisplayFeatureState.postureHalfOpened,
     );
 
-    testWidgets('dashboard above the hinge, add form below, and it saves', (tester) async {
-      final c = await pumpApp(tester, size: const Size(840, 900), displayFeatures: const [hinge]);
+    testWidgets('dashboard above the hinge, add form below, and it saves', (
+      tester,
+    ) async {
+      final c = await pumpApp(
+        tester,
+        size: const Size(840, 900),
+        displayFeatures: const [hinge],
+      );
 
-      expect(tester.getBottomLeft(find.text('Spent this month')).dy, lessThan(440));
+      expect(
+        tester.getBottomLeft(find.text('Spent this month')).dy,
+        lessThan(440),
+      );
       final form = find.text('Save expense');
       expect(form, findsOneWidget);
       expect(tester.getTopLeft(form).dy, greaterThan(460));
@@ -417,25 +573,48 @@ void main() {
   });
 
   group('accessibility', () {
-    testWidgets('keypad keys, category tiles and month arrows are at least 44px', (tester) async {
-      await pumpApp(tester, size: _phone, location: '/add');
-      final keys = find.descendant(of: find.byType(AmountKeypad), matching: find.byType(InkWell));
-      expect(keys, findsNWidgets(12));
-      for (final k in keys.evaluate()) {
-        final size = tester.getSize(find.byWidget(k.widget));
-        expect(size.height, greaterThanOrEqualTo(44));
-        expect(size.width, greaterThanOrEqualTo(44));
-      }
-      for (final name in ['Food', 'Bills', '+ New']) {
-        final size = tester.getSize(find.ancestor(of: find.text(name), matching: find.byType(InkWell)).first);
-        expect(size.height, greaterThanOrEqualTo(44), reason: name);
-      }
+    testWidgets(
+      'keypad keys, category tiles and month arrows are at least 44px',
+      (tester) async {
+        await pumpApp(tester, size: _phone, location: '/add');
+        final keys = find.descendant(
+          of: find.byType(AmountKeypad),
+          matching: find.byType(InkWell),
+        );
+        expect(keys, findsNWidgets(12));
+        for (final k in keys.evaluate()) {
+          final size = tester.getSize(find.byWidget(k.widget));
+          expect(size.height, greaterThanOrEqualTo(44));
+          expect(size.width, greaterThanOrEqualTo(44));
+        }
+        for (final name in ['Food', 'Bills', '+ New']) {
+          final size = tester.getSize(
+            find
+                .ancestor(of: find.text(name), matching: find.byType(InkWell))
+                .first,
+          );
+          expect(size.height, greaterThanOrEqualTo(44), reason: name);
+        }
+      },
+    );
+
+    testWidgets('large text does not overflow the add form', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(360, 800),
+        location: '/add',
+        textScale: 2,
+      );
+      expect(tester.takeException(), isNull);
     });
 
-    testWidgets('large text does not overflow the add form or the list', (tester) async {
-      await pumpApp(tester, size: const Size(360, 800), location: '/add', textScale: 2);
-      expect(tester.takeException(), isNull);
-      await pumpApp(tester, size: const Size(360, 800), location: '/expenses', textScale: 2);
+    testWidgets('large text does not overflow the list', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(360, 800),
+        location: '/expenses',
+        textScale: 2,
+      );
       expect(tester.takeException(), isNull);
     });
   });

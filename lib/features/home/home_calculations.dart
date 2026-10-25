@@ -5,10 +5,13 @@ import '../../core/time.dart';
 import '../expenses/data/day_format.dart';
 import 'home_data.dart';
 
-/// First day the Home query must cover for [month]: the 7-day chart can reach back into
+/// First day the Home query must cover for [month]: the month itself, or earlier when the 7-day chart can reach back into
 /// the previous month.
-DateTime homeRangeStart(DateTime month, DateTime now) =>
-    _referenceDay(month, now).subtract(const Duration(days: 6));
+DateTime homeRangeStart(DateTime month, DateTime now) {
+  final weekStart = _referenceDay(month, now).subtract(const Duration(days: 6));
+  final first = DateTime(month.year, month.month);
+  return weekStart.isBefore(first) ? weekStart : first;
+}
 
 /// Last day the Home query must cover.
 DateTime homeRangeEnd(DateTime month) =>
@@ -36,6 +39,9 @@ HomeSummary buildHomeSummary({
   required List<ExpenseRow> expenses,
   required List<CategoryRow> categories,
   String currentUser = 'You',
+
+  /// Turns `created_by` into the name shown as "who added"; when null, [currentUser] is "You".
+  String Function(String?)? addedByLabel,
   int topCategoryCount = 4,
   int recentCount = 4,
 }) {
@@ -105,7 +111,12 @@ HomeSummary buildHomeSummary({
     categories: _topCategories(monthExpenses, categoryById, topCategoryCount),
     last7: last7,
     monthDaily: monthDaily,
-    recent: _recent(monthExpenses, categoryById, currentUser, recentCount),
+    recent: _recent(
+      monthExpenses,
+      categoryById,
+      addedByLabel ?? (by) => _legacyLabel(by, currentUser),
+      recentCount,
+    ),
   );
 }
 
@@ -165,7 +176,7 @@ List<CategorySpend> _topCategories(
 List<RecentExpense> _recent(
   List<ExpenseRow> monthExpenses,
   Map<String, CategoryRow> categoryById,
-  String currentUser,
+  String Function(String?) addedByLabel,
   int count,
 ) {
   final sorted = [...monthExpenses]
@@ -182,10 +193,12 @@ List<RecentExpense> _recent(
             : e.note,
         categoryName: categoryById[e.categoryId]?.name ?? 'Other',
         spentOn: parseDay(e.spentOn),
-        addedBy: (e.createdBy == null || e.createdBy == currentUser)
-            ? 'You'
-            : e.createdBy!,
+        addedBy: addedByLabel(e.createdBy),
         cents: e.amountCents,
       ),
   ];
 }
+
+/// Before accounts, `created_by` held a plain name; the current user's own entries read "You".
+String _legacyLabel(String? createdBy, String currentUser) =>
+    (createdBy == null || createdBy == currentUser) ? 'You' : createdBy;

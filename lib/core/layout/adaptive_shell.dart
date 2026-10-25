@@ -189,25 +189,35 @@ class _NavRail extends StatelessWidget {
       ),
       child: SafeArea(
         right: false,
-        child: Column(
-          children: [
-            const SizedBox(height: 28),
-            for (final d in AppDestination.main) ...[
-              _RailItem(
-                destination: d,
-                selected: d == destination,
-                onTap: () => onSelect(d),
+        // Short windows (a half-open fold, large text) scroll the rail instead of overflowing.
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 28),
+                    for (final d in AppDestination.main) ...[
+                      _RailItem(
+                        destination: d,
+                        selected: d == destination,
+                        onTap: () => onSelect(d),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    const Spacer(),
+                    _RailItem(
+                      destination: AppDestination.appearance,
+                      selected: destination == AppDestination.appearance,
+                      onTap: () => onSelect(AppDestination.appearance),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-            ],
-            const Spacer(),
-            _RailItem(
-              destination: AppDestination.appearance,
-              selected: destination == AppDestination.appearance,
-              onTap: () => onSelect(AppDestination.appearance),
             ),
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
       ),
     );
@@ -388,16 +398,18 @@ class _MemberStack extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final colors = t.avatars;
+    // Five circles are enough; the count beside them says how many people there are.
+    final shown = initials.length > 5 ? 5 : initials.length;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
       child: Row(
         children: [
           SizedBox(
-            width: 32.0 + (initials.length - 1) * 24,
+            width: 32.0 + (shown - 1) * 24,
             height: 32,
             child: Stack(
               children: [
-                for (var i = 0; i < initials.length; i++)
+                for (var i = 0; i < shown; i++)
                   Positioned(
                     left: i * 24.0,
                     child: Container(
@@ -422,9 +434,13 @@ class _MemberStack extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Text(
-            '${initials.length} members',
-            style: TextStyle(fontSize: 13, color: t.sidebarText),
+          Flexible(
+            child: Text(
+              initials.length == 1 ? '1 member' : '${initials.length} members',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 13, color: t.sidebarText),
+            ),
           ),
         ],
       ),

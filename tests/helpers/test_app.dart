@@ -9,6 +9,7 @@ import 'package:drift/native.dart';
 import 'package:family_expenses/app.dart';
 import 'package:family_expenses/core/db/app_database.dart';
 import 'package:family_expenses/core/db/db_providers.dart';
+import 'package:family_expenses/features/family/member_providers.dart';
 import 'package:family_expenses/features/home/home_providers.dart';
 import 'package:family_expenses/features/home/home_sample.dart';
 import 'package:family_expenses/core/routing/app_router.dart';
@@ -17,6 +18,7 @@ import 'package:family_expenses/core/time.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,8 +67,18 @@ Future<ProviderContainer> pumpApp(
   String location = '/home',
   double textScale = 1,
   bool sampleHome = false,
+  bool sampleMembers = true,
   void Function(AppDatabase db)? seed,
   List<DisplayFeature> displayFeatures = const [],
+
+  /// Extra provider overrides (fake auth, fake server).
+  List<Override> overrides = const [],
+
+  /// Runs against the opened database before the app starts (real async allowed).
+  Future<void> Function(AppDatabase db)? seedAsync,
+
+  /// Use the real router with its sign-in, household and role guards.
+  bool gated = false,
 }) async {
   SharedPreferences.setMockInitialValues(prefs);
   final sp = await SharedPreferences.getInstance();
@@ -82,6 +94,7 @@ Future<ProviderContainer> pumpApp(
   // fake async, where the first connection would never finish).
   await tester.runAsync(() => db.select(db.categories).get());
   seed?.call(db);
+  if (seedAsync != null) await tester.runAsync(() => seedAsync(db));
   addTearDown(() async {
     tester.view.reset();
     tester.platformDispatcher.clearAllTestValues();
@@ -91,23 +104,40 @@ Future<ProviderContainer> pumpApp(
       sharedPreferencesProvider.overrideWithValue(sp),
       clockProvider.overrideWithValue(() => kTestNow),
       databaseProvider.overrideWithValue(db),
+      // The mockups show three members in the sidebar footer; real members are tested in family_test.
+      if (sampleMembers)
+        memberInitialsProvider.overrideWithValue(const ['Y', 'M', 'S']),
       if (sampleHome)
         homeSummaryProvider.overrideWithValue(
           AsyncData(sampleHomeSummary(DateTime(2026, 10))),
         ),
+      ...overrides,
     ],
   );
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: FamilyExpensesApp(router: buildRouter(initialLocation: location)),
+      child: gated
+          ? FamilyExpensesApp(initialLocation: location)
+          : FamilyExpensesApp(router: buildRouter(initialLocation: location)),
     ),
   );
-  await tester.pumpAndSettle(
-    const Duration(milliseconds: 100),
-    EnginePhase.sendSemanticsUpdate,
-    const Duration(seconds: 10),
-  );
+  if (gated) {
+    // Sign-in and household checks use the real event loop, and the starting page's spinner
+    // never settles, so step time by hand.
+    for (var i = 0; i < 8; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+  } else {
+    await tester.pumpAndSettle(
+      const Duration(milliseconds: 100),
+      EnginePhase.sendSemanticsUpdate,
+      const Duration(seconds: 10),
+    );
+  }
   // Drift closes its stream queries on a zero-length timer; let it run before the test ends.
   addTearDown(() async {
     await tester.pumpWidget(const SizedBox());

@@ -4,12 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/routing/app_router.dart';
+import 'features/auth/app_access.dart';
+import 'features/family/member_providers.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/appearance_provider.dart';
 import 'core/theme/color_themes.dart';
 
 class FamilyExpensesApp extends ConsumerStatefulWidget {
-  const FamilyExpensesApp({super.key, this.router});
+  const FamilyExpensesApp({
+    super.key,
+    this.router,
+    this.initialLocation = '/home',
+  });
+
+  /// Where the app opens when it builds its own router.
+  final String initialLocation;
 
   /// Tests pass their own router; the app builds one by default.
   final GoRouter? router;
@@ -19,7 +28,28 @@ class FamilyExpensesApp extends ConsumerStatefulWidget {
 }
 
 class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
-  late final GoRouter _router = widget.router ?? buildRouter();
+  late final RouteGate _gate;
+  late final GoRouter _router =
+      widget.router ??
+      buildRouter(initialLocation: widget.initialLocation, gate: _gate);
+
+  @override
+  void initState() {
+    super.initState();
+    _gate = RouteGate(
+      ref.read(accessProvider),
+      () => ref.read(permissionsProvider),
+    );
+    // The router re-checks its guards whenever sign-in, household or role changes.
+    ref.listenManual(permissionsProvider, (_, _) => _gate.recheck());
+    ref.listenManual(accessProvider, (_, next) => _gate.update(next));
+  }
+
+  @override
+  void dispose() {
+    _gate.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

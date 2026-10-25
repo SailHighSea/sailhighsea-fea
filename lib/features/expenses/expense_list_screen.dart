@@ -68,14 +68,17 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
         ref.watch(categoriesProvider).value ?? const <CategoryRow>[];
     final money = ref.watch(moneyFormatterProvider);
     final now = ref.watch(clockProvider)();
-    final currentUser = ref.watch(currentUserNameProvider);
+    final addedByLabel = ref.watch(addedByLabelProvider);
+    final permissions = ref.watch(permissionsProvider);
     final categoryById = {for (final c in categories) c.id: c};
 
     return AdaptivePage(
       header: PageHeader(
         title: 'Expenses',
         onBack: context.layout.isCompact ? () => context.go('/home') : null,
-        trailing: _AddButton(onTap: () => context.push('/add')),
+        trailing: permissions.canWriteExpenses
+            ? _AddButton(onTap: () => context.push('/add'))
+            : null,
       ),
       children: [
         MonthNavigator(
@@ -157,12 +160,9 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                           category: categoryById[rows[i].categoryId],
                           money: money,
                           now: now,
-                          addedBy:
-                              (rows[i].createdBy == null ||
-                                  rows[i].createdBy == currentUser)
-                              ? 'You'
-                              : rows[i].createdBy!,
+                          addedBy: addedByLabel(rows[i].createdBy),
                           showDivider: i > 0,
+                          canEdit: permissions.canWriteExpenses,
                           onEdit: () =>
                               context.push('/expenses/${rows[i].id}/edit'),
                           onDelete: () => _delete(rows[i]),
@@ -365,6 +365,7 @@ class _ExpenseTile extends StatelessWidget {
     required this.now,
     required this.addedBy,
     required this.showDivider,
+    required this.canEdit,
     required this.onEdit,
     required this.onDelete,
   });
@@ -375,6 +376,9 @@ class _ExpenseTile extends StatelessWidget {
   final DateTime now;
   final String addedBy;
   final bool showDivider;
+
+  /// View-only members see the row but cannot open, swipe or delete it.
+  final bool canEdit;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -385,74 +389,65 @@ class _ExpenseTile extends StatelessWidget {
     final title = expense.note.isEmpty ? categoryName : expense.note;
     final date = relativeDateLabel(parseDay(expense.spentOn), now);
     final amount = money.format(-expense.amountCents);
-    return Dismissible(
-      key: ValueKey('dismiss-${expense.id}'),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => onDelete(),
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: t.rose,
-        child: Icon(Icons.delete_outline, color: t.onPrimary),
+    final row = DecoratedBox(
+      decoration: BoxDecoration(
+        color: t.surface,
+        border: showDivider ? Border(top: BorderSide(color: t.border)) : null,
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: t.surface,
-          border: showDivider ? Border(top: BorderSide(color: t.border)) : null,
-        ),
-        child: Semantics(
-          container: true,
-          label: '$title, $categoryName, $date, $addedBy, $amount',
-          child: InkWell(
-            onTap: onEdit,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 60),
-              child: Row(
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: t.categoryColor(category?.color ?? 'other'),
-                      shape: BoxShape.circle,
-                    ),
+      child: Semantics(
+        container: true,
+        label: '$title, $categoryName, $date, $addedBy, $amount',
+        child: InkWell(
+          onTap: canEdit ? onEdit : null,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 60),
+            child: Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: t.categoryColor(category?.color ?? 'other'),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ExcludeSemantics(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: t.text,
-                              ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ExcludeSemantics(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: t.text,
                             ),
-                            Text(
-                              '$categoryName · $date · $addedBy',
-                              style: TextStyle(fontSize: 13, color: t.muted),
-                            ),
-                          ],
-                        ),
+                          ),
+                          Text(
+                            '$categoryName · $date · $addedBy',
+                            style: TextStyle(fontSize: 13, color: t.muted),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  ExcludeSemantics(
-                    child: Text(
-                      amount,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: t.text,
-                      ),
+                ),
+                const SizedBox(width: 8),
+                ExcludeSemantics(
+                  child: Text(
+                    amount,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: t.text,
                     ),
                   ),
+                ),
+                if (canEdit)
                   PopupMenuButton<_RowAction>(
                     tooltip: 'More actions for $title',
                     icon: Icon(Icons.more_vert, color: t.muted),
@@ -471,12 +466,24 @@ class _ExpenseTile extends StatelessWidget {
                       ),
                     ],
                   ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
       ),
+    );
+    if (!canEdit) return row;
+    return Dismissible(
+      key: ValueKey('dismiss-${expense.id}'),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) => onDelete(),
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: t.rose,
+        child: Icon(Icons.delete_outline, color: t.onPrimary),
+      ),
+      child: row,
     );
   }
 }

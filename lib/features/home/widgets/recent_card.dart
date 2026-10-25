@@ -15,7 +15,7 @@ class RecentCard extends StatelessWidget {
     required this.now,
     required this.table,
     required this.onSeeAll,
-    required this.onOpen,
+    this.onOpen,
   });
 
   final List<RecentExpense> items;
@@ -23,7 +23,9 @@ class RecentCard extends StatelessWidget {
   final DateTime now;
   final bool table;
   final VoidCallback onSeeAll;
-  final ValueChanged<RecentExpense> onOpen;
+
+  /// `null` for members who cannot edit: rows are shown but do not open.
+  final ValueChanged<RecentExpense>? onOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +86,7 @@ class RecentCard extends StatelessWidget {
             if (items.isEmpty) _empty(t),
             for (final e in items)
               InkWell(
-                onTap: () => onOpen(e),
+                onTap: onOpen == null ? null : () => onOpen!(e),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border(top: BorderSide(color: t.border)),
@@ -150,7 +152,7 @@ class RecentCard extends StatelessWidget {
           if (items.isEmpty) _empty(t),
           for (final e in items)
             InkWell(
-              onTap: () => onOpen(e),
+              onTap: onOpen == null ? null : () => onOpen!(e),
               child: Semantics(
                 container: true,
                 label:
