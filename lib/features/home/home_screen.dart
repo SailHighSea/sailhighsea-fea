@@ -1,0 +1,105 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+
+import '../../core/layout/dashboard_layout.dart';
+import '../../core/layout/destinations.dart';
+import '../../core/money/money_provider.dart';
+import '../../core/time.dart';
+import 'home_providers.dart';
+import 'widgets/bill_goal_cards.dart';
+import 'widgets/categories_card.dart';
+import 'widgets/hero_card.dart';
+import 'widgets/home_header.dart';
+import 'widgets/recent_card.dart';
+import 'widgets/trend_cards.dart';
+
+/// Home dashboard (docs/SPEC.md section 3). The same sections on every size; how they
+/// are arranged is decided by [DashboardLayout] in core/layout.
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summaryAsync = ref.watch(homeSummaryProvider);
+    final summary = summaryAsync.value;
+    if (summary == null) {
+      return Center(
+        child: summaryAsync.hasError
+            ? Text('Could not load expenses: ${summaryAsync.error}')
+            : const CircularProgressIndicator(),
+      );
+    }
+    final money = ref.watch(moneyFormatterProvider);
+    final now = ref.watch(clockProvider)();
+    final month = ref.watch(selectedMonthProvider);
+    final months = ref.read(selectedMonthProvider.notifier);
+
+    void goTo(AppDestination d) => context.go(d.path);
+
+    final lastDay = now.month == month.month && now.year == month.year
+        ? now.day
+        : daysInMonth(month);
+    final monthShort = DateFormat('MMM', 'en_US').format(month);
+
+    return DashboardLayout(
+      header: (context, mode) => HomeHeader(
+        month: month,
+        onPrevious: months.previous,
+        onNext: months.next,
+        onAdd: () => context.push('/add'),
+        onSelectDestination: goTo,
+        mode: mode,
+      ),
+      hero: (context, mode) => HeroCard(summary: summary, money: money),
+      trend: (context, mode) => switch (mode) {
+        DashboardMode.wide => MonthBarsCard(
+          summary: summary,
+          money: money,
+          rangeTitle: 'Daily spending, 1 to $lastDay $monthShort',
+          startLabel: '$monthShort 1',
+          endLabel: '$monthShort $lastDay',
+          onFullDashboard: () => goTo(AppDestination.insights),
+        ),
+        DashboardMode.split => WeekBarsCard(
+          summary: summary,
+          money: money,
+          size: WeekChartSize.roomy,
+          onFullDashboard: () => goTo(AppDestination.insights),
+        ),
+        DashboardMode.stacked => WeekBarsCard(
+          summary: summary,
+          money: money,
+          size: WeekChartSize.compact,
+          onFullDashboard: () => goTo(AppDestination.insights),
+        ),
+      },
+      categories: (context, mode) => TopCategoriesCard(
+        categories: summary.categories,
+        money: money,
+        horizontalPadding: mode == DashboardMode.wide ? 20 : 16,
+      ),
+      nextBill: (context, mode) => NextBillCard(
+        bill: summary.nextBill,
+        money: money,
+        wide: mode == DashboardMode.wide,
+        onTap: () => goTo(AppDestination.bills),
+      ),
+      goal: (context, mode) => GoalCard(
+        goal: summary.goal,
+        money: money,
+        wide: mode == DashboardMode.wide,
+        onTap: () => goTo(AppDestination.goals),
+      ),
+      recent: (context, mode) => RecentCard(
+        items: summary.recent,
+        money: money,
+        now: now,
+        table: mode == DashboardMode.wide,
+        onSeeAll: () => context.go('/expenses'),
+        onOpen: (expense) => context.push('/expenses/${expense.id}/edit'),
+      ),
+    );
+  }
+}

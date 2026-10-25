@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Foldable half-open</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 840px; height: 900px; box-sizing: border-box; display: flex; flex-direction: column; background: #F4F6F5; font-family: 'DM Sans', system-ui, sans-serif; color: #0F1F1A; overflow: hidden">
+<div style="height: 440px; box-sizing: border-box; padding: 20px 32px 0; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<span style="font-size: 24px; font-weight: 700">October 2026</span>
+<span style="font-size: 14px; color: #55645D">8 days to go</span>
+</div>
+<div style="display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 12px">
+<div style="background: #0B3D2E; color: #FFFFFF; border-radius: 24px; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 14px; color: #BFD8CC">Spent this month</span>
+<span style="font-size: 34px; font-weight: 700; letter-spacing: -1px">S$1,842</span>
+<span style="font-size: 13px; color: #BFD8CC">of S$2,500 · S$658 left</span>
+</div>
+<div style="position: relative; width: 88px; height: 88px; flex: none">
+<svg aria-hidden="true" width="88" height="88" viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="#1F5A47" stroke-width="10"/><circle cx="48" cy="48" r="40" fill="none" stroke="#F2B84B" stroke-width="10" stroke-linecap="round" stroke-dasharray="186 251.3" transform="rotate(-90 48 48)"/></svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-size: 20px; font-weight: 700">74%</span><span style="font-size: 12px; color: #BFD8CC">used</span></div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-top: 1px solid #1F5A47; padding-top: 10px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #BFD8CC">Today</span><span style="font-size: 15px; font-weight: 700">S$72</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #BFD8CC">This week</span><span style="font-size: 15px; font-weight: 700">S$567</span></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #BFD8CC">Safe per day</span><span style="font-size: 15px; font-weight: 700">S$82</span></div>
+</div>
+</div>
+<div style="background: #FFFFFF; border-radius: 24px; padding: 12px 20px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 15px; font-weight: 700">Last 7 days</span>
+<div style="position: relative; height: 112px; display: flex; align-items: flex-end; gap: 12px">
+<div style="position: absolute; left: 0; right: 0; bottom: 56px; border-top: 2px dashed #0F1F1A"></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px"><span style="font-size: 11px; color: #55645D">130</span><div style="width: 60%; height: 90px; border-radius: 6px 6px 0 0; background: #B9D9CB"></div></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px"><span style="font-size: 11px; color: #55645D">50</span><div style="width: 60%; height: 35px; border-radius: 6px 6px 0 0; background: #B9D9CB"></div></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px"><span style="font-size: 11px; color: #55645D">60</span><div style="width: 60%; height: 42px; border-radius: 6px 6px 0 0; background: #B9D9CB"></div></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px"><span style="font-size: 11px; color: #55645D">85</span><div style="width: 60%; height: 59px; border-radius: 6px 6px 0 0; background: #B9D9CB"></div></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px"><span style="font-size: 11px; color: #55645D">70</span><div style="width: 60%; height: 48px; border-radius: 6px 6px 0 0; background: #B9D9CB"></div></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px"><span style="font-size: 11px; color: #55645D">100</span><div style="width: 60%; height: 69px; border-radius: 6px 6px 0 0; background: #B9D9CB"></div></div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px"><span style="font-size: 11px; font-weight: 700; color: #0F1F1A">72</span><div style="width: 60%; height: 50px; border-radius: 6px 6px 0 0; background: #0B6E4F"></div></div>
+</div>
+<div style="display: flex; gap: 12px; font-size: 12px; color: #55645D; text-align: center">
+<span style="flex: 1">Sat</span><span style="flex: 1">Sun</span><span style="flex: 1">Mon</span><span style="flex: 1">Tue</span><span style="flex: 1">Wed</span><span style="flex: 1">Thu</span><span style="flex: 1; font-weight: 700; color: #0F1F1A">Today</span>
+</div>
+<span style="font-size: 12px; color: #55645D">Dashed line: S$81 a day keeps you on budget</span>
+</div>
+</div>
+<div style="background: #FFFFFF; border-radius: 20px; padding: 12px 20px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; gap: 2px; height: 12px">
+<div style="flex: 612; background: #0B6E4F; border-radius: 6px 0 0 6px"></div>
+<div style="flex: 520; background: #6FB3D9"></div>
+<div style="flex: 284; background: #E0A020"></div>
+<div style="flex: 426; background: #9AA8A1; border-radius: 0 6px 6px 0"></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; font-size: 13px">
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #0B6E4F"></span><span style="flex: 1">Food</span><span style="font-weight: 700">S$612</span></div>
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #6FB3D9"></span><span style="flex: 1">Bills</span><span style="font-weight: 700">S$520</span></div>
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #E0A020"></span><span style="flex: 1">Transport</span><span style="font-weight: 700">S$284</span></div>
+<div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #9AA8A1"></span><span style="flex: 1">Other</span><span style="font-weight: 700">S$426</span></div>
+</div>
+</div>
+</div>
+<div style="height: 20px; background: #0F1F1A"></div>
+<div style="flex: 1; box-sizing: border-box; padding: 24px 32px 0; display: flex; flex-direction: column; gap: 16px; background: #FFFFFF">
+<span style="font-size: 20px; font-weight: 700">Add expense</span>
+<div style="display: flex; align-items: baseline; gap: 6px"><span style="font-size: 24px; font-weight: 600; color: #55645D">S$</span><span style="font-size: 44px; font-weight: 700; letter-spacing: -1px">48.20</span></div>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px">
+<button style="min-height: 52px; border: 2px solid #0B6E4F; border-radius: 16px; background: #DCEFE6; color: #0B3D2E; font-family: inherit; font-size: 15px; font-weight: 700">Food</button>
+<button style="min-height: 52px; border: 2px solid transparent; border-radius: 16px; background: #F4F6F5; color: #0F1F1A; font-family: inherit; font-size: 15px; font-weight: 500">Transport</button>
+<button style="min-height: 52px; border: 2px solid transparent; border-radius: 16px; background: #F4F6F5; color: #0F1F1A; font-family: inherit; font-size: 15px; font-weight: 500">Bills</button>
+<button style="min-height: 52px; border: 2px solid transparent; border-radius: 16px; background: #F4F6F5; color: #0F1F1A; font-family: inherit; font-size: 15px; font-weight: 500">Shopping</button>
+<button style="min-height: 52px; border: 2px solid transparent; border-radius: 16px; background: #F4F6F5; color: #0F1F1A; font-family: inherit; font-size: 15px; font-weight: 500">Fun</button>
+</div>
+<button style="min-height: 56px; border: 0; border-radius: 28px; background: #0B6E4F; color: #FFFFFF; font-family: inherit; font-size: 17px; font-weight: 700">Save expense</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":840,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

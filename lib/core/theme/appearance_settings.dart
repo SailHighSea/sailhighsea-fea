@@ -1,0 +1,69 @@
+import 'package:flutter/foundation.dart';
+
+/// Light/Dark/Pure black, or follow the system (which never picks Pure black).
+enum AppearanceMode {
+  system('System'),
+  light('Light'),
+  dark('Dark'),
+  pureBlack('Pure black');
+
+  const AppearanceMode(this.label);
+  final String label;
+}
+
+/// Colour themes swap the hero card and accent colours (docs/SPEC.md section 2).
+enum ColorThemeId {
+  forest('Forest'),
+  ocean('Ocean'),
+  sunset('Sunset'),
+  graphite('Graphite');
+
+  const ColorThemeId(this.label);
+  final String label;
+}
+
+@immutable
+class AppearanceSettings {
+  const AppearanceSettings({
+    this.mode = AppearanceMode.system,
+    this.colorTheme = ColorThemeId.forest,
+    this.largerText = false,
+    this.colorBlindCharts = false,
+    this.currencyCode = 'SGD',
+  });
+
+  final AppearanceMode mode;
+  final ColorThemeId colorTheme;
+  final bool largerText;
+  final bool colorBlindCharts;
+  final String currencyCode;
+
+  AppearanceSettings copyWith({
+    AppearanceMode? mode,
+    ColorThemeId? colorTheme,
+    bool? largerText,
+    bool? colorBlindCharts,
+    String? currencyCode,
+  }) {
+    return AppearanceSettings(
+      mode: mode ?? this.mode,
+      colorTheme: colorTheme ?? this.colorTheme,
+      largerText: largerText ?? this.largerText,
+      colorBlindCharts: colorBlindCharts ?? this.colorBlindCharts,
+      currencyCode: currencyCode ?? this.currencyCode,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is AppearanceSettings &&
+      other.mode == mode &&
+      other.colorTheme == colorTheme &&
+      other.largerText == largerText &&
+      other.colorBlindCharts == colorBlindCharts &&
+      other.currencyCode == currencyCode;
+
+  @override
+  int get hashCode =>
+      Object.hash(mode, colorTheme, largerText, colorBlindCharts, currencyCode);
+}
