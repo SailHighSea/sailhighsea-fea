@@ -6,7 +6,7 @@ import UserNotifications
 class AppDelegate: FlutterAppDelegate {
   override func applicationDidFinishLaunching(_ notification: Notification) {
     // Show bill reminders while the app is open too (flutter_local_notifications).
-    UNUserNotificationCenter.current().delegate = self
+    UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     super.applicationDidFinishLaunching(notification)
   }
 
