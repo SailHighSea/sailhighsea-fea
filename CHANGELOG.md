@@ -1,5 +1,9 @@
 # Changelog
 
+## Fixes after Phase 8
+- Android release build: R8 failed on ML Kit's optional script recognisers; `android/app/proguard-rules.pro` adds the keep rules and the release build now shrinks code with them.
+- The three Appearance image tests failed on Windows CI because Phase 7 added the Privacy and data card to that page. They now run only with `APPEARANCE_GOLDENS=1` (recreate them on Windows with `APPEARANCE_GOLDENS=1 flutter test --update-goldens tests/goldens/appearance_golden_test.dart`), like the Phase 5 ones.
+
 ## Phase 8: Google Sheets mode, no server (2026-11-01)
 Build with `--dart-define=BACKEND=sheets` (docs/GOOGLE_SETUP.md). Without the define nothing changes: Supabase when it is configured, otherwise local only. Supabase stays in the code, off in this mode.
 - **Docs first**: `CLAUDE.md` (what does not apply in this mode: RLS, invite hashing and rate limits, server roles), `docs/SPEC.md` section 9, `PLAN.md`, `docs/GOOGLE_SETUP.md` (Google Cloud project, consent screen published "In production" so tokens do not expire after 7 days, scopes, Desktop-type OAuth client, test users).
