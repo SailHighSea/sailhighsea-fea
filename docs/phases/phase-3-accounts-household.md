@@ -1,6 +1,6 @@
 # Phase 3: Accounts and household (weeks 4 to 5)
 
-**Status:** Built (2026-10-25). Still to do: run `supabase test db` and `deno test`, and a real two-account run against Supabase.
+**Status:** Done and merged. Built (2026-10-25). Still to do: run `supabase test db` and `deno test`, and a real two-account run against Supabase.
 
 Ask me for the Supabase project URL and anon key; put them in `.env.json` (gitignored). Never ask for the service key in the app.
 

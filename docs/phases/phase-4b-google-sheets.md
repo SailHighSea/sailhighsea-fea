@@ -1,6 +1,6 @@
 # Phase 4b: Google Sheets connection (after Phase 4, about 1 week)
 
-**Status:** Built (2026-10-27) against a fake Google. Still to do: Google Cloud setup (docs/BUILD_AND_TEST.md) and a real connect.
+**Status:** Done and merged. Built (2026-10-27) against a fake Google. Still to do: Google Cloud setup (docs/BUILD_AND_TEST.md) and a real connect.
 
 The household owner (the main admin) links one Google Sheet. Every expense in the household is mirrored into it automatically. Supabase stays the source of truth.
 
