@@ -46,6 +46,7 @@ const otherCategoryId = 'default-other';
     Bills,
     SheetPairs,
     Suggestions,
+    CategoryRules,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -56,7 +57,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump when a table changes and add a step to [migration].
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -92,6 +93,10 @@ class AppDatabase extends _$AppDatabase {
         // Phase 8: Google Sheets mode (paired family members and their suggestions).
         await m.createTable(sheetPairs);
         await m.createTable(suggestions);
+      }
+      if (from < 7) {
+        // Remembered shop -> category decisions for imports.
+        await m.createTable(categoryRules);
       }
       // Future versions add steps here, for example:
       //   if (from < 6) await m.addColumn(expenses, expenses.someNewColumn);

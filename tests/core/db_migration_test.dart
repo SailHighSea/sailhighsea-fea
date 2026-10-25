@@ -133,4 +133,50 @@ void main() {
       expect(await db.select(db.suggestions).get(), hasLength(1));
     },
   );
+
+  test(
+    'a version 6 database gains the remembered-shops table and keeps its data',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('migration6');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final file = File('${dir.path}/app.db');
+
+      var db = AppDatabase(NativeDatabase(file));
+      await db.select(db.categories).get();
+      await db
+          .into(db.expenses)
+          .insert(
+            ExpensesCompanion.insert(
+              id: 'e1',
+              amountCents: 500,
+              categoryId: 'default-food',
+              spentOn: '2026-10-01',
+              updatedAt: DateTime(2026, 10, 1),
+            ),
+          );
+      await db.close();
+
+      db = AppDatabase(
+        NativeDatabase(
+          file,
+          setup: (raw) => raw
+            ..execute('DROP TABLE category_rules')
+            ..execute('PRAGMA user_version = 6'),
+        ),
+      );
+      addTearDown(db.close);
+      expect((await db.select(db.expenses).get()).single.id, 'e1');
+      expect(await db.select(db.categoryRules).get(), isEmpty);
+      await db
+          .into(db.categoryRules)
+          .insert(
+            CategoryRulesCompanion.insert(
+              key: 'shop',
+              categoryId: 'default-food',
+              updatedAt: DateTime(2026, 10, 1),
+            ),
+          );
+      expect(await db.select(db.categoryRules).get(), hasLength(1));
+    },
+  );
 }

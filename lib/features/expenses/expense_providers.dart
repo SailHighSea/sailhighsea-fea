@@ -5,6 +5,7 @@ import '../../core/db/db_providers.dart';
 import '../../core/time.dart';
 import '../family/member_providers.dart';
 import 'data/category_repository.dart';
+import 'data/category_rule_repository.dart';
 import 'data/expense_repository.dart';
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>(
@@ -31,4 +32,12 @@ final categoriesProvider = StreamProvider<List<CategoryRow>>(
 /// Live expenses of one calendar month.
 final monthExpensesProvider = StreamProvider.family<List<ExpenseRow>, DateTime>(
   (ref, month) => ref.watch(expenseRepositoryProvider).watchMonth(month),
+);
+
+/// Remembers shop -> category choices (used by imports and by saving an expense).
+final categoryRuleRepositoryProvider = Provider<CategoryRuleRepository>(
+  (ref) => CategoryRuleRepository(
+    ref.watch(databaseProvider),
+    clock: ref.watch(clockProvider),
+  ),
 );

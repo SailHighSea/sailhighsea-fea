@@ -12,6 +12,8 @@ import '../../core/theme/appearance_provider.dart';
 import '../../core/widgets/surface_card.dart';
 import '../family/member_providers.dart';
 import '../onboarding/onboarding_gate.dart';
+import '../../core/time.dart';
+import '../backup/backup_service.dart';
 import 'app_lock.dart';
 import 'csv_export.dart';
 import 'csv_share.dart';
@@ -53,6 +55,74 @@ class PrivacyCard extends ConsumerWidget {
     );
   }
 
+  BackupService _backupService(WidgetRef ref) => BackupService(
+    ref.read(databaseProvider),
+    currencyCode: ref.read(appearanceProvider).currencyCode,
+    clock: ref.read(clockProvider),
+  );
+
+  /// Saves everything on this device to one file the person keeps wherever they like.
+  Future<void> _backup(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final service = _backupService(ref);
+    final json = await service.export();
+    final d = ref.read(clockProvider)();
+    String two(int n) => n.toString().padLeft(2, '0');
+    await ref
+        .read(fileSharerProvider)
+        .shareText(
+          'family-expenses-backup-${d.year}-${two(d.month)}-${two(d.day)}.json',
+          json,
+          'application/json',
+        );
+    messenger?.showSnackBar(
+      const SnackBar(content: Text('Backup file created')),
+    );
+  }
+
+  Future<void> _restore(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final text = await ref.read(backupFilePickerProvider)();
+    if (text == null || !context.mounted) return;
+    final service = _backupService(ref);
+    final BackupCounts counts;
+    try {
+      counts = service.inspect(text);
+    } on BackupFailure catch (e) {
+      messenger?.showSnackBar(SnackBar(content: Text(e.message)));
+      return;
+    }
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Restore this backup?'),
+        content: Text(
+          'It has ${counts.expenses} expenses, ${counts.categories} categories, ${counts.budgets} budgets, ${counts.goals} goals and ${counts.bills} bills. Anything on this device that is newer is kept, and nothing is deleted.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            key: const ValueKey('confirm-restore'),
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+    if (yes != true) return;
+    try {
+      final done = await service.restore(text);
+      messenger?.showSnackBar(
+        SnackBar(content: Text('Restored ${done.expenses} expenses')),
+      );
+    } on BackupFailure catch (e) {
+      messenger?.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
@@ -80,6 +150,26 @@ class PrivacyCard extends ConsumerWidget {
                 on ? c.enable() : c.disable();
               },
             ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 4),
+            child: Text(
+              dataNote,
+              key: const ValueKey('data-note'),
+              style: TextStyle(fontSize: 13, color: t.muted),
+            ),
+          ),
+          _Row(
+            key: const ValueKey('backup-file'),
+            icon: Icons.save_alt_outlined,
+            label: 'Back up to a file',
+            onTap: () => _backup(context, ref),
+          ),
+          _Row(
+            key: const ValueKey('restore-file'),
+            icon: Icons.settings_backup_restore,
+            label: 'Restore from a backup',
+            onTap: () => _restore(context, ref),
+          ),
           _Row(
             key: const ValueKey('import-expenses'),
             icon: Icons.file_upload_outlined,

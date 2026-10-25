@@ -167,17 +167,24 @@ class CategoryGuess {
   const CategoryGuess(this.categoryId, this.reason);
   final String? categoryId;
 
-  /// `history` (you categorised the same shop before), `keyword`, or `none`.
+  /// `remembered`, `history` (you categorised the same shop before), `keyword`, or `none`.
   final String reason;
 }
 
 /// Decides a category for each description: first what the household did with the same
 /// description before, then keywords. `null` means "ask".
 class CategoryGuesser {
-  CategoryGuesser({required this.categories, required this.history});
+  CategoryGuesser({
+    required this.categories,
+    required this.history,
+    this.rules = const {},
+  });
 
   final List<CategoryRow> categories;
   final Map<String, String> history;
+
+  /// Decisions that were remembered on purpose (confirmed in an import or chosen in a form).
+  final Map<String, String> rules;
 
   /// From existing expenses: the most used category per description.
   static Map<String, String> historyFrom(List<ExpenseRow> expenses) {
@@ -199,9 +206,32 @@ class CategoryGuesser {
     };
   }
 
+  /// The remembered category for this shop: the same description, or one that starts with the
+  /// other ("azzco hypermarket" and "azzco hypermarket doha"), the longest match first.
+  String? _rule(String key) {
+    String? best;
+    var bestLength = 0;
+    for (final e in rules.entries) {
+      final r = e.key;
+      final exact = r == key;
+      final prefix =
+          (key.startsWith('$r ') || r.startsWith('$key ')) &&
+          (r.length < key.length ? r : key).contains(' ');
+      if ((exact || prefix) &&
+          r.length > bestLength &&
+          categories.any((c) => c.id == e.value)) {
+        best = e.value;
+        bestLength = r.length;
+      }
+    }
+    return best;
+  }
+
   CategoryGuess guess(String description) {
     final key = descriptionKey(description);
     if (key.isEmpty) return const CategoryGuess(null, 'none');
+    final remembered = _rule(key);
+    if (remembered != null) return CategoryGuess(remembered, 'remembered');
     final known = history[key];
     if (known != null && categories.any((c) => c.id == known)) {
       return CategoryGuess(known, 'history');

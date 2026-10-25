@@ -9,6 +9,7 @@ import '../../core/db/ids.dart';
 import '../../core/db/tables.dart' show localHouseholdId;
 import '../../core/google/google_api.dart';
 import '../../core/money/currency.dart';
+import '../expenses/data/category_rule_repository.dart';
 import 'category_guess.dart';
 import 'import_parser.dart';
 
@@ -120,6 +121,7 @@ class ImportService {
     return CategoryGuesser(
       categories: categories,
       history: CategoryGuesser.historyFrom(expenses),
+      rules: await CategoryRuleRepository(_db, clock: _clock).all(),
     );
   }
 
@@ -145,6 +147,12 @@ class ImportService {
           ),
       ]);
     });
+    // Every category in the table, guessed or chosen, was confirmed by pressing Import: remember it (but not "Other", which says nothing about the shop).
+    await CategoryRuleRepository(_db, clock: _clock).rememberAll([
+      for (final d in chosen)
+        if (d.categoryId != null && d.categoryId != otherCategoryId)
+          (d.row.description, d.categoryId!),
+    ]);
     return chosen.length;
   }
 

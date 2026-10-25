@@ -6,7 +6,7 @@ This is the same text as the in-app page (Appearance, Privacy policy). It lives 
 
 ## What this app is
 
-Family Expenses is a household expense tracker. It does not show ads, does not include analytics or tracking libraries, and does not sell or share your data.
+Family Expenses is a household expense tracker. Nothing is shared with the app developer: everything stays on your device or in your own Google account. It does not show ads, does not include analytics or tracking libraries, and does not sell or share your data.
 
 ## What is stored, and where
 
@@ -30,7 +30,7 @@ The app lock asks your device to confirm your fingerprint, face or PIN. The app 
 
 ## Exporting and deleting
 
-You can export your expenses as a CSV file at any time from Appearance. Deleting an expense removes it from your devices and the household. To remove an account and its server data, ask the household owner or the person who runs the server.
+You can back up everything to a file, or export your expenses as a CSV file, at any time from Appearance. Deleting an expense removes it from your devices and the household. To remove an account and its server data, ask the household owner or the person who runs the server.
 
 ## Children
 

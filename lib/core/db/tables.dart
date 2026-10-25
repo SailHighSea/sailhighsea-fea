@@ -249,3 +249,16 @@ class Suggestions extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// What the person (or the app, confirmed by them) decided a shop belongs to, so the same shop is
+/// sorted automatically next time. The key is the description in lower case without digits or
+/// punctuation (`azzco hypermarket doha`).
+@DataClassName('CategoryRuleRow')
+class CategoryRules extends Table {
+  TextColumn get key => text()();
+  TextColumn get categoryId => text()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}

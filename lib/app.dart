@@ -51,6 +51,12 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
     ref.listenManual(reminderSyncProvider, (_, _) {});
     // Google Sheets mode: keeps pushing and reading sheets while the app is open.
     ref.listenManual(sheetsAutoSyncProvider, (_, _) {});
+    // The introduction can send the person straight to Import or to sign-in.
+    ref.listenManual(onboardingNextRouteProvider, (_, next) {
+      if (next == null) return;
+      ref.read(onboardingNextRouteProvider.notifier).set(null);
+      _router.go(next);
+    });
   }
 
   @override
