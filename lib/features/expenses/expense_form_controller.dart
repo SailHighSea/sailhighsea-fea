@@ -222,6 +222,12 @@ class ExpenseFormController extends Notifier<ExpenseFormState> {
         note: s.note,
       );
     }
+    // The shop (note) and the category chosen for it are remembered for future imports.
+    if (s.note.trim().isNotEmpty && categoryId != otherCategoryId) {
+      await ref
+          .read(categoryRuleRepositoryProvider)
+          .remember(s.note, categoryId);
+    }
     if (ref.mounted) state = state.copyWith(saving: false);
     return true;
   }

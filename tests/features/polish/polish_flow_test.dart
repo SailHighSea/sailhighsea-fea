@@ -1,6 +1,7 @@
 import 'package:family_expenses/core/db/db_providers.dart';
 import 'package:family_expenses/features/expenses/data/expense_repository.dart';
 import 'package:family_expenses/features/expenses/expense_providers.dart';
+import 'package:family_expenses/core/sheets_sync/sheets_settings.dart';
 import 'package:family_expenses/features/privacy/app_lock.dart';
 import 'package:family_expenses/features/privacy/csv_share.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,9 @@ void main() {
   setUpAll(loadTestFonts);
 
   group('first run', () {
-    testWidgets('three cards, then the app; shown once', (tester) async {
+    testWidgets('two cards, then the choice of where data lives; shown once', (
+      tester,
+    ) async {
       await pumpApp(
         tester,
         size: const Size(390, 844),
@@ -50,22 +53,91 @@ void main() {
       expect(find.text('See where the money goes'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('onboarding-next')));
       await tester.pump();
-      expect(find.text('Yours, on your device'), findsOneWidget);
+      expect(find.text('Where should your data live?'), findsOneWidget);
       expect(find.byKey(const ValueKey('onboarding-skip')), findsNothing);
-      await tester.tap(find.text('Get started'));
+      await tester.tap(find.byKey(const ValueKey('start-local')));
       await settle(tester);
       expect(find.text('Spent this month'), findsOneWidget);
     });
 
-    testWidgets('Skip goes straight to the app', (tester) async {
+    testWidgets('the last page says nothing is shared with the developer', (
+      tester,
+    ) async {
       await pumpApp(
         tester,
         size: const Size(390, 844),
         prefs: {'onboarding.done': false},
       );
       await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+      await tester.pump();
+      expect(
+        find.text(
+          'Nothing is shared with the app developer. Everything stays on this device or in your own Google account.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Sync locally, on this device'), findsOneWidget);
+      expect(find.text('Import expenses from a file first'), findsOneWidget);
+    });
+
+    testWidgets(
+      'Sheets mode offers Google Drive; the button opens the Family page',
+      (tester) async {
+        await pumpApp(
+          tester,
+          size: const Size(390, 844),
+          prefs: {'onboarding.done': false},
+          overrides: [
+            backendModeProvider.overrideWithValue(BackendMode.sheets),
+          ],
+        );
+        await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+        await tester.pump();
+        expect(find.text('Sign in to Google Drive'), findsOneWidget);
+        await tester.tap(find.byKey(const ValueKey('start-google')));
+        await settle(tester);
+        expect(find.text('Family'), findsWidgets);
+        expect(find.byKey(const ValueKey('google-sign-in')), findsWidgets);
+      },
+    );
+
+    testWidgets('local-only builds do not offer a sign-in', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'onboarding.done': false},
+        overrides: [backendModeProvider.overrideWithValue(BackendMode.local)],
+      );
+      await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('start-google')), findsNothing);
+    });
+
+    testWidgets('Import from the start page opens the import screen', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'onboarding.done': false},
+      );
+      await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('start-import')));
       await settle(tester);
-      expect(find.text('Spent this month'), findsOneWidget);
+      expect(find.text('Import expenses'), findsOneWidget);
+    });
+
+    testWidgets('Skip goes to the choice, not past it', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'onboarding.done': false},
+      );
+      await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+      await tester.pump();
+      expect(find.text('Where should your data live?'), findsOneWidget);
+      expect(find.text('Spent this month'), findsNothing);
     });
 
     testWidgets(

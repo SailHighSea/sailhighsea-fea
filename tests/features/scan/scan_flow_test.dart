@@ -29,6 +29,8 @@ class _Ocr implements ReceiptOcr {
   bool get isAvailable => available;
   @override
   Future<String> recognise(String imagePath) async => text;
+  @override
+  Future<List<OcrLine>> recogniseLines(String imagePath) async => const [];
 }
 
 class _Storage implements ReceiptStorage {

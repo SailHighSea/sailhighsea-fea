@@ -131,6 +131,13 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
               children: [
                 if (!editing) ...[
                   RoundIconButton(
+                    key: const ValueKey('import-from-add'),
+                    icon: Icons.upload_file,
+                    label: 'Import from a file',
+                    onTap: () => context.push('/import'),
+                  ),
+                  const SizedBox(width: 8),
+                  RoundIconButton(
                     key: const ValueKey('scan-receipt'),
                     icon: Icons.document_scanner_outlined,
                     label: 'Scan receipt',

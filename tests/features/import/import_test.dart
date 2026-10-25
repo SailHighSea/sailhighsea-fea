@@ -238,7 +238,11 @@ void main() {
       tester,
       size: size,
       location: '/import',
-      overrides: [importFilePickerProvider.overrideWithValue(() async => csv)],
+      overrides: [
+        importFilePickerProvider.overrideWithValue(
+          () async => csv == null ? null : PickedImport.text('file.csv', csv),
+        ),
+      ],
     );
 
     testWidgets(
@@ -278,7 +282,7 @@ void main() {
     testWidgets(
       'a file with nothing usable says so and offers no Import button',
       (tester) async {
-        await open(tester, csv: 'Date,Amount\nnope,abc');
+        await open(tester, csv: 'Date,Currency,Amount\nnope,SGD,abc');
         await tester.tap(find.byKey(const ValueKey('import-file')));
         await settle(tester);
         expect(find.text('Nothing new to import'), findsOneWidget);

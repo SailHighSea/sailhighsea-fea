@@ -14,6 +14,7 @@ import '../../core/theme/app_tokens.dart';
 import '../../core/theme/appearance_provider.dart';
 import '../../core/theme/appearance_settings.dart';
 import '../../core/theme/color_themes.dart';
+import '../../core/widgets/currency_picker.dart';
 import '../privacy/privacy_screen.dart';
 
 /// Appearance settings (Themes, TabAppearance and DeskAppearance mockups). Every control
@@ -438,17 +439,12 @@ class _CurrencyRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return PopupMenuButton<String>(
-      tooltip: 'Change currency',
-      onSelected: onChanged,
-      itemBuilder: (context) => [
-        for (final c in supportedCurrencies)
-          PopupMenuItem(
-            value: c.code,
-            height: kMinTapTarget,
-            child: Text('${c.name} (${c.symbol})'),
-          ),
-      ],
+    return InkWell(
+      key: const ValueKey('currency-row'),
+      onTap: () async {
+        final code = await showCurrencyPicker(context, selected: currency.code);
+        if (code != null) onChanged(code);
+      },
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 56),
         child: Row(
