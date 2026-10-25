@@ -81,6 +81,12 @@ class PrivacyCard extends ConsumerWidget {
               },
             ),
           _Row(
+            key: const ValueKey('import-expenses'),
+            icon: Icons.file_upload_outlined,
+            label: 'Import from a sheet or CSV',
+            onTap: () => context.push('/import'),
+          ),
+          _Row(
             key: const ValueKey('export-csv'),
             icon: Icons.file_download_outlined,
             label: 'Export expenses (CSV)',

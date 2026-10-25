@@ -103,7 +103,7 @@ class FakeGoogle implements SheetsApi, DriveApi, GoogleAuthService {
   }
 
   static final _re = RegExp(
-    r'^([^!]+)(?:!([A-Z]+)(\d+)?(?::([A-Z]+)(\d+)?)?)?$',
+    r"^'?([^!']+)'?(?:!([A-Z]+)(\d+)?(?::([A-Z]+)(\d+)?)?)?$",
   );
   int _col(String c) => c.codeUnitAt(0) - 65;
 
@@ -114,6 +114,12 @@ class FakeGoogle implements SheetsApi, DriveApi, GoogleAuthService {
     final id = 'sheet-${world._next++}';
     world.sheets[id] = FakeSheet(email, title, tabs);
     return id;
+  }
+
+  @override
+  Future<String> firstTabTitle(String sheetId) async {
+    await _gate('tabs');
+    return _readable(sheetId).tabs_.keys.first;
   }
 
   @override
