@@ -1,4 +1,5 @@
 import 'role.dart';
+import 'visibility.dart';
 
 /// What a role may do. This mirrors the Row Level Security policies in
 /// `supabase/migrations` and exists only to hide buttons the server would reject anyway
@@ -30,6 +31,19 @@ class Permissions {
   /// open it and press Sync now. Everyone else sees the state.
   bool get canConnectSheet => role == Role.owner;
   bool get canSyncSheet => _isManager;
+
+  /// Choose whether an editor or viewer sees everyone's spending or only their own. Never for
+  /// yourself, and owner and admin always see everything so there is nothing to choose.
+  bool canSetVisibility(Role target, {required bool isSelf}) =>
+      _isManager && !isSelf && (target == Role.editor || target == Role.viewer);
+
+  /// The "Everyone" overview and the member filter: owner and admin always; others only when
+  /// they were left on household visibility.
+  bool canSeeEveryone(MemberVisibility visibility) =>
+      _isManager || visibility == MemberVisibility.household;
+
+  /// Set a person's monthly allowance.
+  bool get canSetAllowances => _isManager;
 
   bool get canTransferOwnership => role == Role.owner;
   bool get canDeleteHousehold => role == Role.owner;

@@ -13,6 +13,7 @@ import '../integrations/sheets_providers.dart';
 import '../integrations/widgets/sheet_card.dart';
 import 'data/household_remote.dart';
 import 'domain/role.dart';
+import 'domain/visibility.dart';
 import 'member_providers.dart';
 import 'widgets/invite_card.dart';
 import 'widgets/members_card.dart';
@@ -65,6 +66,14 @@ class _FamilyScreenState extends ConsumerState<FamilyScreen> {
           if (role.dbValue == member.role) return;
           await controller.setRole(member.userId, role);
           _toast('${member.displayName} is now ${role.label}');
+        case VisibilityChosen(:final visibility):
+          if (visibility.dbValue == member.visibility) return;
+          await controller.setVisibility(member.userId, visibility);
+          _toast(
+            visibility == MemberVisibility.own
+                ? '${member.displayName} now sees only their own spending'
+                : '${member.displayName} now sees everyone\'s spending',
+          );
         case RemoveChosen():
           final ok = await _confirm(
             title: 'Remove ${member.displayName}?',

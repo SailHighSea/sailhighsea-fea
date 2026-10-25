@@ -1648,6 +1648,18 @@ class $MembersTable extends Members with TableInfo<$MembersTable, MemberRow> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _visibilityMeta = const VerificationMeta(
+    'visibility',
+  );
+  @override
+  late final GeneratedColumn<String> visibility = GeneratedColumn<String>(
+    'visibility',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('household'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     householdId,
@@ -1655,6 +1667,7 @@ class $MembersTable extends Members with TableInfo<$MembersTable, MemberRow> {
     role,
     displayName,
     joinedAt,
+    visibility,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1714,6 +1727,12 @@ class $MembersTable extends Members with TableInfo<$MembersTable, MemberRow> {
     } else if (isInserting) {
       context.missing(_joinedAtMeta);
     }
+    if (data.containsKey('visibility')) {
+      context.handle(
+        _visibilityMeta,
+        visibility.isAcceptableOrUnknown(data['visibility']!, _visibilityMeta),
+      );
+    }
     return context;
   }
 
@@ -1743,6 +1762,10 @@ class $MembersTable extends Members with TableInfo<$MembersTable, MemberRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}joined_at'],
       )!,
+      visibility: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visibility'],
+      )!,
     );
   }
 
@@ -1760,12 +1783,17 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
   final String role;
   final String displayName;
   final DateTime joinedAt;
+
+  /// `household` (sees everyone's spending) or `own` (only their own). Owner and admin always
+  /// see everything; the server enforces it in the expenses select policy.
+  final String visibility;
   const MemberRow({
     required this.householdId,
     required this.userId,
     required this.role,
     required this.displayName,
     required this.joinedAt,
+    required this.visibility,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1775,6 +1803,7 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
     map['role'] = Variable<String>(role);
     map['display_name'] = Variable<String>(displayName);
     map['joined_at'] = Variable<DateTime>(joinedAt);
+    map['visibility'] = Variable<String>(visibility);
     return map;
   }
 
@@ -1785,6 +1814,7 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
       role: Value(role),
       displayName: Value(displayName),
       joinedAt: Value(joinedAt),
+      visibility: Value(visibility),
     );
   }
 
@@ -1799,6 +1829,7 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
       role: serializer.fromJson<String>(json['role']),
       displayName: serializer.fromJson<String>(json['displayName']),
       joinedAt: serializer.fromJson<DateTime>(json['joinedAt']),
+      visibility: serializer.fromJson<String>(json['visibility']),
     );
   }
   @override
@@ -1810,6 +1841,7 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
       'role': serializer.toJson<String>(role),
       'displayName': serializer.toJson<String>(displayName),
       'joinedAt': serializer.toJson<DateTime>(joinedAt),
+      'visibility': serializer.toJson<String>(visibility),
     };
   }
 
@@ -1819,12 +1851,14 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
     String? role,
     String? displayName,
     DateTime? joinedAt,
+    String? visibility,
   }) => MemberRow(
     householdId: householdId ?? this.householdId,
     userId: userId ?? this.userId,
     role: role ?? this.role,
     displayName: displayName ?? this.displayName,
     joinedAt: joinedAt ?? this.joinedAt,
+    visibility: visibility ?? this.visibility,
   );
   MemberRow copyWithCompanion(MembersCompanion data) {
     return MemberRow(
@@ -1837,6 +1871,9 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
           ? data.displayName.value
           : this.displayName,
       joinedAt: data.joinedAt.present ? data.joinedAt.value : this.joinedAt,
+      visibility: data.visibility.present
+          ? data.visibility.value
+          : this.visibility,
     );
   }
 
@@ -1847,14 +1884,15 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
           ..write('userId: $userId, ')
           ..write('role: $role, ')
           ..write('displayName: $displayName, ')
-          ..write('joinedAt: $joinedAt')
+          ..write('joinedAt: $joinedAt, ')
+          ..write('visibility: $visibility')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(householdId, userId, role, displayName, joinedAt);
+      Object.hash(householdId, userId, role, displayName, joinedAt, visibility);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1863,7 +1901,8 @@ class MemberRow extends DataClass implements Insertable<MemberRow> {
           other.userId == this.userId &&
           other.role == this.role &&
           other.displayName == this.displayName &&
-          other.joinedAt == this.joinedAt);
+          other.joinedAt == this.joinedAt &&
+          other.visibility == this.visibility);
 }
 
 class MembersCompanion extends UpdateCompanion<MemberRow> {
@@ -1872,6 +1911,7 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
   final Value<String> role;
   final Value<String> displayName;
   final Value<DateTime> joinedAt;
+  final Value<String> visibility;
   final Value<int> rowid;
   const MembersCompanion({
     this.householdId = const Value.absent(),
@@ -1879,6 +1919,7 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
     this.role = const Value.absent(),
     this.displayName = const Value.absent(),
     this.joinedAt = const Value.absent(),
+    this.visibility = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MembersCompanion.insert({
@@ -1887,6 +1928,7 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
     required String role,
     required String displayName,
     required DateTime joinedAt,
+    this.visibility = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : householdId = Value(householdId),
        userId = Value(userId),
@@ -1899,6 +1941,7 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
     Expression<String>? role,
     Expression<String>? displayName,
     Expression<DateTime>? joinedAt,
+    Expression<String>? visibility,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1907,6 +1950,7 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
       if (role != null) 'role': role,
       if (displayName != null) 'display_name': displayName,
       if (joinedAt != null) 'joined_at': joinedAt,
+      if (visibility != null) 'visibility': visibility,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1917,6 +1961,7 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
     Value<String>? role,
     Value<String>? displayName,
     Value<DateTime>? joinedAt,
+    Value<String>? visibility,
     Value<int>? rowid,
   }) {
     return MembersCompanion(
@@ -1925,6 +1970,7 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
       role: role ?? this.role,
       displayName: displayName ?? this.displayName,
       joinedAt: joinedAt ?? this.joinedAt,
+      visibility: visibility ?? this.visibility,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1947,6 +1993,9 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
     if (joinedAt.present) {
       map['joined_at'] = Variable<DateTime>(joinedAt.value);
     }
+    if (visibility.present) {
+      map['visibility'] = Variable<String>(visibility.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1961,6 +2010,7 @@ class MembersCompanion extends UpdateCompanion<MemberRow> {
           ..write('role: $role, ')
           ..write('displayName: $displayName, ')
           ..write('joinedAt: $joinedAt, ')
+          ..write('visibility: $visibility, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2628,6 +2678,15 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, BudgetRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _amountCentsMeta = const VerificationMeta(
     'amountCents',
   );
@@ -2680,6 +2739,7 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, BudgetRow> {
     householdId,
     month,
     categoryId,
+    userId,
     amountCents,
     updatedAt,
     deletedAt,
@@ -2723,6 +2783,12 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, BudgetRow> {
       context.handle(
         _categoryIdMeta,
         categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
       );
     }
     if (data.containsKey('amount_cents')) {
@@ -2781,6 +2847,10 @@ class $BudgetsTable extends Budgets with TableInfo<$BudgetsTable, BudgetRow> {
         DriftSqlType.string,
         data['${effectivePrefix}category_id'],
       ),
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      ),
       amountCents: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}amount_cents'],
@@ -2813,6 +2883,9 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
   /// First day of the month as `yyyy-MM-01`.
   final String month;
   final String? categoryId;
+
+  /// Set for a person's monthly allowance; null for the household's budgets.
+  final String? userId;
   final int amountCents;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -2822,6 +2895,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
     required this.householdId,
     required this.month,
     this.categoryId,
+    this.userId,
     required this.amountCents,
     required this.updatedAt,
     this.deletedAt,
@@ -2835,6 +2909,9 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
     map['month'] = Variable<String>(month);
     if (!nullToAbsent || categoryId != null) {
       map['category_id'] = Variable<String>(categoryId);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
     }
     map['amount_cents'] = Variable<int>(amountCents);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -2853,6 +2930,9 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
       categoryId: categoryId == null && nullToAbsent
           ? const Value.absent()
           : Value(categoryId),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
       amountCents: Value(amountCents),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -2872,6 +2952,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
       householdId: serializer.fromJson<String>(json['householdId']),
       month: serializer.fromJson<String>(json['month']),
       categoryId: serializer.fromJson<String?>(json['categoryId']),
+      userId: serializer.fromJson<String?>(json['userId']),
       amountCents: serializer.fromJson<int>(json['amountCents']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -2886,6 +2967,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
       'householdId': serializer.toJson<String>(householdId),
       'month': serializer.toJson<String>(month),
       'categoryId': serializer.toJson<String?>(categoryId),
+      'userId': serializer.toJson<String?>(userId),
       'amountCents': serializer.toJson<int>(amountCents),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -2898,6 +2980,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
     String? householdId,
     String? month,
     Value<String?> categoryId = const Value.absent(),
+    Value<String?> userId = const Value.absent(),
     int? amountCents,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -2907,6 +2990,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
     householdId: householdId ?? this.householdId,
     month: month ?? this.month,
     categoryId: categoryId.present ? categoryId.value : this.categoryId,
+    userId: userId.present ? userId.value : this.userId,
     amountCents: amountCents ?? this.amountCents,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -2922,6 +3006,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
       categoryId: data.categoryId.present
           ? data.categoryId.value
           : this.categoryId,
+      userId: data.userId.present ? data.userId.value : this.userId,
       amountCents: data.amountCents.present
           ? data.amountCents.value
           : this.amountCents,
@@ -2938,6 +3023,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
           ..write('householdId: $householdId, ')
           ..write('month: $month, ')
           ..write('categoryId: $categoryId, ')
+          ..write('userId: $userId, ')
           ..write('amountCents: $amountCents, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2952,6 +3038,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
     householdId,
     month,
     categoryId,
+    userId,
     amountCents,
     updatedAt,
     deletedAt,
@@ -2965,6 +3052,7 @@ class BudgetRow extends DataClass implements Insertable<BudgetRow> {
           other.householdId == this.householdId &&
           other.month == this.month &&
           other.categoryId == this.categoryId &&
+          other.userId == this.userId &&
           other.amountCents == this.amountCents &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -2976,6 +3064,7 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
   final Value<String> householdId;
   final Value<String> month;
   final Value<String?> categoryId;
+  final Value<String?> userId;
   final Value<int> amountCents;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -2986,6 +3075,7 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
     this.householdId = const Value.absent(),
     this.month = const Value.absent(),
     this.categoryId = const Value.absent(),
+    this.userId = const Value.absent(),
     this.amountCents = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -2997,6 +3087,7 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
     this.householdId = const Value.absent(),
     required String month,
     this.categoryId = const Value.absent(),
+    this.userId = const Value.absent(),
     required int amountCents,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -3011,6 +3102,7 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
     Expression<String>? householdId,
     Expression<String>? month,
     Expression<String>? categoryId,
+    Expression<String>? userId,
     Expression<int>? amountCents,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -3022,6 +3114,7 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
       if (householdId != null) 'household_id': householdId,
       if (month != null) 'month': month,
       if (categoryId != null) 'category_id': categoryId,
+      if (userId != null) 'user_id': userId,
       if (amountCents != null) 'amount_cents': amountCents,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -3035,6 +3128,7 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
     Value<String>? householdId,
     Value<String>? month,
     Value<String?>? categoryId,
+    Value<String?>? userId,
     Value<int>? amountCents,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -3046,6 +3140,7 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
       householdId: householdId ?? this.householdId,
       month: month ?? this.month,
       categoryId: categoryId ?? this.categoryId,
+      userId: userId ?? this.userId,
       amountCents: amountCents ?? this.amountCents,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -3068,6 +3163,9 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
     }
     if (categoryId.present) {
       map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (amountCents.present) {
       map['amount_cents'] = Variable<int>(amountCents.value);
@@ -3094,6 +3192,7 @@ class BudgetsCompanion extends UpdateCompanion<BudgetRow> {
           ..write('householdId: $householdId, ')
           ..write('month: $month, ')
           ..write('categoryId: $categoryId, ')
+          ..write('userId: $userId, ')
           ..write('amountCents: $amountCents, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -6028,6 +6127,7 @@ typedef $$MembersTableCreateCompanionBuilder = MembersCompanion Function({
   required String role,
   required String displayName,
   required DateTime joinedAt,
+  Value<String> visibility,
   Value<int> rowid,
 });
 typedef $$MembersTableUpdateCompanionBuilder = MembersCompanion Function({
@@ -6036,6 +6136,7 @@ typedef $$MembersTableUpdateCompanionBuilder = MembersCompanion Function({
   Value<String> role,
   Value<String> displayName,
   Value<DateTime> joinedAt,
+  Value<String> visibility,
   Value<int> rowid,
 });
 
@@ -6070,6 +6171,11 @@ class $$MembersTableFilterComposer
 
   ColumnFilters<DateTime> get joinedAt => $composableBuilder(
     column: $table.joinedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visibility => $composableBuilder(
+    column: $table.visibility,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6107,6 +6213,11 @@ class $$MembersTableOrderingComposer
     column: $table.joinedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MembersTableAnnotationComposer
@@ -6136,6 +6247,11 @@ class $$MembersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get joinedAt =>
       $composableBuilder(column: $table.joinedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get visibility => $composableBuilder(
+    column: $table.visibility,
+    builder: (column) => column,
+  );
 }
 
 class $$MembersTableTableManager
@@ -6171,6 +6287,7 @@ class $$MembersTableTableManager
                 Value<String> role = const Value.absent(),
                 Value<String> displayName = const Value.absent(),
                 Value<DateTime> joinedAt = const Value.absent(),
+                Value<String> visibility = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MembersCompanion(
                 householdId: householdId,
@@ -6178,6 +6295,7 @@ class $$MembersTableTableManager
                 role: role,
                 displayName: displayName,
                 joinedAt: joinedAt,
+                visibility: visibility,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6187,6 +6305,7 @@ class $$MembersTableTableManager
                 required String role,
                 required String displayName,
                 required DateTime joinedAt,
+                Value<String> visibility = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MembersCompanion.insert(
                 householdId: householdId,
@@ -6194,6 +6313,7 @@ class $$MembersTableTableManager
                 role: role,
                 displayName: displayName,
                 joinedAt: joinedAt,
+                visibility: visibility,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6594,6 +6714,7 @@ typedef $$BudgetsTableCreateCompanionBuilder = BudgetsCompanion Function({
   Value<String> householdId,
   required String month,
   Value<String?> categoryId,
+  Value<String?> userId,
   required int amountCents,
   required DateTime updatedAt,
   Value<DateTime?> deletedAt,
@@ -6605,6 +6726,7 @@ typedef $$BudgetsTableUpdateCompanionBuilder = BudgetsCompanion Function({
   Value<String> householdId,
   Value<String> month,
   Value<String?> categoryId,
+  Value<String?> userId,
   Value<int> amountCents,
   Value<DateTime> updatedAt,
   Value<DateTime?> deletedAt,
@@ -6638,6 +6760,11 @@ class $$BudgetsTableFilterComposer
 
   ColumnFilters<String> get categoryId => $composableBuilder(
     column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6691,6 +6818,11 @@ class $$BudgetsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get amountCents => $composableBuilder(
     column: $table.amountCents,
     builder: (column) => ColumnOrderings(column),
@@ -6736,6 +6868,9 @@ class $$BudgetsTableAnnotationComposer
     column: $table.categoryId,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<int> get amountCents => $composableBuilder(
     column: $table.amountCents,
@@ -6784,6 +6919,7 @@ class $$BudgetsTableTableManager
                 Value<String> householdId = const Value.absent(),
                 Value<String> month = const Value.absent(),
                 Value<String?> categoryId = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
                 Value<int> amountCents = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -6794,6 +6930,7 @@ class $$BudgetsTableTableManager
                 householdId: householdId,
                 month: month,
                 categoryId: categoryId,
+                userId: userId,
                 amountCents: amountCents,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -6806,6 +6943,7 @@ class $$BudgetsTableTableManager
                 Value<String> householdId = const Value.absent(),
                 required String month,
                 Value<String?> categoryId = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
                 required int amountCents,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -6816,6 +6954,7 @@ class $$BudgetsTableTableManager
                 householdId: householdId,
                 month: month,
                 categoryId: categoryId,
+                userId: userId,
                 amountCents: amountCents,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,

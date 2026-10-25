@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/db/app_database.dart';
 import '../../core/time.dart';
+import '../auth/auth_providers.dart';
+import '../overview/overview_providers.dart';
 import 'expense_providers.dart';
 
 @immutable
@@ -47,7 +49,11 @@ final filteredExpensesProvider = Provider<AsyncValue<List<ExpenseRow>>>((ref) {
   final categories =
       ref.watch(categoriesProvider).value ?? const <CategoryRow>[];
   final filter = ref.watch(expenseFilterProvider);
-  return expenses.whenData((rows) => filterExpenses(rows, categories, filter));
+  final person = ref.watch(activeMemberFilterProvider);
+  final me = ref.watch(currentUserIdProvider);
+  return expenses.whenData(
+    (rows) => filterExpenses(forMember(rows, person, me), categories, filter),
+  );
 });
 
 List<ExpenseRow> filterExpenses(

@@ -8,7 +8,9 @@ import '../budgets/budget_providers.dart';
 import '../goals/domain/goal_calculations.dart';
 import '../goals/goal_providers.dart';
 import '../expenses/expense_providers.dart';
+import '../auth/auth_providers.dart';
 import '../family/member_providers.dart';
+import '../overview/overview_providers.dart';
 import 'home_calculations.dart';
 import 'home_data.dart';
 
@@ -17,9 +19,12 @@ import 'home_data.dart';
 final homeExpensesProvider = StreamProvider<List<ExpenseRow>>((ref) {
   final month = ref.watch(selectedMonthProvider);
   final now = ref.watch(clockProvider)();
+  final person = ref.watch(activeMemberFilterProvider);
+  final me = ref.watch(currentUserIdProvider);
   return ref
       .watch(expenseRepositoryProvider)
-      .watchRange(homeRangeStart(month, now), homeRangeEnd(month));
+      .watchRange(homeRangeStart(month, now), homeRangeEnd(month))
+      .map((rows) => forMember(rows, person, me));
 });
 
 /// What Home shows for the selected month, computed from the local database.

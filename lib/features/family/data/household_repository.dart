@@ -75,10 +75,27 @@ class HouseholdRepository {
                   role: m.role.dbValue,
                   displayName: m.displayName,
                   joinedAt: m.joinedAt,
+                  visibility: Value(m.visibility.dbValue),
                 ),
               );
         }
       });
+
+  /// An own-only member must not keep other people's expenses: they may have been pulled
+  /// before the setting changed. Removes every expense of [householdId] that someone else
+  /// added (the server no longer sends them either).
+  Future<void> purgeOthersExpenses({
+    required String householdId,
+    required String userId,
+  }) async {
+    await (_db.delete(_db.expenses)..where(
+          (e) =>
+              e.householdId.equals(householdId) &
+              e.createdBy.isNotNull() &
+              e.createdBy.isNotIn([userId, 'You']),
+        ))
+        .go();
+  }
 
   /// Forgets a household (the person left, was removed, or it was deleted).
   Future<void> forget(String householdId) => _db.transaction(() async {

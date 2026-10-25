@@ -7,6 +7,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../domain/permissions.dart';
 import '../domain/role.dart';
+import '../domain/visibility.dart';
 
 /// What the person picked in the role sheet.
 sealed class RoleSheetResult {
@@ -16,6 +17,11 @@ sealed class RoleSheetResult {
 class RoleChosen extends RoleSheetResult {
   const RoleChosen(this.role);
   final Role role;
+}
+
+class VisibilityChosen extends RoleSheetResult {
+  const VisibilityChosen(this.visibility);
+  final MemberVisibility visibility;
 }
 
 class RemoveChosen extends RoleSheetResult {
@@ -63,12 +69,36 @@ class _RoleSheet extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         for (final role in Role.assignable)
-          _RoleOption(
+          ChoiceTile(
             key: ValueKey('role-option-${role.dbValue}'),
-            role: role,
+            title: role.label,
+            description: role.description,
             selected: role == current,
             onTap: () => Navigator.of(context).pop(RoleChosen(role)),
           ),
+        if (permissions.canSetVisibility(current, isSelf: false)) ...[
+          const SizedBox(height: 16),
+          Semantics(
+            header: true,
+            child: Text(
+              'Can see',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: t.text,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final v in MemberVisibility.values)
+            ChoiceTile(
+              key: ValueKey('visibility-option-${v.dbValue}'),
+              title: v.label,
+              description: v.description,
+              selected: v == MemberVisibility.fromDb(member.visibility),
+              onTap: () => Navigator.of(context).pop(VisibilityChosen(v)),
+            ),
+        ],
         if (permissions.canRemove(current, isSelf: false)) ...[
           const SizedBox(height: 8),
           PillButton(
@@ -83,15 +113,18 @@ class _RoleSheet extends StatelessWidget {
   }
 }
 
-class _RoleOption extends StatelessWidget {
-  const _RoleOption({
+/// One selectable row in the access sheet (a role, or what the member can see).
+class ChoiceTile extends StatelessWidget {
+  const ChoiceTile({
     super.key,
-    required this.role,
+    required this.title,
+    required this.description,
     required this.selected,
     required this.onTap,
   });
 
-  final Role role;
+  final String title;
+  final String description;
   final bool selected;
   final VoidCallback onTap;
 
@@ -101,7 +134,7 @@ class _RoleOption extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${role.label}. ${role.description}',
+      label: '$title. $description',
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -125,7 +158,7 @@ class _RoleOption extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            role.label,
+                            title,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -133,7 +166,7 @@ class _RoleOption extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            role.description,
+                            description,
                             style: TextStyle(
                               fontSize: 13,
                               color: selected ? t.navActiveText : t.muted,

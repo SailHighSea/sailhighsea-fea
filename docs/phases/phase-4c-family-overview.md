@@ -1,5 +1,7 @@
 # Phase 4c: Family overview ("see all") and private members
 
+**Status:** Built (2026-10-29). Still to do: run `supabase test db`, and try it with a real owner and an own-only member. Item 3 became schema v5 (not v3) because earlier phases had used v3 and v4; item 7 (allowances) is done. See CHANGELOG.md.
+
 Runs after Phase 4 (sync). Until expenses sync, a device only has its own entries, so nobody can see anyone else's spending. Do not start before Phase 4 is done.
 
 ## Goal

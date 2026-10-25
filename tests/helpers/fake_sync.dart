@@ -23,6 +23,9 @@ class FakeSyncServer {
   /// Role per user id: `owner`, `admin`, `editor`, `viewer`. A user not listed has left.
   final Map<String, String> roles = {};
 
+  /// Members who see only their own spending (owner and admin are never listed).
+  final Set<String> ownOnly = {};
+
   /// When true every call fails like a dead network.
   bool offline = false;
 
@@ -106,6 +109,20 @@ class _FakeBackend implements SyncBackend {
       ? const {'owner', 'admin', 'editor'}.contains(_role)
       : const {'owner', 'admin'}.contains(_role);
 
+  /// The select policies: an own-only member sees only the expenses they added, and a
+  /// person's allowance (a budget with `user_id`) is visible to that person and to managers.
+  bool _canSee(String table, RemoteRow row) {
+    if (_role == null) return false;
+    final manager = const {'owner', 'admin'}.contains(_role);
+    if (table == 'expenses' && !manager && _server.ownOnly.contains(_userId)) {
+      return row['created_by'] == _userId;
+    }
+    if (table == 'budgets' && !manager && row['user_id'] != null) {
+      return row['user_id'] == _userId;
+    }
+    return true;
+  }
+
   @override
   Future<List<RemoteRow>> pull(
     String table,
@@ -122,8 +139,10 @@ class _FakeBackend implements SyncBackend {
             .rows(table)
             .where(
               (r) =>
-                  from == null ||
-                  !DateTime.parse(r['updated_at'] as String).isBefore(from),
+                  _canSee(table, r) &&
+                  (from == null ||
+                      !DateTime.parse(r['updated_at'] as String)
+                          .isBefore(from)),
             )
             .toList()
           ..sort(
@@ -143,7 +162,7 @@ class _FakeBackend implements SyncBackend {
     _checkOnline();
     if (_role == null) return null;
     final r = _server.row(table, id);
-    return r == null ? null : {...r};
+    return r == null || !_canSee(table, r) ? null : {...r};
   }
 
   @override

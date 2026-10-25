@@ -9,6 +9,7 @@ import 'data/household_remote.dart';
 import 'data/household_repository.dart';
 import 'domain/permissions.dart';
 import 'domain/role.dart';
+import 'domain/visibility.dart';
 import 'household_controller.dart';
 
 /// `null` while Supabase is not configured. `main()` and tests override it.
@@ -98,4 +99,21 @@ final memberInitialsProvider = Provider<List<String>>((ref) {
           ? '?'
           : String.fromCharCode(m.displayName.trim().runes.first).toUpperCase(),
   ];
+});
+
+/// What I see of other people's spending (local-only: everything).
+final currentVisibilityProvider = Provider<MemberVisibility>((ref) {
+  if (ref.watch(authServiceProvider) == null) return MemberVisibility.household;
+  final mine = ref.watch(myMemberProvider).value;
+  return MemberVisibility.fromDb(mine?.visibility);
+});
+
+/// Whether this person may see the overview of everyone and use the member filter: there must
+/// also be someone else to look at.
+final canSeeEveryoneProvider = Provider<bool>((ref) {
+  if (ref.watch(authServiceProvider) == null) return false;
+  final permissions = ref.watch(permissionsProvider);
+  final members = ref.watch(membersProvider).value ?? const <MemberRow>[];
+  return members.length > 1 &&
+      permissions.canSeeEveryone(ref.watch(currentVisibilityProvider));
 });

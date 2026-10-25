@@ -7,6 +7,7 @@ import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../domain/permissions.dart';
 import '../domain/role.dart';
+import '../domain/visibility.dart';
 
 /// The household's members with a role pill each (Family, TabFamily, DeskFamily mockups).
 /// A role the viewer may change is a button that opens the role sheet; otherwise it is plain.
@@ -78,12 +79,18 @@ class MemberTile extends StatelessWidget {
     final t = context.tokens;
     final role = Role.fromDb(member.role);
     final name = isSelf ? 'You' : member.displayName;
+    // Owner and admin always see everything, so only editors and viewers can be private.
+    final private =
+        MemberVisibility.fromDb(member.visibility) == MemberVisibility.own &&
+        role != Role.owner &&
+        role != Role.admin;
     final subtitle = role == Role.owner
         ? 'Household owner'
         : 'Joined ${DateFormat('d MMM', 'en_US').format(member.joinedAt)}';
     return Semantics(
       container: true,
-      label: '$name, ${role.label}. $subtitle',
+      label:
+          '$name, ${role.label}. $subtitle${private ? '. Private: sees only their own spending' : ''}',
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 76),
         child: Row(
@@ -108,9 +115,35 @@ class MemberTile extends StatelessWidget {
                         color: t.text,
                       ),
                     ),
-                    Text(
-                      subtitle,
-                      style: TextStyle(fontSize: 13, color: t.muted),
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      children: [
+                        Text(
+                          subtitle,
+                          style: TextStyle(fontSize: 13, color: t.muted),
+                        ),
+                        if (private)
+                          Container(
+                            key: ValueKey('private-${member.userId}'),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: t.amber.withValues(alpha: 0.32),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'Private',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: t.amberText,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),

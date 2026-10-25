@@ -8,7 +8,38 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
-  test('a version 2 database upgrades to 3 and keeps its expenses', () async {
+  test(
+    'a version 1 database (no households yet) upgrades without clashes',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('migration1');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final file = File('${dir.path}/app.db');
+      var db = AppDatabase(NativeDatabase(file));
+      await db.select(db.categories).get();
+      await db.close();
+      db = AppDatabase(
+        NativeDatabase(
+          file,
+          setup: (raw) => raw
+            ..execute('DROP TABLE sync_state')
+            ..execute('DROP TABLE sync_issues')
+            ..execute('DROP TABLE budgets')
+            ..execute('DROP TABLE goals')
+            ..execute('DROP TABLE goal_contributions')
+            ..execute('DROP TABLE bills')
+            ..execute('DROP TABLE members')
+            ..execute('DROP TABLE households')
+            ..execute('PRAGMA user_version = 1'),
+        ),
+      );
+      addTearDown(db.close);
+      expect(await db.select(db.members).get(), isEmpty);
+      expect(await db.select(db.budgets).get(), isEmpty);
+      expect(await db.select(db.categories).get(), isNotEmpty);
+    },
+  );
+
+  test('a version 2 database upgrades to the current version and keeps its expenses', () async {
     final dir = Directory.systemTemp.createTempSync('migration');
     addTearDown(() => dir.deleteSync(recursive: true));
     final file = File('${dir.path}/app.db');
@@ -35,6 +66,11 @@ void main() {
         setup: (raw) => raw
           ..execute('DROP TABLE sync_state')
           ..execute('DROP TABLE sync_issues')
+          ..execute('DROP TABLE budgets')
+          ..execute('DROP TABLE goals')
+          ..execute('DROP TABLE goal_contributions')
+          ..execute('DROP TABLE bills')
+          ..execute('ALTER TABLE members DROP COLUMN visibility')
           ..execute('PRAGMA user_version = 2'),
       ),
     );
@@ -42,5 +78,7 @@ void main() {
     expect(await db.select(db.syncState).get(), isEmpty);
     expect(await db.select(db.syncIssues).get(), isEmpty);
     expect((await db.select(db.expenses).get()).single.id, 'e1');
+    expect(await db.select(db.budgets).get(), isEmpty);
+    expect(await db.select(db.members).get(), isEmpty);
   });
 }

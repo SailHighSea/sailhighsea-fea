@@ -8,6 +8,9 @@ import '../../core/money/money_provider.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/widgets/segmented_pills.dart';
 import '../../core/widgets/surface_card.dart';
+import '../family/member_providers.dart';
+import '../overview/overview_providers.dart';
+import '../overview/widgets/overview_view.dart';
 import 'domain/insights_calculations.dart';
 import 'insights_providers.dart';
 import '../home/widgets/trend_cards.dart' show DashedLine;
@@ -23,9 +26,33 @@ class InsightsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final canSeeEveryone = ref.watch(canSeeEveryoneProvider);
+    final tab = ref.watch(insightsTabProvider);
     final async = ref.watch(insightsProvider);
     final data = async.value;
     final t = context.tokens;
+    final tabs = canSeeEveryone
+        ? SegmentedPills(
+            labels: const ['Insights', 'Everyone'],
+            selected: tab == InsightsTab.everyone ? 1 : 0,
+            onChanged: (i) => ref
+                .read(insightsTabProvider.notifier)
+                .select(i == 1 ? InsightsTab.everyone : InsightsTab.charts),
+          )
+        : null;
+    if (canSeeEveryone && tab == InsightsTab.everyone) {
+      return AdaptivePage(
+        header: const PageHeader(title: 'Insights'),
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(width: 320, child: tabs),
+          ),
+          const SizedBox(height: 14),
+          const OverviewView(),
+        ],
+      );
+    }
     if (data == null) {
       return Center(
         child: async.hasError
@@ -111,6 +138,13 @@ class InsightsScreen extends ConsumerWidget {
         trailingBelowWhenCompact: true,
       ),
       children: [
+        if (tabs != null) ...[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(width: 320, child: tabs),
+          ),
+          const SizedBox(height: 14),
+        ],
         AdaptiveGrid(
           compact: 2,
           medium: 4,

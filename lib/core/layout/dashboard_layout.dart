@@ -30,6 +30,8 @@ class DashboardLayout extends StatelessWidget {
     required this.nextBill,
     required this.goal,
     required this.recent,
+    this.filters,
+    this.everyone,
   });
 
   final SlotBuilder header;
@@ -39,6 +41,12 @@ class DashboardLayout extends StatelessWidget {
   final SlotBuilder nextBill;
   final SlotBuilder goal;
   final SlotBuilder recent;
+
+  /// A row of filter chips under the header (who's spending is shown). Absent for most people.
+  final SlotBuilder? filters;
+
+  /// A full-width "See everyone" card above the recent list. Absent for most people.
+  final SlotBuilder? everyone;
 
   static const double _splitMinContent = 760;
   static const double _heroColumn = 380;
@@ -86,6 +94,7 @@ class DashboardLayout extends StatelessWidget {
             SizedBox(height: gap),
             twoCards(),
             SizedBox(height: gap),
+            if (everyone != null) ...[slot(everyone!), SizedBox(height: gap)],
             slot(recent),
           ],
           DashboardMode.split => [
@@ -110,6 +119,10 @@ class DashboardLayout extends StatelessWidget {
                     children: [
                       slot(trend),
                       SizedBox(height: gap),
+                      if (everyone != null) ...[
+                        slot(everyone!),
+                        SizedBox(height: gap),
+                      ],
                       slot(recent),
                     ],
                   ),
@@ -142,6 +155,7 @@ class DashboardLayout extends StatelessWidget {
               ),
             ),
             SizedBox(height: gap),
+            if (everyone != null) ...[slot(everyone!), SizedBox(height: gap)],
             slot(recent),
           ],
         };
@@ -156,6 +170,10 @@ class DashboardLayout extends StatelessWidget {
                 children: [
                   slot(header),
                   SizedBox(height: gap),
+                  if (filters != null) ...[
+                    slot(filters!),
+                    SizedBox(height: gap),
+                  ],
                   ...body,
                 ],
               ),
