@@ -39,7 +39,7 @@ Updated 2026-10-25. **Done** = the code and its automated tests are finished and
 | 4b | Google Sheets connection | Done (merged) | Google Cloud setup and one real connect (tested only against a fake Google) |
 | 4c | Family overview | Done (merged, PR #3) | `supabase test db` for the visibility rules; a real owner plus an own-only member |
 | 5 | Budgets and insights | Done (merged, PR #2) | `supabase test db`; a real bill reminder on a phone; Windows image tests (`PHASE5_GOLDENS=1`); Android, iOS and macOS builds with notifications. The macOS build failed in CI and two fixes are waiting for the next pull request |
-| 6 | Adaptive layouts and scan | **Not started** | |
+| 6 | Adaptive layouts and scan | Done (this branch, not merged) | `supabase test db` for the receipts bucket; a real phone camera and ML Kit read; a real upload to Supabase Storage; window minimum size on Windows and macOS; fold on a real foldable; Android, iOS and macOS builds (new plugins `image_picker`, `google_mlkit_text_recognition`) |
 | 7 | Polish and release | **Not started** | |
 | 8 | Google Sheets mode (no server) | **Not started** (plan written: `docs/phases/phase-8-google-sheets-mode.md`) | Begins after the pull request with the macOS fixes and this plan is merged |
 

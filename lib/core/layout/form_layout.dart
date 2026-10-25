@@ -15,6 +15,7 @@ class AdaptiveFormLayout extends StatelessWidget {
     required this.keypad,
     required this.actions,
     this.tip,
+    this.notice,
   });
 
   final Widget header;
@@ -28,6 +29,9 @@ class AdaptiveFormLayout extends StatelessWidget {
 
   /// Keyboard shortcut hint, shown only where there is a hardware keyboard layout (desktop width).
   final Widget? tip;
+
+  /// Something to tell the person above the details at every width (a receipt is attached).
+  final Widget? notice;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +58,10 @@ class AdaptiveFormLayout extends StatelessWidget {
                     const SizedBox(height: 18),
                     categories,
                     const SizedBox(height: 14),
+                    if (notice != null) ...[
+                      notice!,
+                      const SizedBox(height: 14),
+                    ],
                     details,
                     const SizedBox(height: 14),
                     keypad,
@@ -101,6 +109,10 @@ class AdaptiveFormLayout extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (notice != null) ...[
+                          notice!,
+                          const SizedBox(height: 16),
+                        ],
                         details,
                         if (showTip) ...[const SizedBox(height: 16), tip!],
                         const SizedBox(height: 16),

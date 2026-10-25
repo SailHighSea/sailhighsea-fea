@@ -9,6 +9,7 @@ import '../../core/money/money_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/time.dart';
+import '../../core/widgets/surface_card.dart';
 import '../family/member_providers.dart';
 import 'expense_form_controller.dart';
 import 'expense_providers.dart';
@@ -125,7 +126,25 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
         child: AdaptiveFormLayout(
           header: PageHeader(
             title: editing ? 'Edit expense' : 'Add expense',
-            trailing: _CloseButton(onTap: _close),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!editing) ...[
+                  RoundIconButton(
+                    key: const ValueKey('scan-receipt'),
+                    icon: Icons.document_scanner_outlined,
+                    label: 'Scan receipt',
+                    onTap: () => context.push('/scan'),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                RoundIconButton(
+                  icon: Icons.close,
+                  label: 'Close',
+                  onTap: _close,
+                ),
+              ],
+            ),
           ),
           amount: AmountDisplay(
             symbol: currency.symbol,
@@ -154,17 +173,13 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
             decimalSeparator: money.decimalSeparator,
             allowDecimal: currency.minorDigits > 0,
           ),
-          tip: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: t.navActiveBackground,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              'Tip: press Ctrl or Cmd + N anywhere to add an expense, and Ctrl or Cmd + Enter to save.',
-              style: TextStyle(fontSize: 13, color: t.navActiveText),
-            ),
-          ),
+          notice: form.receiptImagePath == null
+              ? null
+              : _ReceiptAttached(
+                  shared: form.shareReceipt,
+                  onRemove: controller.clearReceipt,
+                ),
+          tip: _tipBox(t),
           actions: PrimaryPillButton(
             label: editing ? 'Save changes' : 'Save expense',
             busy: form.saving || !form.loaded,
@@ -174,6 +189,18 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
       ),
     );
   }
+
+  Widget _tipBox(AppTokens t) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    decoration: BoxDecoration(
+      color: t.navActiveBackground,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Text(
+      'Tip: press Ctrl or Cmd + N anywhere to add an expense, and Ctrl or Cmd + Enter to save.',
+      style: TextStyle(fontSize: 13, color: t.navActiveText),
+    ),
+  );
 
   bool get _focusInNote =>
       FocusScope.of(context).focusedChild?.context?.widget is EditableText;
@@ -191,9 +218,17 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   }
 }
 
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({required this.onTap});
+/// Round outlined icon button (44px) used in page headers.
+class RoundIconButton extends StatelessWidget {
+  const RoundIconButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
+  final IconData icon;
+  final String label;
   final VoidCallback onTap;
 
   @override
@@ -201,7 +236,7 @@ class _CloseButton extends StatelessWidget {
     final t = context.tokens;
     return Semantics(
       button: true,
-      label: 'Close',
+      label: label,
       excludeSemantics: true,
       child: Material(
         color: t.surface,
@@ -212,7 +247,7 @@ class _CloseButton extends StatelessWidget {
           child: SizedBox(
             width: kMinTapTarget,
             height: kMinTapTarget,
-            child: Icon(Icons.close, size: 22, color: t.text),
+            child: Icon(icon, size: 22, color: t.text),
           ),
         ),
       ),
@@ -308,6 +343,42 @@ class _NewCategoryDialogState extends State<_NewCategoryDialog> {
           child: const Text('Add'),
         ),
       ],
+    );
+  }
+}
+
+class _ReceiptAttached extends StatelessWidget {
+  const _ReceiptAttached({required this.shared, required this.onRemove});
+
+  final bool shared;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Container(
+      key: const ValueKey('receipt-attached'),
+      padding: const EdgeInsets.only(left: 16),
+      decoration: BoxDecoration(
+        color: t.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: t.chipBorder),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.receipt_long_outlined, size: 20, color: t.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              shared
+                  ? 'Receipt attached, shared with the household'
+                  : 'Receipt attached, kept on this device',
+              style: TextStyle(fontSize: 13, color: t.text),
+            ),
+          ),
+          TextLinkButton(label: 'Remove', onTap: onRemove),
+        ],
+      ),
     );
   }
 }

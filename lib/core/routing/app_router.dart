@@ -12,6 +12,7 @@ import '../../features/expenses/expense_form_screen.dart';
 import '../../features/expenses/expense_list_providers.dart'
     show searchFocusRequestProvider;
 import '../../features/expenses/expense_list_screen.dart';
+import '../../features/scan/scan_screen.dart';
 import '../../features/expenses/widgets/fold_add_panel.dart';
 import '../../features/auth/app_access.dart';
 import '../../features/auth/sign_in_screen.dart';
@@ -151,6 +152,10 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
             ),
           ),
           GoRoute(
+            path: '/scan',
+            pageBuilder: (c, s) => _page(s, const ScanScreen()),
+          ),
+          GoRoute(
             path: '/add',
             pageBuilder: (c, s) => _page(s, const ExpenseFormScreen()),
           ),
@@ -177,7 +182,8 @@ class _Shell extends ConsumerWidget {
     }
 
     final onTabRoot = AppDestination.tabs.any((d) => d.path == location);
-    final isFormRoute = location == '/add' || location.endsWith('/edit');
+    final isFormRoute =
+        location == '/add' || location == '/scan' || location.endsWith('/edit');
     // Keyboard: Ctrl or Cmd with N, 1 to 6, comma, F and slash; Esc goes back to Home.
     return Focus(
       autofocus: true,
