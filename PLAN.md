@@ -37,7 +37,7 @@ Status is kept current at the end of every phase (and when a phase starts). "Bui
 | 3 | Accounts and household | Sign-in, household, roles, invite codes, RLS | Built. Server tests (`supabase test db`, `deno test`) and a real two-account run still to do |
 | 4 | Sync | Realtime sync, offline queue, conflict handling | Built (fake-server tests). Not yet tried on two real devices against Supabase |
 | 4b | Google Sheets connection | Owner links a Google Sheet; all household expenses mirror into it automatically (one-way, server-side) | Built (fake-Google tests). Google Cloud setup and a real connect still to do |
-| 4c | Family overview | "See all" overview for the owner with per-person spending, member filter, optional own-only visibility for some members (needs sync) | Not started |
+| 4c | Family overview | "See all" overview for the owner with per-person spending, member filter, optional own-only visibility for some members (needs sync) | Built. Server tests (`supabase test db`) and a real owner plus own-only run still to do |
 | 5 | Budgets and insights | Budgets, charts, goals, bills, reminders | Built. Server tests, Android/iOS/macOS builds with notifications, and Windows pixel goldens still to do |
 | 6 | Adaptive layouts and scan | Tablet, desktop, fold half-open polish; receipt scan | Not started |
 | 7 | Polish and release | Accessibility, app lock, export, CI for all platforms, store prep | Not started |

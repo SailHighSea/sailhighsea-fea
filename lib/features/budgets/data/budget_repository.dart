@@ -38,18 +38,41 @@ class BudgetRepository {
     await _write(month, categoryId, existing?.amountCents ?? 1, deleted: true);
   }
 
+  /// Sets [userId]'s monthly allowance from [month] on. Zero or less removes it.
+  Future<void> setAllowance(DateTime month, String userId, int cents) async {
+    if (cents <= 0) return removeAllowance(month, userId);
+    await _write(month, null, cents, deleted: false, userId: userId);
+  }
+
+  Future<void> removeAllowance(DateTime month, String userId) async {
+    final existing = await (_db.select(
+      _db.budgets,
+    )..where((b) => b.id.equals(allowanceId(month, userId)))).getSingleOrNull();
+    await _write(
+      month,
+      null,
+      existing?.amountCents ?? 1,
+      deleted: true,
+      userId: userId,
+    );
+  }
+
   Future<void> _write(
     DateTime month,
     String? categoryId,
     int cents, {
     required bool deleted,
+    String? userId,
   }) async {
     final now = _clock();
     await _db
         .into(_db.budgets)
         .insertOnConflictUpdate(
           BudgetsCompanion.insert(
-            id: budgetId(month, categoryId),
+            id: userId == null
+                ? budgetId(month, categoryId)
+                : allowanceId(month, userId),
+            userId: Value(userId),
             householdId: Value(householdId),
             month: budgetMonthText(month),
             categoryId: Value(categoryId),

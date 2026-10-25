@@ -13,6 +13,10 @@ const nearLimitPercent = 90;
 String budgetId(DateTime month, String? categoryId) =>
     'b:${formatDay(monthStart(month)).substring(0, 7)}:${categoryId ?? 'overall'}';
 
+/// Fixed id for [userId]'s monthly allowance in [month].
+String allowanceId(DateTime month, String userId) =>
+    'b:${formatDay(monthStart(month)).substring(0, 7)}:user:$userId';
+
 String budgetMonthText(DateTime month) => formatDay(monthStart(month));
 
 /// The budget amounts in force for [month], by category id (`null` = overall). A month
@@ -21,12 +25,34 @@ Map<String?, int> effectiveBudgets(List<BudgetRow> rows, DateTime month) {
   final limit = budgetMonthText(month);
   final latest = <String?, BudgetRow>{};
   for (final r in rows) {
-    if (r.month.compareTo(limit) > 0) continue;
+    // Allowances (rows with a person) are separate: see [effectiveAllowances].
+    if (r.userId != null || r.month.compareTo(limit) > 0) continue;
     final current = latest[r.categoryId];
     if (current == null ||
         r.month.compareTo(current.month) > 0 ||
         (r.month == current.month && r.updatedAt.isAfter(current.updatedAt))) {
       latest[r.categoryId] = r;
+    }
+  }
+  return {
+    for (final e in latest.entries)
+      if (e.value.deletedAt == null) e.key: e.value.amountCents,
+  };
+}
+
+/// Each person's monthly allowance in force for [month], by user id. Same rules as budgets:
+/// the latest earlier month's amount applies, and a deleted row means none.
+Map<String, int> effectiveAllowances(List<BudgetRow> rows, DateTime month) {
+  final limit = budgetMonthText(month);
+  final latest = <String, BudgetRow>{};
+  for (final r in rows) {
+    final user = r.userId;
+    if (user == null || r.month.compareTo(limit) > 0) continue;
+    final current = latest[user];
+    if (current == null ||
+        r.month.compareTo(current.month) > 0 ||
+        (r.month == current.month && r.updatedAt.isAfter(current.updatedAt))) {
+      latest[user] = r;
     }
   }
   return {

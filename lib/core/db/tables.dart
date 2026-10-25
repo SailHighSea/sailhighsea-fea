@@ -77,6 +77,11 @@ class Members extends Table {
   TextColumn get displayName => text()();
   DateTimeColumn get joinedAt => dateTime()();
 
+  /// `household` (sees everyone's spending) or `own` (only their own). Owner and admin always
+  /// see everything; the server enforces it in the expenses select policy.
+  TextColumn get visibility =>
+      text().withDefault(const Constant('household'))();
+
   @override
   Set<Column> get primaryKey => {householdId, userId};
 }
@@ -121,6 +126,9 @@ class Budgets extends Table {
   /// First day of the month as `yyyy-MM-01`.
   TextColumn get month => text()();
   TextColumn get categoryId => text().nullable()();
+
+  /// Set for a person's monthly allowance; null for the household's budgets.
+  TextColumn get userId => text().nullable()();
   IntColumn get amountCents => integer()();
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

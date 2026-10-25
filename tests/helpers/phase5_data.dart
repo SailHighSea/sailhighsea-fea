@@ -126,3 +126,16 @@ Future<void> seedPhase5(
   await bill('Streaming plan', 1998, DateTime(2026, 11, 5));
   await bill('Insurance', 11800, DateTime(2026, 11, 15));
 }
+
+/// Gives the seeded expenses real member ids (sampleHousehold: user-you, user-maya, user-sam),
+/// so the overview can tell people apart.
+Future<void> useMemberIds(AppDatabase db) async {
+  for (final (name, id) in [
+    ('You', 'user-you'),
+    ('Maya', 'user-maya'),
+    ('Sam', 'user-sam'),
+  ]) {
+    await (db.update(db.expenses)..where((e) => e.createdBy.equals(name)))
+        .write(ExpensesCompanion(createdBy: Value(id)));
+  }
+}

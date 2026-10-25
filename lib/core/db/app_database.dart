@@ -54,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump when a table changes and add a step to [migration].
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -80,8 +80,14 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(goalContributions);
         await m.createTable(bills);
       }
+      if (from < 5) {
+        // Phase 4c: who may see whose spending, and per-person allowances.
+        // Tables created earlier in this same upgrade already have the new columns.
+        if (from >= 2) await m.addColumn(members, members.visibility);
+        if (from >= 4) await m.addColumn(budgets, budgets.userId);
+      }
       // Future versions add steps here, for example:
-      //   if (from < 5) await m.addColumn(expenses, expenses.someNewColumn);
+      //   if (from < 6) await m.addColumn(expenses, expenses.someNewColumn);
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');

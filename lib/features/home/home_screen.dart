@@ -8,6 +8,9 @@ import '../../core/layout/destinations.dart';
 import '../../core/money/money_provider.dart';
 import '../family/member_providers.dart';
 import '../../core/time.dart';
+import '../overview/overview_providers.dart';
+import '../overview/widgets/everyone_card.dart';
+import '../overview/widgets/member_filter_chips.dart';
 import 'home_providers.dart';
 import 'widgets/bill_goal_cards.dart';
 import 'widgets/categories_card.dart';
@@ -94,6 +97,20 @@ class HomeScreen extends ConsumerWidget {
         wide: mode == DashboardMode.wide,
         onTap: () => goTo(AppDestination.goals),
       ),
+      filters: ref.watch(canSeeEveryoneProvider)
+          ? (context, mode) => const MemberFilterChips()
+          : null,
+      everyone: ref.watch(canSeeEveryoneProvider)
+          ? (context, mode) => EveryoneCard(
+              onTap: () {
+                ref
+                    .read(insightsTabProvider.notifier)
+                    .select(InsightsTab.everyone);
+                ref.read(memberFilterProvider.notifier).select(null);
+                goTo(AppDestination.insights);
+              },
+            )
+          : null,
       recent: (context, mode) => RecentCard(
         items: summary.recent,
         money: money,

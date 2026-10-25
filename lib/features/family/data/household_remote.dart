@@ -1,4 +1,5 @@
 import '../domain/role.dart';
+import '../domain/visibility.dart';
 
 class RemoteMember {
   const RemoteMember({
@@ -6,12 +7,14 @@ class RemoteMember {
     required this.role,
     required this.displayName,
     required this.joinedAt,
+    this.visibility = MemberVisibility.household,
   });
 
   final String userId;
   final Role role;
   final String displayName;
   final DateTime joinedAt;
+  final MemberVisibility visibility;
 }
 
 class RemoteHousehold {
@@ -110,6 +113,14 @@ abstract class HouseholdRemote {
   });
 
   Future<void> setRole(String householdId, String userId, Role role);
+
+  /// Chooses whether [userId] sees everyone's spending or only their own. Owner and admin
+  /// only, never for themselves; the server refuses anything else.
+  Future<void> setVisibility(
+    String householdId,
+    String userId,
+    MemberVisibility visibility,
+  );
 
   /// Removes a member, or lets the signed-in person leave.
   Future<void> removeMember(String householdId, String userId);

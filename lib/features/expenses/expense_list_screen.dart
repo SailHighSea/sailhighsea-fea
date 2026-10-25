@@ -13,6 +13,7 @@ import '../../core/time.dart';
 import '../../core/widgets/month_navigator.dart';
 import '../../core/widgets/surface_card.dart';
 import '../family/member_providers.dart';
+import '../overview/widgets/member_filter_chips.dart';
 import 'data/day_format.dart';
 import 'expense_list_providers.dart';
 import 'expense_providers.dart';
@@ -87,6 +88,10 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
           onNext: months.next,
           titleSize: 18,
         ),
+        if (ref.watch(canSeeEveryoneProvider)) ...[
+          const SizedBox(height: 12),
+          const MemberFilterChips(),
+        ],
         const SizedBox(height: 12),
         _SearchField(
           controller: _search,

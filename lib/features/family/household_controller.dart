@@ -5,6 +5,7 @@ import '../auth/auth_service.dart';
 import 'data/household_remote.dart';
 import 'data/household_repository.dart';
 import 'domain/role.dart';
+import 'domain/visibility.dart';
 import 'member_providers.dart';
 
 /// Household actions: each one asks the server (which enforces the roles), then refreshes
@@ -45,6 +46,18 @@ class HouseholdController {
       return;
     }
     await _repo.replaceFromRemote(remote);
+    // Set to "own only" since the last visit: drop what was pulled while it was allowed.
+    for (final m in remote.members) {
+      if (m.userId == user.id &&
+          m.visibility == MemberVisibility.own &&
+          m.role != Role.owner &&
+          m.role != Role.admin) {
+        await _repo.purgeOthersExpenses(
+          householdId: remote.id,
+          userId: user.id,
+        );
+      }
+    }
   }
 
   /// First sign-in: create the household and make this person its owner. Anything entered
@@ -82,6 +95,11 @@ class HouseholdController {
 
   Future<void> setRole(String userId, Role role) async {
     await _remote.setRole(_householdId, userId, role);
+    await refresh();
+  }
+
+  Future<void> setVisibility(String userId, MemberVisibility visibility) async {
+    await _remote.setVisibility(_householdId, userId, visibility);
     await refresh();
   }
 

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 
 import '../domain/role.dart';
+import '../domain/visibility.dart';
 import 'household_remote.dart';
 
 class SupabaseHouseholdRemote implements HouseholdRemote {
@@ -58,7 +59,7 @@ class SupabaseHouseholdRemote implements HouseholdRemote {
         .single();
     final members = await _client
         .from('members')
-        .select('user_id, role, display_name, joined_at')
+        .select('user_id, role, display_name, joined_at, visibility')
         .eq('household_id', id)
         .order('joined_at');
     return RemoteHousehold(
@@ -73,6 +74,7 @@ class SupabaseHouseholdRemote implements HouseholdRemote {
             role: Role.fromDb(m['role'] as String),
             displayName: m['display_name'] as String,
             joinedAt: DateTime.parse(m['joined_at'] as String),
+            visibility: MemberVisibility.fromDb(m['visibility'] as String?),
           ),
       ],
     );
@@ -109,6 +111,23 @@ class SupabaseHouseholdRemote implements HouseholdRemote {
           throw const HouseholdFailure(HouseholdError.forbidden);
         }
       });
+
+  @override
+  Future<void> setVisibility(
+    String householdId,
+    String userId,
+    MemberVisibility visibility,
+  ) => _guard(() async {
+    final rows = await _client
+        .from('members')
+        .update({'visibility': visibility.dbValue})
+        .eq('household_id', householdId)
+        .eq('user_id', userId)
+        .select('user_id');
+    if (rows.isEmpty) {
+      throw const HouseholdFailure(HouseholdError.forbidden);
+    }
+  });
 
   @override
   Future<void> removeMember(String householdId, String userId) =>

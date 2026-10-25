@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:family_expenses/features/auth/auth_service.dart';
 import 'package:family_expenses/features/family/data/household_remote.dart';
 import 'package:family_expenses/features/family/domain/role.dart';
+import 'package:family_expenses/features/family/domain/visibility.dart';
 
 /// Stands in for Supabase Auth in widget tests.
 class FakeAuthService implements AuthService {
@@ -130,7 +131,11 @@ class FakeHouseholdRemote implements HouseholdRemote {
     return role == Role.owner || role == Role.admin;
   }
 
-  void _replaceMember(String userId, Role role) {
+  void _replaceMember(
+    String userId,
+    Role role, {
+    MemberVisibility? visibility,
+  }) {
     final h = household!;
     household = RemoteHousehold(
       id: h.id,
@@ -145,6 +150,7 @@ class FakeHouseholdRemote implements HouseholdRemote {
               role: role,
               displayName: m.displayName,
               joinedAt: m.joinedAt,
+              visibility: visibility ?? m.visibility,
             )
           else
             m,
@@ -198,6 +204,22 @@ class FakeHouseholdRemote implements HouseholdRemote {
         Role.assignable.contains(role);
     if (!allowed) throw const HouseholdFailure(HouseholdError.forbidden);
     _replaceMember(userId, role);
+  }
+
+  @override
+  Future<void> setVisibility(
+    String householdId,
+    String userId,
+    MemberVisibility visibility,
+  ) async {
+    calls.add('set-visibility:$userId:${visibility.dbValue}');
+    final target = _roleOf(userId);
+    final allowed =
+        _actorIsManager &&
+        userId != actingUserId &&
+        (target == Role.editor || target == Role.viewer);
+    if (!allowed) throw const HouseholdFailure(HouseholdError.forbidden);
+    _replaceMember(userId, target!, visibility: visibility);
   }
 
   @override
@@ -299,7 +321,12 @@ class FakeHouseholdRemote implements HouseholdRemote {
 RemoteHousehold sampleHousehold({
   String ownerId = 'user-you',
   List<RemoteMember>? extra,
+
+  /// User ids set to "only their own" spending (editors and viewers only).
+  Set<String> ownOnly = const {},
 }) {
+  MemberVisibility visibilityOf(String id) =>
+      ownOnly.contains(id) ? MemberVisibility.own : MemberVisibility.household;
   return RemoteHousehold(
     id: 'household-1',
     name: 'Our household',
@@ -323,12 +350,14 @@ RemoteHousehold sampleHousehold({
         role: Role.viewer,
         displayName: 'Sam',
         joinedAt: DateTime(2026, 10, 15),
+        visibility: visibilityOf('user-sam'),
       ),
       RemoteMember(
         userId: 'user-ed',
         role: Role.editor,
         displayName: 'Ed',
         joinedAt: DateTime(2026, 10, 16),
+        visibility: visibilityOf('user-ed'),
       ),
       ...?extra,
     ],

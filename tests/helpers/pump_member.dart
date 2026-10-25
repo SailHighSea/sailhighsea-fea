@@ -25,17 +25,20 @@ Future<ProviderContainer> pumpAsMember(
   required Size size,
   double textScale = 1,
   bool seed = true,
+  Set<String> ownOnly = const {},
+  String mode = 'light',
   List<Override> overrides = const [],
 }) async {
   final household = FakeHouseholdRemote(
     actingUserId: me,
-    household: sampleHousehold(),
+    household: sampleHousehold(ownOnly: ownOnly),
   );
   final container = await pumpApp(
     tester,
     size: size,
     location: location,
     textScale: textScale,
+    prefs: {'appearance.mode': mode},
     gated: true,
     sampleMembers: false,
     overrides: [
@@ -49,7 +52,10 @@ Future<ProviderContainer> pumpAsMember(
     ],
     seedAsync: (db) async {
       await HouseholdRepository(db).replaceFromRemote(household.household!);
-      if (seed) await seedPhase5(db, household: 'household-1');
+      if (seed) {
+        await seedPhase5(db, household: 'household-1');
+        await useMemberIds(db);
+      }
     },
   );
   await settle(tester, rounds: 14);
