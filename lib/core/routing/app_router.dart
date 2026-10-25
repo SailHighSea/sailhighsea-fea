@@ -15,6 +15,7 @@ import '../../features/family/family_screen.dart';
 import '../../features/family/join_screen.dart';
 import '../../features/family/member_providers.dart';
 import '../../features/home/home_screen.dart';
+import '../../features/sync/sync_indicator.dart';
 import '../layout/adaptive_shell.dart';
 import '../layout/destinations.dart';
 import '../layout/page_layout.dart';
@@ -198,6 +199,7 @@ class _Shell extends ConsumerWidget {
           onSelect: (d) => context.go(d.path),
           memberInitials: ref.watch(memberInitialsProvider),
           showBottomTabs: onTabRoot,
+          syncIndicator: (dense) => SyncIndicator(dense: dense),
           foldBottom: location == '/home' && canAdd
               ? const FoldAddPanel()
               : null,

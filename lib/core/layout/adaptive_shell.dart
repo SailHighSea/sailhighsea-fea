@@ -19,6 +19,7 @@ class AdaptiveShell extends StatelessWidget {
     this.memberInitials = const [],
     this.foldBottom,
     this.showBottomTabs = true,
+    this.syncIndicator,
   });
 
   final AppDestination destination;
@@ -35,6 +36,11 @@ class AdaptiveShell extends StatelessWidget {
   /// can use the whole height. The rail and sidebar are always shown.
   final bool showBottomTabs;
 
+  /// Sync status shown on every size: a strip above the page on phones, in the rail and in
+  /// the sidebar. `dense` asks for the one-word version that fits the 96px rail. Null when
+  /// there is nothing to sync.
+  final Widget Function(bool dense)? syncIndicator;
+
   @override
   Widget build(BuildContext context) {
     final windowClass = context.windowClass;
@@ -43,11 +49,16 @@ class AdaptiveShell extends StatelessWidget {
         destination: destination,
         onSelect: onSelect,
         showTabs: showBottomTabs,
+        syncIndicator: syncIndicator?.call(false),
         child: child,
       ),
       WindowClass.medium => Row(
         children: [
-          _NavRail(destination: destination, onSelect: onSelect),
+          _NavRail(
+            destination: destination,
+            onSelect: onSelect,
+            syncIndicator: syncIndicator?.call(true),
+          ),
           Expanded(child: child),
         ],
       ),
@@ -57,6 +68,7 @@ class AdaptiveShell extends StatelessWidget {
             destination: destination,
             onSelect: onSelect,
             memberInitials: memberInitials,
+            syncIndicator: syncIndicator?.call(false),
           ),
           Expanded(child: child),
         ],
@@ -74,19 +86,37 @@ class _CompactShell extends StatelessWidget {
     required this.onSelect,
     required this.showTabs,
     required this.child,
+    this.syncIndicator,
   });
 
   final AppDestination destination;
   final ValueChanged<AppDestination> onSelect;
   final bool showTabs;
   final Widget child;
+  final Widget? syncIndicator;
 
   @override
   Widget build(BuildContext context) {
+    final indicator = syncIndicator;
     return Column(
       children: [
+        if (indicator != null)
+          SafeArea(
+            bottom: false,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: indicator,
+              ),
+            ),
+          ),
         Expanded(
-          child: SafeArea(bottom: !showTabs, child: child),
+          child: SafeArea(
+            top: indicator == null,
+            bottom: !showTabs,
+            child: child,
+          ),
         ),
         if (showTabs) _BottomTabs(destination: destination, onSelect: onSelect),
       ],
@@ -173,10 +203,15 @@ class _TabItem extends StatelessWidget {
 }
 
 class _NavRail extends StatelessWidget {
-  const _NavRail({required this.destination, required this.onSelect});
+  const _NavRail({
+    required this.destination,
+    required this.onSelect,
+    this.syncIndicator,
+  });
 
   final AppDestination destination;
   final ValueChanged<AppDestination> onSelect;
+  final Widget? syncIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +242,10 @@ class _NavRail extends StatelessWidget {
                       const SizedBox(height: 8),
                     ],
                     const Spacer(),
+                    if (syncIndicator != null) ...[
+                      syncIndicator!,
+                      const SizedBox(height: 8),
+                    ],
                     _RailItem(
                       destination: AppDestination.appearance,
                       selected: destination == AppDestination.appearance,
@@ -279,11 +318,13 @@ class _Sidebar extends StatelessWidget {
     required this.destination,
     required this.onSelect,
     required this.memberInitials,
+    this.syncIndicator,
   });
 
   final AppDestination destination;
   final ValueChanged<AppDestination> onSelect;
   final List<String> memberInitials;
+  final Widget? syncIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -322,6 +363,10 @@ class _Sidebar extends StatelessWidget {
                 const SizedBox(height: 6),
               ],
               const Spacer(),
+              if (syncIndicator != null) ...[
+                Align(alignment: Alignment.centerLeft, child: syncIndicator!),
+                const SizedBox(height: 6),
+              ],
               _SidebarItem(
                 destination: AppDestination.appearance,
                 selected: destination == AppDestination.appearance,

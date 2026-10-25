@@ -32,7 +32,9 @@ const defaultCategories = <DefaultCategory>[
 /// Id of the fallback category.
 const otherCategoryId = 'default-other';
 
-@DriftDatabase(tables: [Categories, Expenses, Households, Members])
+@DriftDatabase(
+  tables: [Categories, Expenses, Households, Members, SyncState, SyncIssues],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor, {DateTime Function()? clock})
     : _clock = clock ?? DateTime.now;
@@ -41,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump when a table changes and add a step to [migration].
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -55,8 +57,13 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(households);
         await m.createTable(members);
       }
+      if (from < 3) {
+        // Phase 4: sync cursors and the changes the server refused.
+        await m.createTable(syncState);
+        await m.createTable(syncIssues);
+      }
       // Future versions add steps here, for example:
-      //   if (from < 3) await m.addColumn(expenses, expenses.someNewColumn);
+      //   if (from < 4) await m.addColumn(expenses, expenses.someNewColumn);
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');

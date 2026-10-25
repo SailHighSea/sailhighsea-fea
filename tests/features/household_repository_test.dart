@@ -181,6 +181,6 @@ void main() {
   );
 
   test('schema version covers the new tables', () {
-    expect(db.schemaVersion, 2);
+    expect(db.schemaVersion, 3);
   });
 }
