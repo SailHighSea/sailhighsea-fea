@@ -15,6 +15,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/time.dart';
 import '../../core/widgets/app_text_field.dart';
+import '../../core/widgets/currency_picker.dart';
 import '../../core/widgets/pill_button.dart';
 import '../../core/widgets/surface_card.dart';
 import '../expenses/expense_providers.dart';
@@ -446,24 +447,20 @@ class _CurrencyCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: kMinTapTarget),
-            child: DropdownButton<String>(
-              key: const ValueKey('currency-picker'),
-              isExpanded: true,
-              value: selected?.code,
-              hint: const Text('Choose a currency'),
-              items: [
-                for (final c in supportedCurrencies)
-                  DropdownMenuItem(
-                    value: c.code,
-                    child: Text('${c.code}  ${c.name}'),
-                  ),
-              ],
-              onChanged: (v) {
-                if (v != null) onPick(currencyByCode(v));
-              },
-            ),
+          PillButton(
+            key: const ValueKey('currency-picker'),
+            label: selected == null
+                ? 'Choose a currency'
+                : '${selected!.code}  ${selected!.name}  (change)',
+            style: PillStyle.outlined,
+            icon: Icons.payments_outlined,
+            onTap: () async {
+              final code = await showCurrencyPicker(
+                context,
+                selected: selected?.code,
+              );
+              if (code != null) onPick(currencyByCode(code));
+            },
           ),
           if (selected != null && selected!.code != appCurrency.code) ...[
             const SizedBox(height: 8),

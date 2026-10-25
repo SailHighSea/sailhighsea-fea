@@ -121,7 +121,7 @@ void main() {
     );
     await tester.tap(find.textContaining('Singapore dollar'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Euro (€)'));
+    await tester.tap(find.byKey(const ValueKey('currency-EUR')));
     await tester.pumpAndSettle();
     expect(container.read(appearanceProvider).currencyCode, 'EUR');
     expect(find.textContaining('€'), findsWidgets);

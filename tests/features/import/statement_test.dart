@@ -442,7 +442,7 @@ void main() {
         expect(find.byKey(const ValueKey('import-table')), findsNothing);
         await tester.tap(find.byKey(const ValueKey('currency-picker')));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('SGD  Singapore dollar').last);
+        await tester.tap(find.byKey(const ValueKey('currency-SGD')));
         await settle(tester);
         expect(find.byKey(const ValueKey('import-table')), findsOneWidget);
       },

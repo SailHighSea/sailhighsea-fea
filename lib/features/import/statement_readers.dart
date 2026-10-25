@@ -128,8 +128,39 @@ StatementRows rowsFromStatementText(String text, {int? defaultYear}) {
   return StatementRows(rows, moneyIn: income);
 }
 
+/// Codes that are also ordinary words (ALL, TRY, TOP...) are only trusted when a phrase like
+/// "Amount in QAR" or "Currency: USD" names them.
+const _wordLikeCodes = {
+  'ALL',
+  'TRY',
+  'TOP',
+  'ANG',
+  'MOP',
+  'SOS',
+  'PEN',
+  'LAK',
+  'BAM',
+  'GEL',
+  'KES',
+  'CUP',
+  'LSL',
+  'BIF',
+};
+
 String? _codeIn(String text) {
+  final known = {for (final c in supportedCurrencies) c.code};
+  final phrase = RegExp(
+    r'(?:amounts?\s+in|currency:?|all\s+amounts\s+in|figures\s+in|balance\s+in|in)\s+\(?([A-Z]{3})\)?\b',
+    caseSensitive: false,
+  );
+  for (final m in phrase.allMatches(text)) {
+    final c = m[1]!.toUpperCase();
+    if (known.contains(c) && m[0]!.toLowerCase() != 'in $c'.toLowerCase()) {
+      return c;
+    }
+  }
   for (final c in supportedCurrencies) {
+    if (_wordLikeCodes.contains(c.code)) continue;
     if (RegExp('\\b${c.code}\\b').hasMatch(text)) return c.code;
   }
   return null;

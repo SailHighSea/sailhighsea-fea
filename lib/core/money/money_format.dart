@@ -28,14 +28,14 @@ class MoneyFormatter {
         ..write(decimalSeparator)
         ..write(fraction.toString().padLeft(currency.minorDigits, '0'));
     }
-    return '${_sign(cents, signed)}${currency.symbol}$body';
+    return '${_sign(cents, signed)}${currency.prefix}$body';
   }
 
   /// Whole units only, rounded half away from zero: `S$1,842`.
   String formatWhole(int cents, {bool signed = false}) {
     final factor = currency.minorFactor;
     final rounded = (cents.abs() + factor ~/ 2) ~/ factor;
-    return '${_sign(cents, signed)}${currency.symbol}${_grouping.format(rounded)}';
+    return '${_sign(cents, signed)}${currency.prefix}${_grouping.format(rounded)}';
   }
 
   /// A plain number with the currency's decimals and no symbol, for the keypad display.
