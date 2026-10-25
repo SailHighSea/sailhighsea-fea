@@ -39,7 +39,7 @@ Nothing here has been done and nothing is published. Every step that sends somet
 ## Windows (Microsoft Store / MSIX)
 1. Microsoft Partner Center account and an app name reservation.
 2. Add the `msix` package configuration (publisher id, identity name from Partner Center, logo from `assets/icon`), then `dart run msix:create`. Sideloading needs a code-signing certificate; the Store signs it for you.
-3. CI builds x64 (`windows-x64.zip`) and tries Arm64 (`windows-11-arm`, marked optional until it has been seen to pass). Submit one package per architecture or a bundle.
+3. CI builds x64 (`windows-x64.zip`). Arm64 is not built yet: `subosito/flutter-action` cannot find a Flutter 3.47.8 release for Windows arm64, so the `windows-11-arm` runner would need Flutter installed by hand (clone the stable channel and add it to PATH). Submit one package per architecture or a bundle once it exists.
 4. Windows Hello for the app lock needs nothing extra; the minimum window size is set in `windows/runner/flutter_window.cpp`.
 
 ## Linux

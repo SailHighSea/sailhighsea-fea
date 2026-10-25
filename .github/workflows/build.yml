@@ -25,10 +25,9 @@ jobs:
       matrix:
         include:
           - { os: windows-latest, arch: x64 }
-          # Arm64 builds on GitHub's Windows 11 Arm runner. Not verified yet, so it never blocks
-          # the other builds (see docs/RELEASE.md).
-          - { os: windows-11-arm, arch: arm64 }
-    continue-on-error: ${{ matrix.arch == 'arm64' }}
+          # Windows Arm64 is not built: subosito/flutter-action cannot find a Flutter 3.47.8
+          # release for Windows on arm64 ("Unable to determine Flutter version"). To add it, set up
+          # Flutter by hand on windows-11-arm (see docs/RELEASE.md).
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
