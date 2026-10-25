@@ -26,15 +26,11 @@ DESK
 case "$KIND" in
   deb)
     PKG="$WORK/pkg"
-    mkdir -p "$PKG/DEBIAN" "$PKG/opt/family-expenses" "$PKG/usr/bin" "$PKG/usr/share/applications" "$PKG/usr/share/icons/hicolor/512x512/apps"
+    mkdir -p "$PKG/DEBIAN" "$PKG/opt/family-expenses" "$PKG/usr/bin" "$PKG/usr/share/applications" "$PKG/usr/share/icons/hicolor/1024x1024/apps"
     cp -r "$BUNDLE"/. "$PKG/opt/family-expenses/"
     ln -s /opt/family-expenses/family_expenses "$PKG/usr/bin/family-expenses"
     desktop_file family-expenses > "$PKG/usr/share/applications/family-expenses.desktop"
-    python3 - "$ICON" "$PKG/usr/share/icons/hicolor/512x512/apps/family-expenses.png" <<'PY'
-import sys
-from PIL import Image
-Image.open(sys.argv[1]).resize((512, 512)).save(sys.argv[2])
-PY
+    cp "$ICON" "$PKG/usr/share/icons/hicolor/1024x1024/apps/family-expenses.png"
     cat > "$PKG/DEBIAN/control" <<CTRL
 Package: family-expenses
 Version: $VERSION
