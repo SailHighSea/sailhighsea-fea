@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -8,9 +9,7 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class _FakePaths extends Fake
-        // ignore: invalid_use_of_visible_for_testing_member
-        with
-        MockPlatformInterfaceMixin
+    with MockPlatformInterfaceMixin
     implements PathProviderPlatform {
   _FakePaths(this.dir);
   final String dir;
