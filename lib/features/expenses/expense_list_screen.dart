@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'widgets/new_category.dart';
+import '../../core/widgets/pill_button.dart';
+
 import '../../core/widgets/async_placeholder.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,6 +79,85 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
       );
   }
 
+  bool _selecting = false;
+  final _selected = <String>{};
+
+  void _startSelecting([String? first]) => setState(() {
+    _selecting = true;
+    if (first != null) _selected.add(first);
+  });
+
+  void _stopSelecting() => setState(() {
+    _selecting = false;
+    _selected.clear();
+  });
+
+  void _toggle(String id) => setState(() {
+    if (!_selected.remove(id)) _selected.add(id);
+  });
+
+  Future<void> _deleteSelected() async {
+    final ids = _selected.toList();
+    if (ids.isEmpty) return;
+    final repo = ref.read(expenseRepositoryProvider);
+    await repo.softDeleteMany(ids);
+    _stopSelecting();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            '${ids.length} ${ids.length == 1 ? 'expense' : 'expenses'} deleted',
+          ),
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () => repo.restoreMany(ids),
+          ),
+        ),
+      );
+  }
+
+  Future<void> _changeCategory(
+    List<CategoryRow> categories,
+    List<ExpenseRow> rows,
+    bool canAdd,
+  ) async {
+    final ids = _selected.toList();
+    if (ids.isEmpty) return;
+    final categoryId = await showDialog<String>(
+      context: context,
+      builder: (_) => _ChangeCategoryDialog(
+        categories: categories,
+        canAdd: canAdd,
+        count: ids.length,
+      ),
+    );
+    if (categoryId == null || !mounted) return;
+    await ref.read(expenseRepositoryProvider).setCategoryMany(ids, categoryId);
+    // The shops that were moved are remembered for next time.
+    final rules = ref.read(categoryRuleRepositoryProvider);
+    await rules.rememberAll([
+      for (final e in rows)
+        if (_selected.contains(e.id) &&
+            e.note.trim().isNotEmpty &&
+            categoryId != otherCategoryId)
+          (e.note, categoryId),
+    ]);
+    _stopSelecting();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            '${ids.length} ${ids.length == 1 ? 'expense' : 'expenses'} moved',
+          ),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
@@ -105,7 +187,20 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
         title: 'Expenses',
         onBack: context.layout.isCompact ? () => context.go('/home') : null,
         trailing: permissions.canWriteExpenses
-            ? _AddButton(onTap: () => context.push('/add'))
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextLinkButton(
+                    key: ValueKey(
+                      _selecting ? 'select-cancel' : 'select-start',
+                    ),
+                    label: _selecting ? 'Cancel' : 'Select',
+                    onTap: _selecting ? _stopSelecting : _startSelecting,
+                  ),
+                  if (!_selecting)
+                    _AddButton(onTap: () => context.push('/add')),
+                ],
+              )
             : null,
       ),
       children: [
@@ -175,6 +270,30 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                     ),
                   ),
                 ),
+                if (_selecting) ...[
+                  _SelectionBar(
+                    count: _selected.length,
+                    total: rows.where((e) => canEdit(e.createdBy)).length,
+                    onSelectAll: () => setState(() {
+                      final all = rows
+                          .where((e) => canEdit(e.createdBy))
+                          .map((e) => e.id)
+                          .toSet();
+                      if (_selected.containsAll(all)) {
+                        _selected.clear();
+                      } else {
+                        _selected.addAll(all);
+                      }
+                    }),
+                    onCategory: () => _changeCategory(
+                      categories,
+                      rows,
+                      permissions.canManageCategories,
+                    ),
+                    onDelete: _deleteSelected,
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 SurfaceCard(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -192,6 +311,10 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                           addedBy: addedByLabel(rows[i].createdBy),
                           showDivider: i > 0,
                           canEdit: canEdit(rows[i].createdBy),
+                          selecting: _selecting,
+                          selected: _selected.contains(rows[i].id),
+                          onToggle: () => _toggle(rows[i].id),
+                          onLongPress: () => _startSelecting(rows[i].id),
                           onEdit: () =>
                               context.push('/expenses/${rows[i].id}/edit'),
                           onDelete: () => _delete(rows[i]),
@@ -399,6 +522,10 @@ class _ExpenseTile extends StatelessWidget {
     required this.addedBy,
     required this.showDivider,
     required this.canEdit,
+    required this.selecting,
+    required this.selected,
+    required this.onToggle,
+    required this.onLongPress,
     required this.onEdit,
     required this.onDelete,
   });
@@ -412,6 +539,12 @@ class _ExpenseTile extends StatelessWidget {
 
   /// View-only members see the row but cannot open, swipe or delete it.
   final bool canEdit;
+
+  /// Select-many mode: a checkbox on rows that can be changed; tapping toggles it.
+  final bool selecting;
+  final bool selected;
+  final VoidCallback onToggle;
+  final VoidCallback onLongPress;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -431,11 +564,34 @@ class _ExpenseTile extends StatelessWidget {
         container: true,
         label: '$title, $categoryName, $date, $addedBy, $amount',
         child: InkWell(
-          onTap: canEdit ? onEdit : null,
+          onTap: selecting
+              ? (canEdit ? onToggle : null)
+              : (canEdit ? onEdit : null),
+          onLongPress: !selecting && canEdit ? onLongPress : null,
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 60),
             child: Row(
               children: [
+                if (selecting)
+                  SizedBox(
+                    width: kMinTapTarget,
+                    child: canEdit
+                        ? Semantics(
+                            container: true,
+                            excludeSemantics: true,
+                            checked: selected,
+                            label: 'Select $title',
+                            onTap: onToggle,
+                            child: Checkbox(
+                              key: ValueKey('select-${expense.id}'),
+                              value: selected,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.padded,
+                              onChanged: (_) => onToggle(),
+                            ),
+                          )
+                        : null,
+                  ),
                 Container(
                   width: 10,
                   height: 10,
@@ -480,7 +636,7 @@ class _ExpenseTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (canEdit)
+                if (canEdit && !selecting)
                   PopupMenuButton<_RowAction>(
                     tooltip: 'More actions for $title',
                     icon: Icon(Icons.more_vert, color: t.muted),
@@ -505,7 +661,7 @@ class _ExpenseTile extends StatelessWidget {
         ),
       ),
     );
-    if (!canEdit) return row;
+    if (!canEdit || selecting) return row;
     return ContextMenuRegion(
       items: [
         ContextMenuItem('Edit', onEdit),
@@ -523,6 +679,132 @@ class _ExpenseTile extends StatelessWidget {
         ),
         child: row,
       ),
+    );
+  }
+}
+
+class _SelectionBar extends StatelessWidget {
+  const _SelectionBar({
+    required this.count,
+    required this.total,
+    required this.onSelectAll,
+    required this.onCategory,
+    required this.onDelete,
+  });
+
+  final int count;
+  final int total;
+  final VoidCallback onSelectAll;
+  final VoidCallback onCategory;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final none = count == 0;
+    return SurfaceCard(
+      key: const ValueKey('selection-bar'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  none ? 'Tap expenses to select them' : '$count selected',
+                  key: const ValueKey('selected-count'),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: t.text,
+                  ),
+                ),
+              ),
+              TextLinkButton(
+                key: const ValueKey('select-all'),
+                label: count == total && total > 0 ? 'Clear' : 'Select all',
+                onTap: onSelectAll,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: PillButton(
+                  key: const ValueKey('bulk-category'),
+                  label: 'Change category',
+                  height: 44,
+                  style: PillStyle.outlined,
+                  onTap: none ? null : onCategory,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: PillButton(
+                  key: const ValueKey('bulk-delete'),
+                  label: 'Delete',
+                  height: 44,
+                  style: PillStyle.danger,
+                  onTap: none ? null : onDelete,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChangeCategoryDialog extends StatefulWidget {
+  const _ChangeCategoryDialog({
+    required this.categories,
+    required this.canAdd,
+    required this.count,
+  });
+
+  final List<CategoryRow> categories;
+  final bool canAdd;
+  final int count;
+
+  @override
+  State<_ChangeCategoryDialog> createState() => _ChangeCategoryDialogState();
+}
+
+class _ChangeCategoryDialogState extends State<_ChangeCategoryDialog> {
+  String? _choice;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return AlertDialog(
+      backgroundColor: t.surface,
+      surfaceTintColor: Colors.transparent,
+      title: Text(
+        'Move ${widget.count} ${widget.count == 1 ? 'expense' : 'expenses'}',
+      ),
+      content: CategoryDropdown(
+        key: const ValueKey('bulk-category-picker'),
+        categories: widget.categories,
+        value: _choice,
+        canAdd: widget.canAdd,
+        hint: 'Choose a category',
+        onChanged: (v) => setState(() => _choice = v),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          key: const ValueKey('bulk-category-apply'),
+          onPressed: _choice == null
+              ? null
+              : () => Navigator.pop(context, _choice),
+          child: const Text('Move'),
+        ),
+      ],
     );
   }
 }

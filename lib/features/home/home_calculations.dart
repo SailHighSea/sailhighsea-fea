@@ -46,6 +46,9 @@ HomeSummary buildHomeSummary({
   int recentCount = 4,
   UpcomingBill? nextBill,
   GoalProgress? goal,
+
+  /// Expenses of the previous month (for "against last month"); empty when not loaded.
+  List<ExpenseRow> previousExpenses = const [],
 }) {
   final today = now.dateOnly;
   final monthIndex = month.year * 12 + month.month;
@@ -111,6 +114,13 @@ HomeSummary buildHomeSummary({
     safePerDayCents: safePerDay,
     paceCents: pace,
     categories: _topCategories(monthExpenses, categoryById, topCategoryCount),
+    comparison: _comparison(
+      monthExpenses,
+      previousExpenses,
+      categoryById,
+      month,
+      ref,
+    ),
     last7: last7,
     monthDaily: monthDaily,
     nextBill: nextBill,
@@ -207,3 +217,47 @@ List<RecentExpense> _recent(
 /// Before accounts, `created_by` held a plain name; the current user's own entries read "You".
 String _legacyLabel(String? createdBy, String currentUser) =>
     (createdBy == null || createdBy == currentUser) ? 'You' : createdBy;
+
+/// This month's spending per category beside last month's up to the same day of the month, largest
+/// first. Categories with nothing in either month are left out.
+List<CategoryCompare> _comparison(
+  List<ExpenseRow> monthExpenses,
+  List<ExpenseRow> previousExpenses,
+  Map<String, CategoryRow> categoryById,
+  DateTime month,
+  DateTime reference,
+) {
+  final prevMonth = DateTime(month.year, month.month - 1);
+  final prevPrefix = formatDay(prevMonth).substring(0, 7);
+  final cutoffDay = reference.day < daysInMonth(prevMonth)
+      ? reference.day
+      : daysInMonth(prevMonth);
+  String id(ExpenseRow e) =>
+      categoryById.containsKey(e.categoryId) ? e.categoryId : otherCategoryId;
+  final now = <String, int>{};
+  final before = <String, int>{};
+  for (final e in monthExpenses) {
+    now[id(e)] = (now[id(e)] ?? 0) + e.amountCents;
+  }
+  for (final e in previousExpenses) {
+    if (e.deletedAt != null || !e.spentOn.startsWith(prevPrefix)) continue;
+    if (int.parse(e.spentOn.substring(8, 10)) > cutoffDay) continue;
+    before[id(e)] = (before[id(e)] ?? 0) + e.amountCents;
+  }
+  final ids = {...now.keys, ...before.keys};
+  final list =
+      [
+        for (final k in ids)
+          CategoryCompare(
+            name: categoryById[k]?.name ?? 'Other',
+            colorKey: categoryById[k]?.color ?? 'other',
+            icon: categoryById[k]?.icon,
+            cents: now[k] ?? 0,
+            previousCents: before[k] ?? 0,
+          ),
+      ]..sort((a, b) {
+        final byNow = b.cents.compareTo(a.cents);
+        return byNow != 0 ? byNow : b.previousCents.compareTo(a.previousCents);
+      });
+  return list;
+}

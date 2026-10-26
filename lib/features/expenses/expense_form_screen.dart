@@ -16,6 +16,7 @@ import 'expense_providers.dart';
 import 'widgets/amount_widgets.dart';
 import 'widgets/category_picker.dart';
 import 'widgets/details_card.dart';
+import 'widgets/new_category.dart';
 
 /// Add (`editId == null`) or edit an expense. Same screen and fields on every size.
 class ExpenseFormScreen extends ConsumerStatefulWidget {
@@ -215,7 +216,7 @@ class _ExpenseFormScreenState extends ConsumerState<ExpenseFormScreen> {
   Future<void> _addCategory(BuildContext context) async {
     final name = await showDialog<String>(
       context: context,
-      builder: (_) => const _NewCategoryDialog(),
+      builder: (_) => const NewCategoryDialog(),
     );
     if (name != null && name.trim().isNotEmpty) {
       await ref
@@ -304,52 +305,6 @@ class PrimaryPillButton extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _NewCategoryDialog extends StatefulWidget {
-  const _NewCategoryDialog();
-
-  @override
-  State<_NewCategoryDialog> createState() => _NewCategoryDialogState();
-}
-
-class _NewCategoryDialogState extends State<_NewCategoryDialog> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    return AlertDialog(
-      backgroundColor: t.surface,
-      surfaceTintColor: Colors.transparent,
-      title: const Text('New category'),
-      content: TextField(
-        key: const Key('new-category-field'),
-        controller: _controller,
-        autofocus: true,
-        maxLength: 24,
-        textCapitalization: TextCapitalization.words,
-        decoration: const InputDecoration(hintText: 'For example Pets'),
-        onSubmitted: (v) => Navigator.of(context).pop(v),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(_controller.text),
-          child: const Text('Add'),
-        ),
-      ],
     );
   }
 }

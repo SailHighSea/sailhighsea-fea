@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/money/currency.dart';
 import '../../core/sheets_sync/sheets_settings.dart';
+import '../../core/theme/appearance_settings.dart';
+import '../../core/widgets/currency_picker.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/appearance_provider.dart';
@@ -169,6 +172,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 15, color: t.muted),
                           ),
+                          const SizedBox(height: 20),
+                          const _StartSettings(),
                         ],
                         const Spacer(),
                         Semantics(
@@ -241,6 +246,106 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Currency and theme, chosen on the first page so the app starts the way the person wants it.
+/// The currency list opens inline (this page sits above the app's navigator, so no pop-up).
+class _StartSettings extends ConsumerStatefulWidget {
+  const _StartSettings();
+
+  @override
+  ConsumerState<_StartSettings> createState() => _StartSettingsState();
+}
+
+class _StartSettingsState extends ConsumerState<_StartSettings> {
+  bool _pickingCurrency = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final settings = ref.watch(appearanceProvider);
+    final controller = ref.read(appearanceProvider.notifier);
+    final currency = currencyByCode(settings.currencyCode);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            'Theme',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: t.muted,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final m in AppearanceMode.values)
+              ChoiceChip(
+                key: ValueKey('start-theme-${m.name}'),
+                label: Text(m.label),
+                selected: settings.mode == m,
+                materialTapTargetSize: MaterialTapTargetSize.padded,
+                onSelected: (_) => controller.setMode(m),
+              ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Semantics(
+          header: true,
+          child: Text(
+            'Currency',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: t.muted,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        PillButton(
+          key: const ValueKey('start-currency'),
+          label: '${currency.code}  ${currency.name}  (change)',
+          style: PillStyle.outlined,
+          icon: Icons.payments_outlined,
+          onTap: () => setState(() => _pickingCurrency = !_pickingCurrency),
+        ),
+        if (_pickingCurrency)
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            decoration: BoxDecoration(
+              color: t.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: t.chipBorder),
+            ),
+            clipBehavior: Clip.antiAlias,
+            // Its own Overlay: this page sits above the app's navigator, and the search box needs one.
+            child: SizedBox(
+              height: 320,
+              child: Overlay(
+                initialEntries: [
+                  OverlayEntry(
+                    builder: (_) => CurrencyPickerSheet(
+                      selected: settings.currencyCode,
+                      onPicked: (code) {
+                        controller.setCurrency(code);
+                        setState(() => _pickingCurrency = false);
+                      },
+                      height: 320,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -15,8 +15,19 @@ Future<String?> showCurrencyPicker(BuildContext context, {String? selected}) =>
     );
 
 class CurrencyPickerSheet extends StatefulWidget {
-  const CurrencyPickerSheet({super.key, this.selected});
+  const CurrencyPickerSheet({
+    super.key,
+    this.selected,
+    this.onPicked,
+    this.height,
+  });
   final String? selected;
+
+  /// Called with the code instead of closing a route (for use inline on a page).
+  final ValueChanged<String>? onPicked;
+
+  /// Fixed height; by default a sheet-sized one from the screen.
+  final double? height;
 
   @override
   State<CurrencyPickerSheet> createState() => _CurrencyPickerSheetState();
@@ -50,8 +61,9 @@ class _CurrencyPickerSheetState extends State<CurrencyPickerSheet> {
     final matches = _matches;
     // A fixed height gives the list room to scroll inside a bottom sheet or a dialog.
     final height =
+        widget.height ??
         (media.size.height * 0.7).clamp(320.0, 560.0) -
-        media.viewInsets.bottom.clamp(0.0, 200.0);
+            media.viewInsets.bottom.clamp(0.0, 200.0);
     return SizedBox(
       key: const ValueKey('currency-sheet'),
       height: height < 240 ? 240 : height,
@@ -105,7 +117,9 @@ class _CurrencyPickerSheetState extends State<CurrencyPickerSheet> {
                       final on = c.code == widget.selected;
                       return InkWell(
                         key: ValueKey('currency-${c.code}'),
-                        onTap: () => Navigator.of(context).pop(c.code),
+                        onTap: () => widget.onPicked != null
+                            ? widget.onPicked!(c.code)
+                            : Navigator.of(context).pop(c.code),
                         child: Semantics(
                           button: true,
                           selected: on,

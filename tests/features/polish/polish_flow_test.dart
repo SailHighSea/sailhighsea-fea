@@ -2,6 +2,7 @@ import 'package:family_expenses/core/db/db_providers.dart';
 import 'package:family_expenses/features/expenses/data/expense_repository.dart';
 import 'package:family_expenses/features/expenses/expense_providers.dart';
 import 'package:family_expenses/core/sheets_sync/sheets_settings.dart';
+import 'package:family_expenses/core/theme/appearance_provider.dart';
 import 'package:family_expenses/features/privacy/app_lock.dart';
 import 'package:family_expenses/features/privacy/csv_share.dart';
 import 'package:flutter/material.dart';
@@ -127,6 +128,93 @@ void main() {
       await settle(tester);
       expect(find.text('Import expenses'), findsOneWidget);
     });
+
+    testWidgets('the start page lets you pick a theme, applied at once', (
+      tester,
+    ) async {
+      final c = await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'onboarding.done': false},
+      );
+      await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+      await tester.pump();
+      for (final m in ['dark', 'pureBlack', 'light']) {
+        await tester.ensureVisible(find.byKey(ValueKey('start-theme-$m')));
+        await tester.tap(find.byKey(ValueKey('start-theme-$m')));
+        await tester.pump();
+        expect(c.read(appearanceProvider).mode.name, m);
+      }
+    });
+
+    testWidgets(
+      'the start page lets you pick any currency, with search, and keeps it',
+      (tester) async {
+        final c = await pumpApp(
+          tester,
+          size: const Size(390, 844),
+          prefs: {'onboarding.done': false},
+        );
+        await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+        await tester.pump();
+        expect(c.read(appearanceProvider).currencyCode, 'SGD');
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('start-currency')),
+        );
+        await tester.tap(find.byKey(const ValueKey('start-currency')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('currency-list')), findsOneWidget);
+        await tester.enterText(
+          find.byKey(const ValueKey('currency-search')),
+          'qatar',
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('currency-QAR')));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('currency-list')),
+          findsNothing,
+          reason: 'closes after choosing',
+        );
+        expect(c.read(appearanceProvider).currencyCode, 'QAR');
+        expect(find.textContaining('QAR  Qatari riyal'), findsOneWidget);
+        await tester.ensureVisible(find.byKey(const ValueKey('start-local')));
+        await tester.tap(find.byKey(const ValueKey('start-local')));
+        await settle(tester);
+        expect(
+          find.textContaining('QR'),
+          findsWidgets,
+          reason: 'Home now shows the chosen currency',
+        );
+      },
+    );
+
+    for (final size in const {
+      'phone': Size(360, 640),
+      'desktop': Size(1280, 800),
+    }.entries) {
+      testWidgets(
+        'the start page fits with the currency list open on ${size.key}, large text',
+        (tester) async {
+          await pumpApp(
+            tester,
+            size: size.value,
+            prefs: {'onboarding.done': false},
+            textScale: 2,
+          );
+          await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+          await tester.pump();
+          await tester.ensureVisible(
+            find.byKey(const ValueKey('start-currency')),
+          );
+          await tester.tap(find.byKey(const ValueKey('start-currency')));
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+          await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+        },
+      );
+    }
 
     testWidgets('Skip goes to the choice, not past it', (tester) async {
       await pumpApp(

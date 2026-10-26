@@ -27,6 +27,8 @@ class DashboardLayout extends StatelessWidget {
     required this.hero,
     required this.trend,
     required this.categories,
+    required this.compare,
+    required this.tiles,
     required this.nextBill,
     required this.goal,
     required this.recent,
@@ -38,6 +40,12 @@ class DashboardLayout extends StatelessWidget {
   final SlotBuilder hero;
   final SlotBuilder trend;
   final SlotBuilder categories;
+
+  /// Categories against last month.
+  final SlotBuilder compare;
+
+  /// Category tiles with icons.
+  final SlotBuilder tiles;
   final SlotBuilder nextBill;
   final SlotBuilder goal;
   final SlotBuilder recent;
@@ -92,6 +100,10 @@ class DashboardLayout extends StatelessWidget {
             SizedBox(height: gap),
             slot(categories),
             SizedBox(height: gap),
+            slot(compare),
+            SizedBox(height: gap),
+            slot(tiles),
+            SizedBox(height: gap),
             twoCards(),
             SizedBox(height: gap),
             if (everyone != null) ...[slot(everyone!), SizedBox(height: gap)],
@@ -109,6 +121,8 @@ class DashboardLayout extends StatelessWidget {
                       SizedBox(height: gap),
                       slot(categories),
                       SizedBox(height: gap),
+                      slot(tiles),
+                      SizedBox(height: gap),
                       twoCards(),
                     ],
                   ),
@@ -118,6 +132,8 @@ class DashboardLayout extends StatelessWidget {
                   child: Column(
                     children: [
                       slot(trend),
+                      SizedBox(height: gap),
+                      slot(compare),
                       SizedBox(height: gap),
                       if (everyone != null) ...[
                         slot(everyone!),
@@ -153,6 +169,16 @@ class DashboardLayout extends StatelessWidget {
                   Expanded(child: slot(goal)),
                 ],
               ),
+            ),
+            SizedBox(height: gap),
+            // No IntrinsicHeight here: these cards size their bars from the available width.
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: slot(compare)),
+                SizedBox(width: gap),
+                Expanded(child: slot(tiles)),
+              ],
             ),
             SizedBox(height: gap),
             if (everyone != null) ...[slot(everyone!), SizedBox(height: gap)],

@@ -17,6 +17,7 @@ import '../overview/widgets/member_filter_chips.dart';
 import 'home_providers.dart';
 import 'widgets/bill_goal_cards.dart';
 import 'widgets/categories_card.dart';
+import 'widgets/category_cards.dart';
 import 'widgets/hero_card.dart';
 import 'widgets/home_header.dart';
 import 'widgets/recent_card.dart';
@@ -85,6 +86,16 @@ class HomeScreen extends ConsumerWidget {
       },
       categories: (context, mode) => TopCategoriesCard(
         categories: summary.categories,
+        money: money,
+        horizontalPadding: mode == DashboardMode.wide ? 20 : 16,
+      ),
+      compare: (context, mode) => CategoryCompareCard(
+        items: summary.comparison,
+        money: money,
+        horizontalPadding: mode == DashboardMode.wide ? 20 : 16,
+      ),
+      tiles: (context, mode) => CategoryTilesCard(
+        items: summary.comparison,
         money: money,
         horizontalPadding: mode == DashboardMode.wide ? 20 : 16,
       ),

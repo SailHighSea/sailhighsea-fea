@@ -11,7 +11,6 @@ import '../../core/google/google_api.dart';
 import '../../core/layout/page_layout.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_provider.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/time.dart';
 import '../../core/widgets/app_text_field.dart';
@@ -19,6 +18,9 @@ import '../../core/widgets/currency_picker.dart';
 import '../../core/widgets/pill_button.dart';
 import '../../core/widgets/surface_card.dart';
 import '../expenses/expense_providers.dart';
+import '../expenses/widgets/new_category.dart';
+import '../family/member_providers.dart';
+import 'category_guess.dart';
 import 'import_parser.dart';
 import 'import_service.dart';
 import '../scan/receipt_services.dart';
@@ -360,7 +362,16 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           _Summary(preview: p, money: money, drafts: _drafts),
           if (_drafts.isNotEmpty) ...[
             const SizedBox(height: 12),
+            _Shops(
+              canAdd: ref.watch(permissionsProvider).canManageCategories,
+              drafts: _drafts,
+              categories: categories,
+              money: money,
+              onChanged: () => setState(() {}),
+            ),
+            const SizedBox(height: 12),
             _Table(
+              canAdd: ref.watch(permissionsProvider).canManageCategories,
               drafts: _drafts,
               categories: categories,
               money: money,
@@ -559,12 +570,14 @@ class _Summary extends StatelessWidget {
 /// checkbox to leave a row out, and a category picker that is highlighted when it needs a choice.
 class _Table extends StatelessWidget {
   const _Table({
+    required this.canAdd,
     required this.drafts,
     required this.categories,
     required this.money,
     required this.onChanged,
   });
 
+  final bool canAdd;
   final List<ImportDraft> drafts;
   final List<CategoryRow> categories;
   final dynamic money;
@@ -612,6 +625,7 @@ class _Table extends StatelessWidget {
               for (final d in drafts)
                 _Row(
                   key: ValueKey('import-row-${d.row.line}'),
+                  canAdd: canAdd,
                   draft: d,
                   categories: categories,
                   money: money,
@@ -629,6 +643,7 @@ class _Table extends StatelessWidget {
 class _Row extends StatelessWidget {
   const _Row({
     super.key,
+    required this.canAdd,
     required this.draft,
     required this.categories,
     required this.money,
@@ -636,6 +651,7 @@ class _Row extends StatelessWidget {
     required this.onChanged,
   });
 
+  final bool canAdd;
   final ImportDraft draft;
   final List<CategoryRow> categories;
   final dynamic money;
@@ -707,55 +723,193 @@ class _Row extends StatelessWidget {
               const SizedBox(width: 12),
               SizedBox(
                 width: widths[4] - 12,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: needs
-                        ? Border.all(color: t.rose, width: 1.5)
-                        : null,
-                  ),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: kMinTapTarget),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        key: ValueKey('category-${d.row.line}'),
-                        isExpanded: true,
-                        value: d.categoryId,
-                        hint: Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Text(
-                            'Choose…',
-                            style: TextStyle(
-                              color: t.rose,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        items: [
-                          for (final c in categories)
-                            DropdownMenuItem(
-                              value: c.id,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: Text(c.name),
-                              ),
-                            ),
-                        ],
-                        onChanged: d.include
-                            ? (v) {
-                                d.categoryId = v;
-                                d.reason = 'you';
-                                onChanged();
-                              }
-                            : null,
-                      ),
-                    ),
-                  ),
+                child: CategoryDropdown(
+                  key: ValueKey('category-${d.row.line}'),
+                  categories: categories,
+                  value: d.categoryId,
+                  canAdd: canAdd,
+                  highlight: needs,
+                  enabled: d.include,
+                  onChanged: (v) {
+                    d.categoryId = v;
+                    d.reason = 'you';
+                    onChanged();
+                  },
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// The shops in the statement, each once: choose a category here and every row of that shop gets
+/// it. Shops that still need an answer come first and are outlined.
+class _Shops extends StatelessWidget {
+  const _Shops({
+    required this.canAdd,
+    required this.drafts,
+    required this.categories,
+    required this.money,
+    required this.onChanged,
+  });
+
+  final bool canAdd;
+  final List<ImportDraft> drafts;
+  final List<CategoryRow> categories;
+  final dynamic money;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final groups = <String, List<ImportDraft>>{};
+    for (final d in drafts) {
+      final key = descriptionKey(d.row.description);
+      groups
+          .putIfAbsent(key.isEmpty ? '(no description)' : key, () => [])
+          .add(d);
+    }
+    final entries = groups.entries.toList()
+      ..sort((a, b) {
+        final needA = a.value.any((d) => d.include && d.categoryId == null)
+            ? 0
+            : 1;
+        final needB = b.value.any((d) => d.include && d.categoryId == null)
+            ? 0
+            : 1;
+        if (needA != needB) return needA - needB;
+        final totalA = a.value.fold<int>(0, (s, d) => s + d.row.cents);
+        final totalB = b.value.fold<int>(0, (s, d) => s + d.row.cents);
+        return totalB.compareTo(totalA);
+      });
+    final unknown = entries
+        .where((e) => e.value.any((d) => d.include && d.categoryId == null))
+        .length;
+    return SurfaceCard(
+      key: const ValueKey('import-shops'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '${entries.length} different ${entries.length == 1 ? 'shop' : 'shops'}',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: t.text,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            unknown == 0
+                ? 'Choose a category once for each shop; it applies to all of its rows. Everything has a category already, change any you like.'
+                : 'Choose a category once for each shop; it applies to all of its rows. $unknown ${unknown == 1 ? 'shop needs' : 'shops need'} one.',
+            style: TextStyle(fontSize: 13, color: t.muted),
+          ),
+          const SizedBox(height: 8),
+          for (final e in entries)
+            _ShopRow(
+              key: ValueKey('shop-${e.key}'),
+              name: e.value.first.row.description.isEmpty
+                  ? '(no description)'
+                  : e.value.first.row.description,
+              count: e.value.length,
+              totalText: money.format(
+                e.value.fold<int>(0, (s, d) => s + d.row.cents),
+              ) as String,
+              category: _commonCategory(e.value),
+              needs: e.value.any((d) => d.include && d.categoryId == null),
+              categories: categories,
+              canAdd: canAdd,
+              onChanged: (id) {
+                for (final d in e.value) {
+                  d.categoryId = id;
+                  d.reason = 'you';
+                }
+                onChanged();
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// The category all of the shop's rows share, or null when they differ or are unset.
+  String? _commonCategory(List<ImportDraft> rows) {
+    final first = rows.first.categoryId;
+    return rows.every((d) => d.categoryId == first) ? first : null;
+  }
+}
+
+class _ShopRow extends StatelessWidget {
+  const _ShopRow({
+    super.key,
+    required this.name,
+    required this.count,
+    required this.totalText,
+    required this.category,
+    required this.needs,
+    required this.categories,
+    required this.canAdd,
+    required this.onChanged,
+  });
+
+  final String name;
+  final int count;
+  final String totalText;
+  final String? category;
+  final bool needs;
+  final List<CategoryRow> categories;
+  final bool canAdd;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 12,
+        runSpacing: 6,
+        children: [
+          SizedBox(
+            width: 200,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: t.text,
+                  ),
+                ),
+                Text(
+                  '$count ${count == 1 ? 'row' : 'rows'} · $totalText',
+                  style: TextStyle(fontSize: 12, color: t.muted),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 190,
+            child: CategoryDropdown(
+              key: ValueKey('shop-category-$name'),
+              categories: categories,
+              value: category,
+              canAdd: canAdd,
+              highlight: needs,
+              hint: needs && category == null ? 'Choose…' : 'Mixed',
+              onChanged: onChanged,
+            ),
+          ),
+        ],
       ),
     );
   }
