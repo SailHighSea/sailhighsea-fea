@@ -262,3 +262,27 @@ class CategoryRules extends Table {
   @override
   Set<Column> get primaryKey => {key};
 }
+
+/// Monthly income, kept on this device only (it is private to the person). One row per month the
+/// amount starts to apply from; a month uses the latest row at or before it (`yyyy-MM`).
+@DataClassName('IncomeRow')
+class IncomeEntries extends Table {
+  TextColumn get month => text()();
+  IntColumn get amountCents => integer()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {month};
+}
+
+/// What the person holds in savings (bank, cash) on a day, kept on this device only. The latest
+/// row is the current total; older rows keep the history.
+@DataClassName('SavingsBalanceRow')
+class SavingsBalances extends Table {
+  TextColumn get asOn => text()();
+  IntColumn get amountCents => integer()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {asOn};
+}

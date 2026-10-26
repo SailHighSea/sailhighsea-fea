@@ -5,6 +5,7 @@ import 'package:family_expenses/core/sheets_sync/sheets_settings.dart';
 import 'package:family_expenses/core/theme/appearance_provider.dart';
 import 'package:family_expenses/features/privacy/app_lock.dart';
 import 'package:family_expenses/features/privacy/csv_share.dart';
+import 'package:family_expenses/features/backup/backup_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -128,6 +129,30 @@ void main() {
       await settle(tester);
       expect(find.text('Import expenses'), findsOneWidget);
     });
+
+    testWidgets(
+      'Restore from a backup on the start page opens the file chooser',
+      (tester) async {
+        var asked = 0;
+        await pumpApp(
+          tester,
+          size: const Size(390, 844),
+          prefs: {'onboarding.done': false},
+          overrides: [
+            backupFilePickerProvider.overrideWithValue(() async {
+              asked++;
+              return null;
+            }),
+          ],
+        );
+        await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+        await tester.pump();
+        await tester.tap(find.byKey(const ValueKey('start-restore')));
+        await settle(tester);
+        expect(asked, 1);
+        expect(find.text('Privacy and data'), findsWidgets);
+      },
+    );
 
     testWidgets('the start page lets you pick a theme, applied at once', (
       tester,
@@ -265,7 +290,7 @@ void main() {
         await pumpApp(
           tester,
           size: const Size(1280, 800),
-          location: '/appearance',
+          location: '/data',
           overrides: [appLockServiceProvider.overrideWithValue(lock)],
         );
         await settle(tester);
@@ -310,7 +335,7 @@ void main() {
       await pumpApp(
         tester,
         size: const Size(1280, 800),
-        location: '/appearance',
+        location: '/data',
         overrides: [appLockServiceProvider.overrideWithValue(lock)],
       );
       await settle(tester);
@@ -331,7 +356,7 @@ void main() {
       await pumpApp(
         tester,
         size: const Size(1280, 800),
-        location: '/appearance',
+        location: '/data',
         overrides: [
           appLockServiceProvider.overrideWithValue(_Lock(supported: false)),
         ],
@@ -381,7 +406,7 @@ void main() {
       final c = await pumpApp(
         tester,
         size: const Size(1280, 800),
-        location: '/appearance',
+        location: '/data',
         overrides: [fileSharerProvider.overrideWithValue(sharer)],
       );
       await tester.runAsync(() async {
@@ -408,11 +433,7 @@ void main() {
     });
 
     testWidgets('the privacy policy page opens and reads', (tester) async {
-      await pumpApp(
-        tester,
-        size: const Size(390, 844),
-        location: '/appearance',
-      );
+      await pumpApp(tester, size: const Size(390, 844), location: '/data');
       await settle(tester);
       await tester.ensureVisible(find.byKey(const ValueKey('privacy-policy')));
       await tester.tap(find.byKey(const ValueKey('privacy-policy')));
@@ -424,11 +445,7 @@ void main() {
     testWidgets('"Show the introduction again" brings the intro back', (
       tester,
     ) async {
-      await pumpApp(
-        tester,
-        size: const Size(1280, 800),
-        location: '/appearance',
-      );
+      await pumpApp(tester, size: const Size(1280, 800), location: '/data');
       await settle(tester);
       await tester.ensureVisible(find.byKey(const ValueKey('show-intro')));
       await tester.tap(find.byKey(const ValueKey('show-intro')));

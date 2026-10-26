@@ -62,7 +62,18 @@ class HomeScreen extends ConsumerWidget {
         onSelectDestination: goTo,
         mode: mode,
       ),
-      hero: (context, mode) => HeroCard(summary: summary, money: money),
+      // Swipe the card sideways to change month: left for the next, right for the previous.
+      hero: (context, mode) => GestureDetector(
+        key: const ValueKey('hero-swipe'),
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragEnd: (d) {
+          final v = d.primaryVelocity ?? 0;
+          final months = ref.read(selectedMonthProvider.notifier);
+          if (v < -300) months.next();
+          if (v > 300) months.previous();
+        },
+        child: HeroCard(summary: summary, money: money),
+      ),
       trend: (context, mode) => switch (mode) {
         DashboardMode.wide => MonthBarsCard(
           summary: summary,

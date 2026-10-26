@@ -118,7 +118,10 @@ void main() {
         for (final d in AppDestination.values) {
           if (d == AppDestination.home) continue;
           // The Settings tab exists on the phone only; larger windows list its items directly.
-          if (d == AppDestination.settings && !compact) continue;
+          if ((d == AppDestination.settings || d == AppDestination.data) &&
+              !compact) {
+            continue;
+          }
           if (compact && !d.isTab) {
             // The phone reaches these from the Settings tab.
             await tester.tap(find.text('Settings').first);

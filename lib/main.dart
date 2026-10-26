@@ -10,6 +10,7 @@ import 'core/db/app_database.dart';
 import 'core/db/db_providers.dart';
 import 'core/supabase/supabase_config.dart';
 import 'core/theme/appearance_provider.dart';
+import 'core/window/window_controls.dart';
 import 'features/auth/auth_providers.dart';
 import 'features/auth/supabase_auth_service.dart';
 import 'features/family/data/supabase_household_remote.dart';
@@ -27,6 +28,8 @@ import 'core/sync/supabase_sync_backend.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('en_US');
+  // Desktop: hide the system title bar; the app draws its own in the theme's colours.
+  final windowControls = isDesktopPlatform ? await setUpDesktopWindow() : null;
   final prefs = await SharedPreferences.getInstance();
   // Local-first: the UI reads and writes this SQLite file.
   final database = AppDatabase(driftDatabase(name: 'family_expenses'));
@@ -49,6 +52,7 @@ Future<void> main() async {
     ProviderScope(
       overrides: [
         backendModeProvider.overrideWithValue(mode),
+        windowControlsProvider.overrideWithValue(windowControls),
         if (mode == BackendMode.sheets)
           googleAuthProvider.overrideWithValue(
             LoopbackGoogleAuth(

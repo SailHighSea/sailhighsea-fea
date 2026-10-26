@@ -13,7 +13,6 @@ import 'package:family_expenses/features/goals/data/goal_repository.dart';
 import 'package:family_expenses/features/import/category_guess.dart';
 import 'package:family_expenses/features/import/import_parser.dart';
 import 'package:family_expenses/features/import/import_service.dart';
-import 'package:family_expenses/features/privacy/csv_share.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -395,30 +394,87 @@ void main() {
   });
 
   group('screens', () {
-    testWidgets('Back up to a file shares one JSON file with a dated name', (
+    testWidgets('Back up to a file saves one JSON file with a dated name', (
       tester,
     ) async {
-      final shared = <(String, String, String)>[];
+      final saved = <(String, String)>[];
       final c = await pumpApp(
         tester,
         size: const Size(1280, 800),
-        location: '/appearance',
-        overrides: [fileSharerProvider.overrideWithValue(_Sharer(shared))],
+        location: '/data',
+        overrides: [
+          backupKdfRoundsProvider.overrideWithValue(1000),
+          backupSaverProvider.overrideWithValue((name, bytes) async {
+            saved.add((name, utf8.decode(bytes)));
+            return true;
+          }),
+        ],
       );
       await tester.runAsync(() => _fill(c.read(databaseProvider)));
       await settle(tester);
       await tester.ensureVisible(find.byKey(const ValueKey('backup-file')));
       await tester.tap(find.byKey(const ValueKey('backup-file')));
       await settle(tester);
+      // No password: leave the fields empty.
+      await tester.tap(find.byKey(const ValueKey('backup-protect-ok')));
       await settle(tester);
-      expect(shared, hasLength(1));
-      expect(shared.single.$1, 'family-expenses-backup-2026-10-23.json');
-      expect(shared.single.$3, 'application/json');
+      await settle(tester);
+      expect(saved, hasLength(1));
+      expect(saved.single.$1, 'family-expenses-backup-2026-10-23.json');
       expect(
-        (jsonDecode(shared.single.$2) as Map)['format'],
+        (jsonDecode(saved.single.$2) as Map)['format'],
         'family-expenses-backup',
       );
-      expect(find.text('Backup file created'), findsOneWidget);
+      expect(find.text('Backup saved'), findsOneWidget);
+    });
+
+    testWidgets('a password makes the saved file encrypted', (tester) async {
+      final saved = <(String, String)>[];
+      final c = await pumpApp(
+        tester,
+        size: const Size(1280, 800),
+        location: '/data',
+        overrides: [
+          backupKdfRoundsProvider.overrideWithValue(1000),
+          backupSaverProvider.overrideWithValue((name, bytes) async {
+            saved.add((name, utf8.decode(bytes)));
+            return true;
+          }),
+        ],
+      );
+      await tester.runAsync(() => _fill(c.read(databaseProvider)));
+      await settle(tester);
+      await tester.ensureVisible(find.byKey(const ValueKey('backup-file')));
+      await tester.tap(find.byKey(const ValueKey('backup-file')));
+      await settle(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('backup-password')),
+        'secret1',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('backup-password-confirm')),
+        'secret2',
+      );
+      await tester.tap(find.byKey(const ValueKey('backup-protect-ok')));
+      await settle(tester);
+      expect(
+        find.byKey(const ValueKey('backup-password-error')),
+        findsOneWidget,
+        reason: 'the two passwords differ',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('backup-password-confirm')),
+        'secret1',
+      );
+      await tester.tap(find.byKey(const ValueKey('backup-protect-ok')));
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 500)),
+      );
+      await settle(tester);
+      expect(saved, hasLength(1));
+      expect(saved.single.$1, endsWith('-encrypted.json'));
+      expect(BackupService.isEncrypted(saved.single.$2), isTrue);
+      expect(saved.single.$2, isNot(contains('Lunch')));
     });
 
     testWidgets('Restore asks first and says what is in the file', (
@@ -431,7 +487,7 @@ void main() {
       final c = await pumpApp(
         tester,
         size: const Size(1280, 800),
-        location: '/appearance',
+        location: '/data',
         overrides: [
           backupFilePickerProvider.overrideWithValue(() async => json),
         ],
@@ -458,7 +514,7 @@ void main() {
       await pumpApp(
         tester,
         size: const Size(1280, 800),
-        location: '/appearance',
+        location: '/data',
         overrides: [
           backupFilePickerProvider.overrideWithValue(() async => 'hello'),
         ],
@@ -476,11 +532,7 @@ void main() {
     testWidgets('Privacy and data says nothing is shared with the developer', (
       tester,
     ) async {
-      await pumpApp(
-        tester,
-        size: const Size(390, 844),
-        location: '/appearance',
-      );
+      await pumpApp(tester, size: const Size(390, 844), location: '/data');
       await tester.ensureVisible(find.byKey(const ValueKey('data-note')));
       expect(
         find.text(
@@ -490,15 +542,93 @@ void main() {
       );
     });
   });
-}
 
-class _Sharer implements FileSharer {
-  _Sharer(this.shared);
-  final List<(String, String, String)> shared;
-  @override
-  Future<void> shareText(
-    String filename,
-    String content,
-    String mimeType,
-  ) async => shared.add((filename, content, mimeType));
+  group('encrypted backups', () {
+    test(
+      'encrypt then decrypt gives the same text; a wrong password fails',
+      () async {
+        const plain = '{"format":"family-expenses-backup","version":1}';
+        final enc = await encryptBackup(plain, 'pa55word', rounds: 1000);
+        expect(BackupService.isEncrypted(enc), isTrue);
+        expect(BackupService.isEncrypted(plain), isFalse);
+        expect(enc, isNot(contains('family-expenses-backup"')));
+        expect(await BackupService.decryptBackup(enc, 'pa55word'), plain);
+        await expectLater(
+          BackupService.decryptBackup(enc, 'wrong'),
+          throwsA(isA<BackupFailure>()),
+        );
+      },
+    );
+
+    test('the same text and password give a different file each time (random salt)', () async {
+      final a = await encryptBackup('x', 'pw', rounds: 1000);
+      final b = await encryptBackup('x', 'pw', rounds: 1000);
+      expect(a, isNot(b));
+    });
+
+    test('an altered file is refused', () async {
+      final enc = jsonDecode(
+        await encryptBackup('hello', 'pw', rounds: 1000),
+      ) as Map<String, dynamic>;
+      final data = base64.decode(enc['data'] as String);
+      data[0] ^= 1;
+      enc['data'] = base64.encode(data);
+      await expectLater(
+        BackupService.decryptBackup(jsonEncode(enc), 'pw'),
+        throwsA(isA<BackupFailure>()),
+      );
+    });
+
+    testWidgets(
+      'Restore asks for the password, says when it is wrong, then restores',
+      (tester) async {
+        final src = AppDatabase(NativeDatabase.memory());
+        await tester.runAsync(() => _fill(src));
+        final enc = (await tester.runAsync(() async {
+          final text = await BackupService(
+            src,
+            currencyCode: 'SGD',
+            kdfRounds: 1000,
+          ).export(password: 'pa55word');
+          await src.close();
+          return text;
+        }))!;
+        await pumpApp(
+          tester,
+          size: const Size(1280, 800),
+          location: '/data',
+          overrides: [
+            backupFilePickerProvider.overrideWithValue(() async => enc),
+          ],
+        );
+        await tester.ensureVisible(find.byKey(const ValueKey('restore-file')));
+        await tester.tap(find.byKey(const ValueKey('restore-file')));
+        await settle(tester);
+        expect(find.text('This backup is password protected'), findsOneWidget);
+        await tester.enterText(
+          find.byKey(const ValueKey('restore-password')),
+          'nope',
+        );
+        await tester.tap(find.byKey(const ValueKey('restore-password-ok')));
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 300)),
+        );
+        await settle(tester);
+        expect(
+          find.byKey(const ValueKey('restore-password-error')),
+          findsOneWidget,
+        );
+        await tester.enterText(
+          find.byKey(const ValueKey('restore-password')),
+          'pa55word',
+        );
+        await tester.tap(find.byKey(const ValueKey('restore-password-ok')));
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 300)),
+        );
+        await settle(tester);
+        expect(find.text('Restore this backup?'), findsOneWidget);
+      },
+    );
+  });
 }

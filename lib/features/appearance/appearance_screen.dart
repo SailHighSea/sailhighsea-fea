@@ -15,7 +15,6 @@ import '../../core/theme/appearance_provider.dart';
 import '../../core/theme/appearance_settings.dart';
 import '../../core/theme/color_themes.dart';
 import '../../core/widgets/currency_picker.dart';
-import '../privacy/privacy_screen.dart';
 
 /// Appearance settings (Themes, TabAppearance and DeskAppearance mockups). Every control
 /// is wired to the real theme switch, so changes apply live and persist.
@@ -65,9 +64,14 @@ class AppearanceScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const _SectionLabel('Privacy and data'),
-          const SizedBox(height: 10),
-          const PrivacyCard(),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextLinkButton(
+              key: const ValueKey('open-privacy-data'),
+              label: 'Privacy and data: backup, restore, import, lock',
+              onTap: () => context.go('/data'),
+            ),
+          ),
           if (mode == PaneMode.stacked) const SizedBox(height: 16),
         ],
       ),

@@ -2,6 +2,13 @@
 
 ## Fixes after Phase 8
 
+- Goals page now has the savings picture: monthly income (with the month it applies from), total savings, "left to save this month" (income − spent − bills still due − monthly goal amounts), where the income goes, savings in goals vs not in a goal, a warning when the goals ask for more than is left, and a 6-month savings rate. Income and the total stay on this device (private) and are in the backup file. Schema v8.
+- Settings: Appearance and Privacy and data are separate pages (Settings tab on the phone; Appearance links to Privacy and data on larger windows).
+- Backups: saved through a save dialog (Files on Android, the file manager on computers) instead of the share sheet; an optional password encrypts the file (AES-256-GCM, key from PBKDF2-HMAC-SHA256 with a random salt). Restore asks for the password when the file has one; the file chooser no longer hides unknown file types.
+- Welcome page: "Restore from a backup".
+- Home: swipe the top card sideways to change month.
+- Windows, macOS and Linux: the title bar is drawn by the app in the theme's colours (Light, Dark, Pure black), with its own minimize, maximize and close; drag to move, double-click to maximize. macOS keeps its round buttons.
+
 - Settings tab: the phone now has four tabs (Home, Budgets, Insights, Settings). Settings lists Family, Goals, Bills, Appearance and Import a statement; the Home header menu is gone. Tab labels shrink to one line at large text.
 - Expenses page: Select is an outlined pill with a gap before + Add (no overlap), search text is centred, category chips wrap instead of being cut off, and a custom date range ("Choose a date range") replaces the month navigator until cleared.
 - Home: "Who spent it" card (each top category as one bar split by person, with a legend), shown only to people who see everyone.
