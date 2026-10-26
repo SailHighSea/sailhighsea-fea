@@ -126,14 +126,21 @@ jobs:
 
       # The build number goes up on every run: Android only installs an update with a higher number.
       - name: Build release APK
-        run: flutter build apk --release --build-number=${{ github.run_number }} --dart-define-from-file=.env.json
+        # One APK per processor type is about a third the size of the universal one. Debug symbols
+        # are split out of the app (smaller download, same behaviour).
+        run: flutter build apk --release --split-per-abi --split-debug-info=build/symbols --build-number=${{ github.run_number }} --dart-define-from-file=.env.json
 
-      - run: cp build/app/outputs/flutter-apk/app-release.apk family-expenses.apk
+      # arm64 is every phone made since about 2017; armv7 is for older ones.
+      - run: |
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk family-expenses.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk family-expenses-older-phones.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: family-expenses.apk
+          path: |
+            family-expenses.apk
+            family-expenses-older-phones.apk
           if-no-files-found: error
 
   macos:
@@ -260,4 +267,4 @@ jobs:
           gh release delete latest --cleanup-tag --yes || true
           gh release create latest dist/* --target "$GITHUB_SHA" --prerelease \
             --title "Latest build ($(echo $GITHUB_SHA | cut -c1-7))" \
-            --notes "Built from commit $GITHUB_SHA. Windows: unzip and run family_expenses.exe. macOS: open the dmg, then right-click the app and choose Open (unsigned). Linux: extract the tar.gz and run the family_expenses binary. Android: install the apk (allow unknown sources)."
+            --notes "Built from commit $GITHUB_SHA. Windows: unzip and run family_expenses.exe. macOS: open the dmg, then right-click the app and choose Open (unsigned). Linux: extract the tar.gz and run the family_expenses binary. Android: install family-expenses.apk (allow unknown sources); family-expenses-older-phones.apk is only for phones from before about 2017."

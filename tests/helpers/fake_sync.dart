@@ -33,7 +33,12 @@ class FakeSyncServer {
   final List<String> pushLog = [];
   int pullCalls = 0;
 
-  DateTime _clock = DateTime.utc(2026, 10, 26, 8);
+  // Starts at the real time: a device that pulls an empty household remembers its own clock
+  // as the cursor, so a server clock in the past would hide every later row.
+  DateTime _clock = DateTime.fromMillisecondsSinceEpoch(
+    DateTime.now().millisecondsSinceEpoch ~/ 1000 * 1000,
+    isUtc: true,
+  );
   final _signals = StreamController<SyncSignal>.broadcast();
 
   String _stamp() {
