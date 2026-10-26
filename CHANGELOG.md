@@ -2,6 +2,7 @@
 
 ## Fixes after Phase 8
 
+- New app icon: a tri-colour ring (green, blue, amber) with FET in the middle, on dark. Android gets a round, an adaptive and a themed (monochrome) version; iOS, macOS and Windows get theirs. Made by `ICONS=1 flutter test tests/tool/make_icons_test.dart` then `dart run flutter_launcher_icons`. It is also on the About page and the README.
 - The app is now called FET Family Expenses Tracker (app name, window titles, About page, notifications; the code and bundle ids keep their old names so updates still install over the old app).
 - About page (Settings tab on the phone, Appearance elsewhere): name, version, what the app does, privacy policy, source code and open-source licences.
 - Backups now also hold the theme and app settings (mode, colour theme, text size, chart colours, currency, personal background with its pictures, bill reminder choices). App lock, Google sign-in and sheet pairing stay out on purpose. Restoring asks first and says the settings are included.

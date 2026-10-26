@@ -220,6 +220,7 @@ void main() {
       );
       await settle(tester);
       expect(find.text(kAppName), findsOneWidget);
+      expect(key('about-icon'), findsOneWidget);
       expect(find.text('Version 1.2.3 (45)'), findsOneWidget);
       expect(find.text(kAppTagline), findsOneWidget);
       for (final f in aboutFeatures) {

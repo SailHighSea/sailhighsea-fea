@@ -87,17 +87,14 @@ class AboutScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: t.hero,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.account_balance_wallet,
-                      color: t.ringAccent,
-                      size: 30,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(
+                      'assets/icon/icon.png',
+                      key: const ValueKey('about-icon'),
+                      width: 56,
+                      height: 56,
+                      semanticLabel: '$kAppShortName icon',
                     ),
                   ),
                   const SizedBox(width: 14),

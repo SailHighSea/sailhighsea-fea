@@ -58,6 +58,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/icon.png
   fonts:
     # DM Sans (SIL OFL, see assets/fonts/OFL.txt). Variable font: weight axis follows FontWeight.
     - family: DM Sans
@@ -69,8 +71,9 @@ flutter_launcher_icons:
   android: true
   ios: true
   remove_alpha_ios: true
-  adaptive_icon_background: "#0F6B4F"
+  adaptive_icon_background: "#0E1512"
   adaptive_icon_foreground: assets/icon/icon_foreground.png
+  adaptive_icon_monochrome: assets/icon/icon_monochrome.png
   macos:
     generate: true
   windows:

@@ -1,4 +1,6 @@
-# FET Family Expenses Tracker
+<p align="center"><img src="assets/icon/icon.png" width="112" alt="FET icon"></p>
+
+<h1 align="center">FET Family Expenses Tracker</h1>
 
 **A shared monthly expense tracker for families.** Private, works offline, and keeps your data on your own device or in your own Google account. One app, the same features on phones, tablets, foldables and desktops.
 
