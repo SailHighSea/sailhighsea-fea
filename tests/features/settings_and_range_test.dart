@@ -1,4 +1,5 @@
 import 'package:family_expenses/core/db/app_database.dart';
+import 'package:family_expenses/core/time.dart';
 import 'package:family_expenses/features/expenses/data/expense_repository.dart';
 import 'package:family_expenses/features/expenses/expense_list_providers.dart';
 import 'package:family_expenses/features/overview/domain/overview_calculations.dart';
@@ -28,6 +29,7 @@ Future<void> _seed(AppDatabase db) async {
 
 void main() {
   setUpAll(loadTestFonts);
+  swipeMonthTests();
 
   group('Settings tab', () {
     testWidgets('the phone has four tabs, and Settings lists the extras', (
@@ -48,6 +50,7 @@ void main() {
         'settings-goals',
         'settings-bills',
         'settings-appearance',
+        'settings-data',
         'settings-import',
       ]) {
         expect(key(k), findsOneWidget, reason: k);
@@ -247,6 +250,30 @@ void main() {
     testWidgets('a solo person has no card', (tester) async {
       await pumpApp(tester, size: const Size(390, 844));
       expect(key('category-by-person'), findsNothing);
+    });
+  });
+}
+
+void swipeMonthTests() {
+  group('Swipe the Home card to change month', () {
+    testWidgets('left goes to the next month, right to the previous', (
+      tester,
+    ) async {
+      final c = await pumpApp(tester, size: const Size(390, 844));
+      final start = c.read(selectedMonthProvider);
+      await tester.fling(key('hero-swipe'), const Offset(-300, 0), 1200);
+      await settle(tester);
+      expect(
+        c.read(selectedMonthProvider),
+        DateTime(start.year, start.month + 1),
+      );
+      await tester.fling(key('hero-swipe'), const Offset(300, 0), 1200);
+      await tester.fling(key('hero-swipe'), const Offset(300, 0), 1200);
+      await settle(tester);
+      expect(
+        c.read(selectedMonthProvider),
+        DateTime(start.year, start.month - 1),
+      );
     });
   });
 }

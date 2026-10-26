@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:cryptography/cryptography.dart';
 import 'package:drift/drift.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,6 +34,11 @@ class BackupFailure implements Exception {
 
 const _format = 'family-expenses-backup';
 const _version = 1;
+const _encryptedFormat = 'family-expenses-backup-encrypted';
+
+/// PBKDF2 rounds for a new password-protected backup. The number used is stored in the file.
+const defaultBackupKdfRounds = 150000;
+const _maxKdfRounds = 2000000;
 
 /// A backup is one JSON file with everything that lives on this device: expenses, categories,
 /// budgets, goals (and what was added to them), bills and the remembered shop categories. Nothing
@@ -42,14 +49,24 @@ class BackupService {
     required this.currencyCode,
     DateTime Function()? clock,
     this.householdId = localHouseholdId,
+    this.kdfRounds = defaultBackupKdfRounds,
   }) : _clock = clock ?? DateTime.now;
 
   final AppDatabase _db;
   final String currencyCode;
   final String householdId;
   final DateTime Function() _clock;
+  final int kdfRounds;
 
-  Future<String> export() async {
+  /// The backup as text. With a [password] the text is encrypted (AES-256-GCM, key from the
+  /// password with PBKDF2-HMAC-SHA256 and a random salt); without it, plain JSON.
+  Future<String> export({String? password}) async {
+    final json = await _plainExport();
+    if (password == null || password.isEmpty) return json;
+    return encryptBackup(json, password, rounds: kdfRounds);
+  }
+
+  Future<String> _plainExport() async {
     List<Map<String, Object?>> rows<T extends DataClass>(List<T> list) => [
       for (final r in list)
         Map<String, Object?>.from((r as dynamic).toJson() as Map),
@@ -89,6 +106,21 @@ class BackupService {
     };
     return const JsonEncoder.withIndent('  ').convert(doc);
   }
+
+  /// Whether [text] is a password-protected backup (it must be decrypted before use).
+  static bool isEncrypted(String text) {
+    try {
+      final doc = jsonDecode(text);
+      return doc is Map && doc['format'] == _encryptedFormat;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// The plain backup inside an encrypted one. A wrong password and a damaged file both fail
+  /// the same way, because AES-GCM cannot tell them apart.
+  static Future<String> decryptBackup(String text, String password) =>
+      _decrypt(text, password);
 
   /// Reads a backup and says what is in it, without changing anything.
   BackupCounts inspect(String text) {
@@ -269,20 +301,85 @@ class BackupService {
   }
 }
 
+Future<SecretKey> _key(String password, List<int> salt, int rounds) => Pbkdf2(
+  macAlgorithm: Hmac.sha256(),
+  iterations: rounds,
+  bits: 256,
+).deriveKeyFromPassword(password: password, nonce: salt);
+
+/// Encrypts a plain backup with [password]. Public for tests; the app calls
+/// [BackupService.export].
+Future<String> encryptBackup(
+  String plain,
+  String password, {
+  int rounds = defaultBackupKdfRounds,
+}) async {
+  final algo = AesGcm.with256bits();
+  final salt = SecretKeyData.random(length: 16).bytes;
+  final key = await _key(password, salt, rounds);
+  final box = await algo.encrypt(utf8.encode(plain), secretKey: key);
+  return jsonEncode({
+    'format': _encryptedFormat,
+    'version': 1,
+    'kdf': 'pbkdf2-hmac-sha256',
+    'rounds': rounds,
+    'cipher': 'aes-256-gcm',
+    'salt': base64.encode(salt),
+    'nonce': base64.encode(box.nonce),
+    'data': base64.encode(box.cipherText),
+    'mac': base64.encode(box.mac.bytes),
+  });
+}
+
+Future<String> _decrypt(String text, String password) async {
+  try {
+    final doc = jsonDecode(text) as Map<String, dynamic>;
+    if (doc['format'] != _encryptedFormat) throw const FormatException();
+    final rounds = doc['rounds'] as int;
+    if (rounds < 1 || rounds > _maxKdfRounds) throw const FormatException();
+    final key = await _key(
+      password,
+      base64.decode(doc['salt'] as String),
+      rounds,
+    );
+    final box = SecretBox(
+      base64.decode(doc['data'] as String),
+      nonce: base64.decode(doc['nonce'] as String),
+      mac: Mac(base64.decode(doc['mac'] as String)),
+    );
+    final plain = await AesGcm.with256bits().decrypt(box, secretKey: key);
+    return utf8.decode(plain);
+  } on Object {
+    throw const BackupFailure('Wrong password, or the backup file is damaged.');
+  }
+}
+
+/// Writes a backup where the person chooses (a save dialog: Files on a phone, the file manager
+/// on a computer). Returns whether it was saved; false when they cancelled.
+/// How many PBKDF2 rounds a new encrypted backup uses (tests lower it to run fast).
+final backupKdfRoundsProvider = Provider<int>((ref) => defaultBackupKdfRounds);
+
+typedef BackupSaver = Future<bool> Function(String filename, Uint8List bytes);
+
+final backupSaverProvider = Provider<BackupSaver>(
+  (ref) => (filename, bytes) async {
+    final saved = await FilePicker.saveFile(
+      fileName: filename,
+      bytes: bytes,
+      mimeType: 'application/json',
+      dialogTitle: 'Save your backup',
+    );
+    return saved != null;
+  },
+);
+
 /// Opens a file chooser for a backup; returns its text, or null when cancelled.
 typedef BackupFilePicker = Future<String?> Function();
 
 final backupFilePickerProvider = Provider<BackupFilePicker>(
   (ref) => () async {
-    final file = await openFile(
-      acceptedTypeGroups: const [
-        XTypeGroup(
-          label: 'Family Expenses backup',
-          extensions: ['json'],
-          mimeTypes: ['application/json'],
-        ),
-      ],
-    );
+    // Any file: some phones hide a file whose type they do not know.
+    final file = await openFile();
     return file?.readAsString();
   },
 );

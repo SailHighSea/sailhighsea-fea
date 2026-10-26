@@ -26,7 +26,16 @@ enum AppDestination {
     Icons.settings,
   ),
 
-  /// The phone's Settings tab: a page that lists Family, Goals, Bills and Appearance.
+  /// Backup, restore, import, export, app lock and the privacy policy. On the phone it is an
+  /// item on the Settings tab; on larger windows it is linked from the Settings (Appearance) page.
+  data(
+    'Privacy and data',
+    '/data',
+    Icons.privacy_tip_outlined,
+    Icons.privacy_tip,
+  ),
+
+  /// The phone's Settings tab: a page that lists Family, Goals, Bills, Appearance and Privacy.
   settings('Settings', '/settings', Icons.settings_outlined, Icons.settings);
 
   const AppDestination(this.label, this.path, this.icon, this.activeIcon);
@@ -46,7 +55,7 @@ enum AppDestination {
   static const main = [home, budgets, insights, goals, bills, family];
 
   /// Listed on the phone's Settings tab (items not in the tab bar).
-  static const overflow = [family, goals, bills, appearance];
+  static const overflow = [family, goals, bills, appearance, data];
 
   bool get isTab => tabs.contains(this);
 

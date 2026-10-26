@@ -170,6 +170,17 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
             pageBuilder: (c, s) => _page(s, const ImportScreen()),
           ),
           GoRoute(
+            path: '/data',
+            pageBuilder: (c, s) => _page(s, const PrivacyDataScreen()),
+            routes: [
+              GoRoute(
+                path: 'restore',
+                pageBuilder: (c, s) =>
+                    _page(s, const PrivacyDataScreen(restoreOnOpen: true)),
+              ),
+            ],
+          ),
+          GoRoute(
             path: '/privacy',
             pageBuilder: (c, s) => _page(s, const PrivacyPolicyScreen()),
           ),

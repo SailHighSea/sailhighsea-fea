@@ -232,6 +232,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ],
                           const SizedBox(height: 4),
                           TextLinkButton(
+                            key: const ValueKey('start-restore'),
+                            label: 'Restore from a backup',
+                            onTap: () => finish(next: '/data/restore'),
+                          ),
+                          TextLinkButton(
                             key: const ValueKey('start-import'),
                             label: 'Import expenses from a file first',
                             onTap: () => finish(next: '/import'),
