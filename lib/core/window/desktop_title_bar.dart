@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../app_info.dart';
 import '../theme/app_tokens.dart';
 import 'window_controls.dart';
 
@@ -15,7 +16,7 @@ class DesktopTitleBar extends StatefulWidget {
     super.key,
     required this.controls,
     this.platform,
-    this.title = 'Family Expenses',
+    this.title = kAppName,
   });
 
   final WindowControls controls;

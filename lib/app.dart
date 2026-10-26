@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/app_info.dart';
 import 'core/routing/app_router.dart';
 import 'features/auth/app_access.dart';
 import 'features/bills/reminders/reminder_providers.dart';
@@ -80,7 +81,7 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
         ? darkVariantFor(settings.mode)
         : ThemeVariant.light;
     return MaterialApp.router(
-      title: 'Family Expenses',
+      title: kAppName,
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
       theme: buildTheme(

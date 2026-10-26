@@ -322,7 +322,7 @@ class LoopbackGoogleAuth implements GoogleAuthService {
         ..headers.contentType = ContentType.html
         ..write(
           ok
-              ? '<html><body style="font-family:sans-serif"><h3>Signed in</h3><p>You can close this tab and go back to Family Expenses.</p></body></html>'
+              ? '<html><body style="font-family:sans-serif"><h3>Signed in</h3><p>You can close this tab and go back to FET Family Expenses Tracker.</p></body></html>'
               : '<html><body>Not expected.</body></html>',
         );
       await req.response.close();

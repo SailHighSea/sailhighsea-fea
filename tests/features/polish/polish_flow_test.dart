@@ -318,7 +318,7 @@ void main() {
         overrides: [appLockServiceProvider.overrideWithValue(lock)],
       );
       await settle(tester);
-      expect(find.text('Family Expenses is locked'), findsOneWidget);
+      expect(find.text('FET is locked'), findsOneWidget);
       expect(
         find.text('Spent this month'),
         findsNothing,

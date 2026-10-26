@@ -97,3 +97,21 @@ Future<StoredPicture> keepPicture(Uint8List bytes, String slot) async {
   await file.writeAsBytes(png.buffer.asUint8List());
   return StoredPicture(file.path, luminance);
 }
+
+/// Puts picture [bytes] (already scaled, taken from a backup) back in the app's folder and returns
+/// its path. An older picture for the same [slot] is removed.
+Future<String> storePictureBytes(Uint8List bytes, String slot) async {
+  final dir = Directory(
+    '${(await getApplicationSupportDirectory()).path}/backgrounds',
+  )..createSync(recursive: true);
+  for (final f in dir.listSync()) {
+    if (f is File && f.uri.pathSegments.last.startsWith('$slot-')) {
+      f.deleteSync();
+    }
+  }
+  final file = File(
+    '${dir.path}/$slot-${DateTime.now().millisecondsSinceEpoch}.png',
+  );
+  await file.writeAsBytes(bytes);
+  return file.path;
+}

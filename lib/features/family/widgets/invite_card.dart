@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/app_info.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/time.dart';
@@ -155,7 +156,7 @@ class InviteCard extends ConsumerWidget {
 
   Future<void> _share(BuildContext context, CreatedInvite invite) async {
     final text =
-        'Join our household on Family Expenses with this code: ${invite.display}. '
+        'Join our household on $kAppName with this code: ${invite.display}. '
         'It works once and expires in 24 hours.';
     try {
       await SharePlus.instance.share(ShareParams(text: text));

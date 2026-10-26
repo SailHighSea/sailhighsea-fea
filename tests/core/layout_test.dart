@@ -117,7 +117,8 @@ void main() {
           // The Settings tab exists on the phone only; larger windows list its items directly.
           if ((d == AppDestination.settings ||
                   d == AppDestination.data ||
-                  d == AppDestination.categories) &&
+                  d == AppDestination.categories ||
+                  d == AppDestination.about) &&
               !compact) {
             continue;
           }

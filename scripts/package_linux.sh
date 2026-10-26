@@ -14,7 +14,7 @@ WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
 desktop_file() { cat <<DESK
 [Desktop Entry]
 Type=Application
-Name=Family Expenses
+Name=FET Family Expenses Tracker
 Comment=Household expense tracker
 Exec=$1
 Icon=family-expenses
@@ -38,7 +38,7 @@ Section: utils
 Priority: optional
 Architecture: $ARCH
 Depends: libgtk-3-0, libsecret-1-0, libjsoncpp25 | libjsoncpp1
-Maintainer: Family Expenses <noreply@example.invalid>
+Maintainer: FET Family Expenses Tracker <noreply@example.invalid>
 Description: Household expense tracker
  Local-first family expense tracker with budgets, goals and bills.
 CTRL

@@ -9,7 +9,7 @@ const dataNote =
 const privacyPolicySections = <(String, String)>[
   (
     'What this app is',
-    'Family Expenses is a household expense tracker. Nothing is shared with the app developer: everything stays on your device or in your own Google account. It does not show ads, does not include analytics or tracking libraries, and does not sell or share your data.',
+    'FET Family Expenses Tracker is a household expense tracker. Nothing is shared with the app developer: everything stays on your device or in your own Google account. It does not show ads, does not include analytics or tracking libraries, and does not sell or share your data.',
   ),
   (
     'What is stored, and where',

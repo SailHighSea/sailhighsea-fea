@@ -29,7 +29,7 @@ class MemberWriter {
   /// Creates the sheet with its tabs and headers. Returns its id.
   Future<String> createSheet(String ownerName) async {
     final id = await _sheets.createSpreadsheet(
-      'Family Expenses - ${ownerName.isEmpty ? 'me' : ownerName}',
+      'FET Family Expenses - ${ownerName.isEmpty ? 'me' : ownerName}',
       Tabs.memberSheetTabs,
     );
     await _sheets.writeRanges(id, {

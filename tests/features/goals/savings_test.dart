@@ -311,6 +311,16 @@ void main() {
       expect(key('income-empty'), findsNothing);
       expect(find.text('Left to save this month'), findsOneWidget);
       expect(key('savings-flow'), findsOneWidget);
+      final bar = find.descendant(
+        of: key('savings-flow'),
+        matching: find.byType(ColoredBox),
+      );
+      expect(bar, findsWidgets);
+      expect(
+        tester.getSize(bar.first).height,
+        16,
+        reason: 'the split bar is drawn, not collapsed',
+      );
       expect(key('savings-total'), findsOneWidget);
       expect(key('savings-rate'), findsOneWidget);
       final db = c.read(databaseProvider);

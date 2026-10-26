@@ -67,6 +67,14 @@ class AppearanceScreen extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextLinkButton(
+              key: const ValueKey('open-about'),
+              label: 'About FET',
+              onTap: () => context.go('/about'),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextLinkButton(
               key: const ValueKey('open-personalise'),
               label: 'Backgrounds and pictures',
               onTap: () => context.go('/personalise'),

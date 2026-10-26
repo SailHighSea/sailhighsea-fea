@@ -107,7 +107,7 @@ void main() {
       tester,
     ) async {
       await _pump(tester);
-      expect(find.text('Family Expenses'), findsOneWidget);
+      expect(find.text('FET Family Expenses Tracker'), findsOneWidget);
       expect(_key('auth-email'), findsOneWidget);
       expect(find.text('Spent this month'), findsNothing);
       // No Apple or Google buttons on a desktop-class platform.

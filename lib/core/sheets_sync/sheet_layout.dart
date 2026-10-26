@@ -61,7 +61,7 @@ abstract final class Headers {
 }
 
 const metaNote =
-    'Family Expenses writes this sheet. It is a mirror of the app: changes typed here are overwritten on the next sync.';
+    'FET Family Expenses Tracker writes this sheet. It is a mirror of the app: changes typed here are overwritten on the next sync.';
 
 /// Rows of the Meta tab: a note, then the revision counter the other side checks to see whether
 /// anything changed without reading the whole sheet.

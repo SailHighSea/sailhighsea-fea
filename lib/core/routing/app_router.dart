@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
 
+import '../../features/about/about_screen.dart';
 import '../../features/appearance/appearance_screen.dart';
 import '../../features/appearance/personalise_screen.dart';
 import '../../features/categories/categories_screen.dart';
@@ -170,6 +171,10 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
           GoRoute(
             path: '/import',
             pageBuilder: (c, s) => _page(s, const ImportScreen()),
+          ),
+          GoRoute(
+            path: '/about',
+            pageBuilder: (c, s) => _page(s, const AboutScreen()),
           ),
           GoRoute(
             path: '/personalise',

@@ -2,6 +2,11 @@
 
 ## Fixes after Phase 8
 
+- The app is now called FET Family Expenses Tracker (app name, window titles, About page, notifications; the code and bundle ids keep their old names so updates still install over the old app).
+- About page (Settings tab on the phone, Appearance elsewhere): name, version, what the app does, privacy policy, source code and open-source licences.
+- Backups now also hold the theme and app settings (mode, colour theme, text size, chart colours, currency, personal background with its pictures, bill reminder choices). App lock, Google sign-in and sheet pairing stay out on purpose. Restoring asks first and says the settings are included.
+- README rewritten as a product page with a description, features and screenshots (made by `SCREENSHOTS=1 flutter test tests/screenshots`). The old starter-kit text is in docs/STARTER_KIT.md.
+- Fix: the "where your income goes" and "who spent it" split bars collapsed to nothing; they are drawn now.
 - Colour themes: six new ones (Lavender, Rose, Lagoon, Indigo, Mocha, Citrus), ten in all, each in Light, Dark and Pure black with checked contrast.
 - Backgrounds and pictures (Appearance → Backgrounds and pictures): a colour, a gradient or the person's own picture (gallery or camera on phones, file chooser on computers) behind every screen, and the same for the Home "Spent this month" card, with blur, dimming, text colour (automatic, light, dark) and a contrast check. The app switches to the light or dark look that suits the background; cards stay solid. Pictures are scaled down, kept on the device and are not in the backup file. "Reset" returns to the theme.
 - Goals is a bottom tab on the phone (Home, Budgets, Goals, Insights, Settings).

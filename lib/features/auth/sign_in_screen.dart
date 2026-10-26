@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../../core/app_info.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/layout/window_class.dart';
@@ -141,7 +144,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   Semantics(
                     header: true,
                     child: Text(
-                      'Family Expenses',
+                      kAppName,
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w700,

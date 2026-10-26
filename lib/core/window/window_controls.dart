@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../app_info.dart';
+
 /// What the app's own title bar can ask of the window. Windows, macOS and Linux only; this is
 /// window chrome, so it is allowed to differ by platform (docs: platform code is for hardware
 /// and window chrome only).
@@ -39,7 +41,7 @@ Future<WindowControls> setUpDesktopWindow() async {
   const options = WindowOptions(
     titleBarStyle: TitleBarStyle.hidden,
     minimumSize: Size(360, 560),
-    title: 'Family Expenses',
+    title: kAppName,
   );
   await windowManager.waitUntilReadyToShow(options, () async {
     await windowManager.show();

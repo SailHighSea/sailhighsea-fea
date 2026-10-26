@@ -96,6 +96,7 @@ class CategoryByPersonCard extends ConsumerWidget {
                 child: SizedBox(
                   height: 10,
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       for (var i = 0; i < people.length; i++)
                         if ((c.byPerson[people[i].userId] ?? 0) > 0)

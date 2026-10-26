@@ -18,9 +18,13 @@ class BackupCounts {
     this.goals = 0,
     this.bills = 0,
     this.rules = 0,
+    this.hasSettings = false,
   });
 
   final int expenses, categories, budgets, goals, bills, rules;
+
+  /// Whether the backup also holds the theme and app settings.
+  final bool hasSettings;
 
   int get total => expenses + categories + budgets + goals + bills + rules;
 }
@@ -60,13 +64,16 @@ class BackupService {
 
   /// The backup as text. With a [password] the text is encrypted (AES-256-GCM, key from the
   /// password with PBKDF2-HMAC-SHA256 and a random salt); without it, plain JSON.
-  Future<String> export({String? password}) async {
-    final json = await _plainExport();
+  Future<String> export({
+    String? password,
+    Map<String, Object?>? settings,
+  }) async {
+    final json = await _plainExport(settings);
     if (password == null || password.isEmpty) return json;
     return encryptBackup(json, password, rounds: kdfRounds);
   }
 
-  Future<String> _plainExport() async {
+  Future<String> _plainExport(Map<String, Object?>? settings) async {
     List<Map<String, Object?>> rows<T extends DataClass>(List<T> list) => [
       for (final r in list)
         Map<String, Object?>.from((r as dynamic).toJson() as Map),
@@ -103,6 +110,7 @@ class BackupService {
         await (_db.select(_db.bills)..where((b) => b.deletedAt.isNull())).get(),
       ),
       'categoryRules': rows(await _db.select(_db.categoryRules).get()),
+      'settings': ?settings,
       'incomeEntries': rows(await _db.select(_db.incomeEntries).get()),
       'savingsBalances': rows(await _db.select(_db.savingsBalances).get()),
     };
@@ -135,7 +143,14 @@ class BackupService {
       goals: n('goals'),
       bills: n('bills'),
       rules: n('categoryRules'),
+      hasSettings: doc['settings'] is Map,
     );
+  }
+
+  /// The theme and settings in a plain backup, or `null` when it has none.
+  Map<String, dynamic>? settingsIn(String text) {
+    final s = _parse(text)['settings'];
+    return s is Map ? s.cast<String, dynamic>() : null;
   }
 
   Map<String, dynamic> _parse(String text) {
@@ -143,10 +158,10 @@ class BackupService {
     try {
       doc = jsonDecode(text);
     } catch (_) {
-      throw const BackupFailure('That file is not a Family Expenses backup.');
+      throw const BackupFailure('That file is not an FET backup.');
     }
     if (doc is! Map<String, dynamic> || doc['format'] != _format) {
-      throw const BackupFailure('That file is not a Family Expenses backup.');
+      throw const BackupFailure('That file is not an FET backup.');
     }
     if (doc['version'] is! int || (doc['version'] as int) > _version) {
       throw const BackupFailure(
