@@ -34,6 +34,7 @@ class DashboardLayout extends StatelessWidget {
     required this.recent,
     this.filters,
     this.everyone,
+    this.byPerson,
   });
 
   final SlotBuilder header;
@@ -55,6 +56,9 @@ class DashboardLayout extends StatelessWidget {
 
   /// A full-width "See everyone" card above the recent list. Absent for most people.
   final SlotBuilder? everyone;
+
+  /// Categories split by person; only when several people's spending is visible.
+  final SlotBuilder? byPerson;
 
   static const double _splitMinContent = 760;
   static const double _heroColumn = 380;
@@ -104,6 +108,7 @@ class DashboardLayout extends StatelessWidget {
             SizedBox(height: gap),
             slot(tiles),
             SizedBox(height: gap),
+            if (byPerson != null) ...[slot(byPerson!), SizedBox(height: gap)],
             twoCards(),
             SizedBox(height: gap),
             if (everyone != null) ...[slot(everyone!), SizedBox(height: gap)],
@@ -135,6 +140,10 @@ class DashboardLayout extends StatelessWidget {
                       SizedBox(height: gap),
                       slot(compare),
                       SizedBox(height: gap),
+                      if (byPerson != null) ...[
+                        slot(byPerson!),
+                        SizedBox(height: gap),
+                      ],
                       if (everyone != null) ...[
                         slot(everyone!),
                         SizedBox(height: gap),
@@ -181,6 +190,7 @@ class DashboardLayout extends StatelessWidget {
               ],
             ),
             SizedBox(height: gap),
+            if (byPerson != null) ...[slot(byPerson!), SizedBox(height: gap)],
             if (everyone != null) ...[slot(everyone!), SizedBox(height: gap)],
             slot(recent),
           ],

@@ -411,14 +411,11 @@ void main() {
     });
 
     testWidgets(
-      'the phone reaches Family from the menu and opens Join from it',
+      'the phone reaches Family from Settings and opens Join from it',
       (tester) async {
         await _pumpMember(tester, me: _owner, size: _phone, location: '/home');
-        await _tap(
-          tester,
-          find.byTooltip('Menu: family, goals, bills, appearance'),
-        );
-        await _tap(tester, find.text('Family').last);
+        await _tap(tester, find.text('Settings').first);
+        await _tap(tester, find.byKey(const ValueKey('settings-family')));
         expect(_key('invite-create'), findsOneWidget);
         await _tap(tester, find.text('Have a code instead? Join a household'));
         expect(find.text('Join a household'), findsOneWidget);

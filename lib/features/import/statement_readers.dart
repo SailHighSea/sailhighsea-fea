@@ -75,11 +75,16 @@ StatementRows rowsFromStatementText(String text, {int? defaultYear}) {
     ['Date', 'Description', 'Debit', 'Credit', 'Currency'],
   ];
   var income = 0;
-  final head = text.split(RegExp(r'\r?\n')).take(40).join(' ');
+  final head = text.split(RegExp(r'\r?\n')).take(80).join(' ');
   final statementCurrency = _codeIn(head) ?? '';
   for (final raw in text.split(RegExp(r'\r?\n'))) {
-    final line = raw.replaceAll(RegExp(r'\s{2,}'), '  ').trim();
+    var line = raw.replaceAll(RegExp(r'\s{2,}'), '  ').trim();
     if (line.isEmpty) continue;
+    // Some PDFs run the columns together: "28/07/2626/07/26SHOP..." is two dates and a shop.
+    line = line.replaceFirstMapped(
+      RegExp(r'^(\d{2}[-/.]\d{2}[-/.]\d{2})(\d{2}[-/.]\d{2}[-/.]\d{2})(?=\S)'),
+      (m) => '${m[1]} ${m[2]} ',
+    );
     final d = _dateStart.firstMatch(line);
     if (d == null) continue;
     var rest = line.substring(d.end).trim();
@@ -90,13 +95,23 @@ StatementRows rowsFromStatementText(String text, {int? defaultYear}) {
     }
     final amounts = _money.allMatches(rest).toList();
     if (amounts.isEmpty) continue;
-    final pick = amounts.length >= 2
+    // "USD 117.37  435.95": a foreign amount, then the amount in the statement currency, is
+    // two amounts but not a running balance; the transaction is the last one.
+    final foreign =
+        amounts.length >= 2 &&
+        _knownCodeBefore(rest.substring(0, amounts[amounts.length - 2].start));
+    final pick = foreign
+        ? amounts.last
+        : amounts.length >= 2
         ? amounts[amounts.length - 2]
         : amounts.first;
     var description = rest
         .substring(0, amounts.first.start)
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
+    if (_knownCodeBefore(description)) {
+      description = description.substring(0, description.length - 3).trim();
+    }
     // The bank's reference number at the end ("..., DOHA, 068276") is noise in a description.
     description = description
         .replaceAll(RegExp(r'[ ,]+\d{5,}\s*(CR)?$'), '')
@@ -110,7 +125,7 @@ StatementRows rowsFromStatementText(String text, {int? defaultYear}) {
     final amountText = pick[0]!;
     // "CR" can sit after the amount (`1,000.00 CR`) or before it in its own column.
     final isCredit =
-        RegExp(r'\bCR\b').hasMatch(rest) ||
+        RegExp(r'(?<![A-Za-z])CR(?![A-Za-z])').hasMatch(rest) ||
         RegExp(r'\bCR\b', caseSensitive: false).hasMatch(amountText) ||
         _creditWords.hasMatch(description);
     final clean = amountText.replaceAll(RegExp(r'\s?(CR|DR|Cr|Dr)$'), '');
@@ -118,7 +133,9 @@ StatementRows rowsFromStatementText(String text, {int? defaultYear}) {
       (pick.start - 4).clamp(0, rest.length),
       (pick.end + 4).clamp(0, rest.length),
     );
-    final cur = _codeIn(around) ?? statementCurrency;
+    final cur = foreign
+        ? statementCurrency
+        : _codeIn(around) ?? statementCurrency;
     if (isCredit) {
       income++;
       continue;
@@ -126,6 +143,13 @@ StatementRows rowsFromStatementText(String text, {int? defaultYear}) {
     rows.add([dateText, description, clean, '', cur]);
   }
   return StatementRows(rows, moneyIn: income);
+}
+
+/// Whether [text] ends with a known currency code ("... 025389USD").
+bool _knownCodeBefore(String text) {
+  final m = RegExp(r'([A-Z]{3})\s*$').firstMatch(text.trimRight());
+  if (m == null) return false;
+  return supportedCurrencies.any((c) => c.code == m[1]);
 }
 
 /// Codes that are also ordinary words (ALL, TRY, TOP...) are only trusted when a phrase like

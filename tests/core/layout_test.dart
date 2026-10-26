@@ -56,9 +56,8 @@ void main() {
             expect(
               find.text('Goals'),
               findsNothing,
-              reason: 'Goals is in the overflow menu on the phone',
+              reason: 'Goals is on the Settings page on the phone',
             );
-            expect(find.text('Settings'), findsNothing);
             expect(find.text('Expenses'), findsNothing);
           case WindowClass.medium:
             final rail = find.byWidgetPredicate(
@@ -118,13 +117,13 @@ void main() {
 
         for (final d in AppDestination.values) {
           if (d == AppDestination.home) continue;
+          // The Settings tab exists on the phone only; larger windows list its items directly.
+          if (d == AppDestination.settings && !compact) continue;
           if (compact && !d.isTab) {
-            // Overflow menu on the phone Home header.
-            await tester.tap(
-              find.byTooltip('Menu: family, goals, bills, appearance'),
-            );
+            // The phone reaches these from the Settings tab.
+            await tester.tap(find.text('Settings').first);
             await tester.pumpAndSettle();
-            await tester.tap(find.text(d.label).last);
+            await tester.tap(find.text(d.label).first);
           } else {
             await tester.tap(
               find

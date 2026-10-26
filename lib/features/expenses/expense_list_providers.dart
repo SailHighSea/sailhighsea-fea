@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/db/app_database.dart';
@@ -41,11 +42,40 @@ final expenseFilterProvider =
       ExpenseFilterController.new,
     );
 
-/// Expenses of the selected month, filtered by category and by a search over note,
-/// category name and who added them.
+/// A custom date range for the expense list (From and To, both included); null shows the
+/// selected month.
+class ExpenseRangeController extends Notifier<DateTimeRange?> {
+  @override
+  DateTimeRange? build() => null;
+
+  void set(DateTimeRange range) => state = DateTimeRange(
+    start: DateTime(range.start.year, range.start.month, range.start.day),
+    end: DateTime(range.end.year, range.end.month, range.end.day),
+  );
+  void clear() => state = null;
+}
+
+final expenseRangeProvider =
+    NotifierProvider<ExpenseRangeController, DateTimeRange?>(
+      ExpenseRangeController.new,
+    );
+
+/// Live expenses between two days.
+final rangeExpensesProvider =
+    StreamProvider.family<List<ExpenseRow>, DateTimeRange>(
+      (ref, range) => ref
+          .watch(expenseRepositoryProvider)
+          .watchRange(range.start, range.end),
+    );
+
+/// Expenses of the selected month (or the custom range), filtered by category and by a search
+/// over note, category name and who added them.
 final filteredExpensesProvider = Provider<AsyncValue<List<ExpenseRow>>>((ref) {
   final month = ref.watch(selectedMonthProvider);
-  final expenses = ref.watch(monthExpensesProvider(month));
+  final range = ref.watch(expenseRangeProvider);
+  final expenses = range == null
+      ? ref.watch(monthExpensesProvider(month))
+      : ref.watch(rangeExpensesProvider(range));
   final categories =
       ref.watch(categoriesProvider).value ?? const <CategoryRow>[];
   final filter = ref.watch(expenseFilterProvider);

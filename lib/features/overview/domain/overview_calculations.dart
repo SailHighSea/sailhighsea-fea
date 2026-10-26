@@ -239,3 +239,53 @@ OverviewData buildOverview({
     people: people,
   );
 }
+
+/// One category's month split by person: [byPerson] holds cents per person id (the ids in
+/// [OverviewData.people]).
+class CategoryByPerson {
+  const CategoryByPerson({
+    required this.name,
+    required this.colorKey,
+    required this.totalCents,
+    required this.byPerson,
+  });
+
+  final String name;
+  final String colorKey;
+  final int totalCents;
+  final Map<String, int> byPerson;
+}
+
+/// The biggest categories of [month], each split by who spent it. Same person keys as
+/// [buildOverview] (`null` or "You" is [currentUserId]).
+List<CategoryByPerson> buildCategoriesByPerson({
+  required DateTime month,
+  required List<ExpenseRow> expenses,
+  required List<CategoryRow> categories,
+  required String? currentUserId,
+}) {
+  final prefix = formatDay(DateTime(month.year, month.month)).substring(0, 7);
+  final categoryById = {for (final c in categories) c.id: c};
+  final split = <String, Map<String, int>>{};
+  for (final e in expenses) {
+    if (e.deletedAt != null || !e.spentOn.startsWith(prefix)) continue;
+    final by = e.createdBy;
+    final who = (by == null || by == 'You') ? (currentUserId ?? 'You') : by;
+    final cats = split.putIfAbsent(e.categoryId, () => {});
+    cats[who] = (cats[who] ?? 0) + e.amountCents;
+  }
+  final out = [
+    for (final entry in split.entries)
+      CategoryByPerson(
+        name: categoryById[entry.key]?.name ?? 'Other',
+        colorKey: categoryById[entry.key]?.color ?? 'other',
+        totalCents: entry.value.values.fold<int>(0, (s, v) => s + v),
+        byPerson: entry.value,
+      ),
+  ];
+  out.sort((a, b) {
+    final c = b.totalCents.compareTo(a.totalCents);
+    return c != 0 ? c : a.name.toLowerCase().compareTo(b.name.toLowerCase());
+  });
+  return out;
+}
