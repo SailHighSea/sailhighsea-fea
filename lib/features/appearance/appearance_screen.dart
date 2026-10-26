@@ -67,6 +67,14 @@ class AppearanceScreen extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextLinkButton(
+              key: const ValueKey('open-categories'),
+              label: 'Categories: icons and colours',
+              onTap: () => context.go('/categories'),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextLinkButton(
               key: const ValueKey('open-privacy-data'),
               label: 'Privacy and data: backup, restore, import, lock',
               onTap: () => context.go('/data'),

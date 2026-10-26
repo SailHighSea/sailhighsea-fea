@@ -32,11 +32,17 @@ void main() {
   swipeMonthTests();
 
   group('Settings tab', () {
-    testWidgets('the phone has four tabs, and Settings lists the extras', (
+    testWidgets('the phone has five tabs, and Settings lists the extras', (
       tester,
     ) async {
       await pumpApp(tester, size: const Size(390, 844));
-      for (final label in ['Home', 'Budgets', 'Insights', 'Settings']) {
+      for (final label in [
+        'Home',
+        'Budgets',
+        'Goals',
+        'Insights',
+        'Settings',
+      ]) {
         expect(find.text(label), findsWidgets, reason: label);
       }
       expect(
@@ -47,7 +53,7 @@ void main() {
       await settle(tester);
       for (final k in [
         'settings-family',
-        'settings-goals',
+        'settings-categories',
         'settings-bills',
         'settings-appearance',
         'settings-data',
@@ -62,8 +68,8 @@ void main() {
 
     testWidgets('an item opens its page', (tester) async {
       await pumpApp(tester, size: const Size(390, 844), location: '/settings');
-      await tapKey(tester, 'settings-goals');
-      expect(find.text('Savings goals'), findsWidgets);
+      await tapKey(tester, 'settings-bills');
+      expect(find.text('Upcoming bills'), findsWidgets);
     });
 
     testWidgets('fits at large text', (tester) async {
