@@ -53,11 +53,8 @@ void main() {
                 reason: '${d.label} tab',
               );
             }
-            expect(
-              find.text('Goals'),
-              findsNothing,
-              reason: 'Goals is on the Settings page on the phone',
-            );
+            expect(AppDestination.tabs, hasLength(5));
+            expect(find.text('Goals'), findsWidgets, reason: 'Goals is a tab');
             expect(find.text('Expenses'), findsNothing);
           case WindowClass.medium:
             final rail = find.byWidgetPredicate(
@@ -118,7 +115,10 @@ void main() {
         for (final d in AppDestination.values) {
           if (d == AppDestination.home) continue;
           // The Settings tab exists on the phone only; larger windows list its items directly.
-          if ((d == AppDestination.settings || d == AppDestination.data) &&
+          if ((d == AppDestination.settings ||
+                  d == AppDestination.data ||
+                  d == AppDestination.categories ||
+                  d == AppDestination.about) &&
               !compact) {
             continue;
           }

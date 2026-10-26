@@ -68,7 +68,7 @@ void main() {
           titleBarPlatformProvider.overrideWithValue(platform),
         ],
       );
-      expect(find.text('Family Expenses'), findsWidgets);
+      expect(find.text('FET Family Expenses Tracker'), findsWidgets);
       await tapKey(tester, 'title-minimize');
       await tapKey(tester, 'title-maximize');
       expect(

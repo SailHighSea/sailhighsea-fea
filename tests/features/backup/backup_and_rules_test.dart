@@ -522,10 +522,7 @@ void main() {
       await tester.ensureVisible(find.byKey(const ValueKey('restore-file')));
       await tester.tap(find.byKey(const ValueKey('restore-file')));
       await settle(tester);
-      expect(
-        find.text('That file is not a Family Expenses backup.'),
-        findsOneWidget,
-      );
+      expect(find.text('That file is not an FET backup.'), findsOneWidget);
       expect(find.text('Restore this backup?'), findsNothing);
     });
 

@@ -219,19 +219,74 @@ void main() {
     });
 
     test('add appends a category with the next colour and ignores duplicates by name', () async {
-      final pets = await categories.add('  Pets ');
-      expect(pets.name, 'Pets');
+      final pets = await categories.add('  Hobby ');
+      expect(pets.name, 'Hobby');
       expect(pets.sort, 6);
       expect(pets.color, newCategoryColorKeys.first);
       expect(pets.dirty, isTrue);
 
-      final again = await categories.add('pets');
+      final again = await categories.add('hobby');
       expect(again.id, pets.id);
       expect(await categories.getAll(), hasLength(7));
 
-      final school = await categories.add('School');
+      final school = await categories.add('Stuff');
       expect(school.color, newCategoryColorKeys[1]);
     });
+
+    test('a name with a known word gets that icon and colour', () async {
+      final c = await categories.add('Grocery run');
+      expect(c.icon, 'local_grocery_store');
+      expect(c.color, 'green');
+      final plain = await categories.add('Hobby');
+      expect(plain.icon, isNull);
+    });
+
+    test(
+      'update changes name, icon and colour; another name is refused',
+      () async {
+        final a = await categories.add('Hobby');
+        await categories.add('Stuff');
+        await categories.update(
+          a.id,
+          name: 'Crafts',
+          color: 'violet',
+          icon: 'toys',
+        );
+        final row = (await categories.getAll()).firstWhere((c) => c.id == a.id);
+        expect([row.name, row.color, row.icon], ['Crafts', 'violet', 'toys']);
+        expect(row.dirty, isTrue);
+        expect(
+          () =>
+              categories.update(a.id, name: 'stuff', color: 'red', icon: null),
+          throwsArgumentError,
+        );
+      },
+    );
+
+    test(
+      'delete moves the expenses to Other and removes the category',
+      () async {
+        final a = await categories.add('Hobby');
+        final id = await expenses.add(
+          amountCents: 500,
+          categoryId: a.id,
+          spentOn: DateTime(2026, 10, 1),
+          note: 'Glue',
+          createdBy: 'You',
+        );
+        await categories.delete(a.id);
+        expect((await categories.getAll()).any((c) => c.id == a.id), isFalse);
+        final e = await (db.select(
+          db.expenses,
+        )..where((x) => x.id.equals(id))).getSingle();
+        expect(e.categoryId, 'default-other');
+        await categories.delete('default-other');
+        expect(
+          (await categories.getAll()).any((c) => c.id == 'default-other'),
+          isTrue,
+        );
+      },
+    );
 
     test('empty names are rejected', () async {
       expect(() => categories.add('   '), throwsArgumentError);

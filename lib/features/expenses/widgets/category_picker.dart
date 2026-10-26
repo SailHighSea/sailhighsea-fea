@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/db/app_database.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/widgets/category_badge.dart';
 
 /// Category tiles, three per row, plus a dashed "+ New" tile.
 class CategoryPicker extends StatelessWidget {
@@ -38,6 +39,8 @@ class CategoryPicker extends StatelessWidget {
         (w) => _Tile(
           width: w,
           label: c.name,
+          icon: c.icon,
+          colorKey: c.color,
           selected: c.id == selectedId,
           background: tileColor,
           onTap: () => onSelect(c.id),
@@ -88,10 +91,14 @@ class _Tile extends StatelessWidget {
     required this.onTap,
     this.dashed = false,
     this.background,
+    this.icon,
+    this.colorKey,
   });
 
   final double width;
   final String label;
+  final String? icon;
+  final String? colorKey;
   final bool selected;
   final bool dashed;
   final Color? background;
@@ -123,15 +130,26 @@ class _Tile extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               border: selected ? Border.all(color: t.primary, width: 2) : null,
             ),
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: textColor,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (colorKey != null) ...[
+                  CategoryBadge(icon: icon, colorKey: colorKey!, size: 26),
+                  const SizedBox(width: 6),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

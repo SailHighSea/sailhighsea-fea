@@ -73,6 +73,7 @@ void main() {
     }) async {
       String? picked = 'unset';
       await pumpApp(tester, size: size, location: '/appearance');
+      await tester.ensureVisible(find.byKey(const ValueKey('currency-row')));
       await tester.tap(find.byKey(const ValueKey('currency-row')));
       await tester.pumpAndSettle();
       return picked;
@@ -144,6 +145,7 @@ void main() {
         size: const Size(1280, 800),
         location: '/appearance',
       );
+      await tester.ensureVisible(find.byKey(const ValueKey('currency-row')));
       await tester.tap(find.byKey(const ValueKey('currency-row')));
       await tester.pumpAndSettle();
       await tester.enterText(
@@ -184,6 +186,7 @@ void main() {
       );
       await tester.ensureVisible(find.byKey(const ValueKey('currency-row')));
       await tester.pump();
+      await tester.ensureVisible(find.byKey(const ValueKey('currency-row')));
       await tester.tap(find.byKey(const ValueKey('currency-row')));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);

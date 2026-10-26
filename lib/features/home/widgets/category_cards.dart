@@ -2,23 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../core/money/money_format.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/category_style.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../home_data.dart';
-
-/// Material icon for a category's icon name (`restaurant`, `directions_bus`...); a plain category
-/// icon for names it does not know and for categories made by the person.
-IconData categoryIconData(String? name) => switch (name) {
-  'restaurant' => Icons.restaurant,
-  'receipt' => Icons.receipt_long,
-  'directions_bus' => Icons.directions_bus,
-  'celebration' => Icons.celebration,
-  'favorite' => Icons.favorite,
-  'shopping_cart' => Icons.shopping_cart,
-  'home' => Icons.home,
-  'school' => Icons.school,
-  'pets' => Icons.pets,
-  _ => Icons.category,
-};
 
 String _changeLabel(CategoryCompare c) {
   final p = c.changePercent;

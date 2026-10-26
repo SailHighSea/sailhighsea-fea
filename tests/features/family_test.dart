@@ -239,7 +239,7 @@ void main() {
       await _tap(tester, _key('sign-out'));
       expect(env.auth.calls, contains('sign-out'));
       expect(
-        find.text('Family Expenses'),
+        find.text('FET Family Expenses Tracker'),
         findsOneWidget,
         reason: 'back at sign-in',
       );

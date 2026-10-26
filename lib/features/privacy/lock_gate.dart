@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/app_info.dart';
 import '../../core/theme/app_tokens.dart';
 import '../expenses/expense_form_screen.dart' show PrimaryPillButton;
 import 'app_lock.dart';
@@ -84,7 +85,7 @@ class _LockScreen extends ConsumerWidget {
                   Semantics(
                     header: true,
                     child: Text(
-                      'Family Expenses is locked',
+                      '$kAppShortName is locked',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 20,

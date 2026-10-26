@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../../core/app_info.dart';
 import '../../core/theme/appearance_provider.dart';
 
 /// Asks the device to confirm who is holding it (fingerprint, face, PIN, Windows Hello).
@@ -92,7 +93,7 @@ class AppLockController extends Notifier<AppLockState> {
   Future<bool> unlock() async {
     final ok = await ref
         .read(appLockServiceProvider)
-        .authenticate('Unlock Family Expenses');
+        .authenticate('Unlock $kAppShortName');
     if (ok && ref.mounted) {
       state = AppLockState(enabled: state.enabled, locked: false);
     }

@@ -6,6 +6,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../../core/app_info.dart';
 import 'reminder_plan.dart';
 
 /// Shows and schedules the bill reminders. Hardware-specific, so it sits behind an interface
@@ -71,7 +72,7 @@ class LocalNotificationsScheduler implements ReminderScheduler {
           ),
           linux: LinuxInitializationSettings(defaultActionName: 'Open'),
           windows: WindowsInitializationSettings(
-            appName: 'Family Expenses',
+            appName: kAppName,
             appUserModelId: 'app.familyexpenses.FamilyExpenses',
             guid: '6f3b2a54-7d7e-4c55-9d52-3d5c4f9a0b11',
           ),

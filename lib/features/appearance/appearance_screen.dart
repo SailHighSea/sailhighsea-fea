@@ -67,6 +67,30 @@ class AppearanceScreen extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: TextLinkButton(
+              key: const ValueKey('open-about'),
+              label: 'About FET',
+              onTap: () => context.go('/about'),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextLinkButton(
+              key: const ValueKey('open-personalise'),
+              label: 'Backgrounds and pictures',
+              onTap: () => context.go('/personalise'),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextLinkButton(
+              key: const ValueKey('open-categories'),
+              label: 'Categories: icons and colours',
+              onTap: () => context.go('/categories'),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextLinkButton(
               key: const ValueKey('open-privacy-data'),
               label: 'Privacy and data: backup, restore, import, lock',
               onTap: () => context.go('/data'),

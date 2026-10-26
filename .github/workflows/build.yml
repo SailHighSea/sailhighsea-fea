@@ -180,7 +180,7 @@ jobs:
       - name: Make dmg
         run: |
           APP=$(ls -d build/macos/Build/Products/Release/*.app | head -1)
-          hdiutil create -volname "Family Expenses" -srcfolder "$APP" -ov -format UDZO family-expenses-macos.dmg
+          hdiutil create -volname "FET Family Expenses Tracker" -srcfolder "$APP" -ov -format UDZO family-expenses-macos.dmg
 
       - uses: actions/upload-artifact@v4
         with:

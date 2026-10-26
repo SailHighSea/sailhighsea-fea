@@ -42,7 +42,7 @@ void main() {
         final report = await maya.sync.syncOnce();
         expect(report.pushed, 2);
         final sheet = world.sheets[maya.settings.ownSheetId!]!;
-        expect(sheet.title, 'Family Expenses - Maya');
+        expect(sheet.title, 'FET Family Expenses - Maya');
         expect(
           sheet.tabs_.keys,
           containsAll([

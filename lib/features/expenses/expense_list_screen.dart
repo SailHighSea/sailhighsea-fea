@@ -19,6 +19,7 @@ import '../../core/money/money_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/time.dart';
+import '../../core/widgets/category_badge.dart';
 import '../../core/widgets/context_menu_region.dart';
 import '../../core/widgets/month_navigator.dart';
 import '../../core/widgets/surface_card.dart';
@@ -658,13 +659,10 @@ class _ExpenseTile extends StatelessWidget {
                           )
                         : null,
                   ),
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: t.categoryColor(category?.color ?? 'other'),
-                    shape: BoxShape.circle,
-                  ),
+                CategoryBadge(
+                  icon: category?.icon,
+                  colorKey: category?.color ?? 'other',
+                  size: 36,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

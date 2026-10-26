@@ -18,6 +18,9 @@ import '../family/member_providers.dart';
 import '../onboarding/onboarding_gate.dart';
 import '../../core/time.dart';
 import '../backup/backup_service.dart';
+import '../backup/settings_backup.dart';
+import '../bills/bill_providers.dart' show reminderSettingsProvider;
+import '../../core/theme/personal_look.dart';
 import 'app_lock.dart';
 import 'csv_export.dart';
 import 'csv_share.dart';
@@ -76,7 +79,10 @@ class PrivacyCard extends ConsumerWidget {
     );
     if (choice == null) return;
     final service = _backupService(ref);
-    final text = await service.export(password: choice.password);
+    final text = await service.export(
+      password: choice.password,
+      settings: await exportSettings(ref.read(sharedPreferencesProvider)),
+    );
     final d = ref.read(clockProvider)();
     String two(int n) => n.toString().padLeft(2, '0');
     final name =
@@ -264,7 +270,7 @@ Future<void> restoreFromBackup(BuildContext context, WidgetRef ref) async {
     builder: (c) => AlertDialog(
       title: const Text('Restore this backup?'),
       content: Text(
-        'It has ${counts.expenses} expenses, ${counts.categories} categories, ${counts.budgets} budgets, ${counts.goals} goals and ${counts.bills} bills. Anything on this device that is newer is kept, and nothing is deleted.',
+        'It has ${counts.expenses} expenses, ${counts.categories} categories, ${counts.budgets} budgets, ${counts.goals} goals and ${counts.bills} bills${counts.hasSettings ? ', and your theme and settings' : ''}. Anything on this device that is newer is kept, and nothing is deleted.',
       ),
       actions: [
         TextButton(
@@ -282,6 +288,13 @@ Future<void> restoreFromBackup(BuildContext context, WidgetRef ref) async {
   if (yes != true) return;
   try {
     final done = await service.restore(text);
+    final settings = service.settingsIn(text);
+    if (settings != null) {
+      await restoreSettings(ref.read(sharedPreferencesProvider), settings);
+      ref.invalidate(appearanceProvider);
+      ref.invalidate(personalLookProvider);
+      ref.invalidate(reminderSettingsProvider);
+    }
     messenger?.showSnackBar(
       SnackBar(content: Text('Restored ${done.expenses} expenses')),
     );
