@@ -2,6 +2,8 @@
 
 ## Fixes after Phase 8
 
+- Colour themes: six new ones (Lavender, Rose, Lagoon, Indigo, Mocha, Citrus), ten in all, each in Light, Dark and Pure black with checked contrast.
+- Backgrounds and pictures (Appearance → Backgrounds and pictures): a colour, a gradient or the person's own picture (gallery or camera on phones, file chooser on computers) behind every screen, and the same for the Home "Spent this month" card, with blur, dimming, text colour (automatic, light, dark) and a contrast check. The app switches to the light or dark look that suits the background; cards stay solid. Pictures are scaled down, kept on the device and are not in the backup file. "Reset" returns to the theme.
 - Goals is a bottom tab on the phone (Home, Budgets, Goals, Insights, Settings).
 - Categories: a Categories page (Settings tab; linked from Appearance on larger windows) to add, edit and delete categories with their own icon (48 to choose from) and colour (26 to choose from), with 38 ready-made ones (Groceries, Rent, Fuel, Pets, Travel...) to add in one tap. A new category picks an icon and colour from the words in its name. Deleting moves its expenses to Other. Icons show in the expense list and the category picker.
 - Goals page now has the savings picture: monthly income (with the month it applies from), total savings, "left to save this month" (income − spent − bills still due − monthly goal amounts), where the income goes, savings in goals vs not in a goal, a warning when the goals ask for more than is left, and a 6-month savings rate. Income and the total stay on this device (private) and are in the backup file. Schema v8.

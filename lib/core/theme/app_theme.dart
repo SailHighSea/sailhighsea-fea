@@ -15,7 +15,12 @@ abstract final class AppRadii {
 /// Minimum tap target (rule 8).
 const double kMinTapTarget = 44;
 
-ThemeData buildTheme(AppearanceSettings settings, ThemeVariant variant) {
+/// [transparentScaffold] lets a personal background picture or gradient show through the screens.
+ThemeData buildTheme(
+  AppearanceSettings settings,
+  ThemeVariant variant, {
+  bool transparentScaffold = false,
+}) {
   final tokens = tokensFor(
     settings.colorTheme,
     variant,
@@ -42,7 +47,9 @@ ThemeData buildTheme(AppearanceSettings settings, ThemeVariant variant) {
     brightness: brightness,
     colorScheme: scheme,
     fontFamily: appFontFamily,
-    scaffoldBackgroundColor: tokens.background,
+    scaffoldBackgroundColor: transparentScaffold
+        ? const Color(0x00000000)
+        : tokens.background,
     canvasColor: tokens.background,
     dividerColor: tokens.border,
     splashFactory: InkRipple.splashFactory,

@@ -1,4 +1,3 @@
-import 'package:family_expenses/core/db/app_database.dart';
 import 'package:family_expenses/core/db/db_providers.dart';
 import 'package:family_expenses/core/theme/category_style.dart';
 import 'package:family_expenses/features/expenses/expense_providers.dart';

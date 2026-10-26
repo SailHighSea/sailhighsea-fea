@@ -10,6 +10,7 @@ import '../../core/layout/dashboard_layout.dart';
 import '../../core/layout/destinations.dart';
 import '../../core/money/money_provider.dart';
 import '../family/member_providers.dart';
+import '../../core/theme/personal_look.dart';
 import '../../core/time.dart';
 import '../overview/overview_providers.dart';
 import '../overview/widgets/category_by_person_card.dart';
@@ -20,6 +21,7 @@ import 'widgets/bill_goal_cards.dart';
 import 'widgets/categories_card.dart';
 import 'widgets/category_cards.dart';
 import 'widgets/hero_card.dart';
+import 'widgets/personal_hero.dart';
 import 'widgets/home_header.dart';
 import 'widgets/recent_card.dart';
 import 'widgets/trend_cards.dart';
@@ -72,7 +74,10 @@ class HomeScreen extends ConsumerWidget {
           if (v < -300) months.next();
           if (v > 300) months.previous();
         },
-        child: HeroCard(summary: summary, money: money),
+        child: PersonalHero(
+          style: ref.watch(personalLookProvider).card,
+          child: HeroCard(summary: summary, money: money),
+        ),
       ),
       trend: (context, mode) => switch (mode) {
         DashboardMode.wide => MonthBarsCard(
