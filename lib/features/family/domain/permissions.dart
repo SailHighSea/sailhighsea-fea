@@ -5,9 +5,13 @@ import 'visibility.dart';
 /// `supabase/migrations` and exists only to hide buttons the server would reject anyway
 /// (rule 6: the server is the authority). If a rule changes, change the SQL first.
 class Permissions {
-  const Permissions(this.role);
+  const Permissions(this.role, {this.localData = false});
 
   final Role role;
+
+  /// Google Sheets mode: everyone keeps their own data on their own device, so everyone may add
+  /// categories for it.
+  final bool localData;
 
   /// Used before sign-in and when Supabase is not configured: one person, everything allowed.
   static const local = Permissions(Role.owner);
@@ -18,7 +22,7 @@ class Permissions {
   bool get canWriteExpenses => _isManager || role == Role.editor;
 
   /// Categories, budgets, goals and bills (PLAN.md open decision 2).
-  bool get canManageCategories => _isManager;
+  bool get canManageCategories => _isManager || localData;
   bool get canManageBudgets => _isManager;
   bool get canManageGoals => _isManager;
   bool get canManageBills => _isManager;

@@ -27,6 +27,18 @@ final homeExpensesProvider = StreamProvider<List<ExpenseRow>>((ref) {
       .map((rows) => forMember(rows, person, me));
 });
 
+/// The previous month, for the "against last month" comparison.
+final homePreviousExpensesProvider = StreamProvider<List<ExpenseRow>>((ref) {
+  final month = ref.watch(selectedMonthProvider);
+  final person = ref.watch(activeMemberFilterProvider);
+  final me = ref.watch(currentUserIdProvider);
+  final prev = DateTime(month.year, month.month - 1);
+  return ref
+      .watch(expenseRepositoryProvider)
+      .watchRange(prev, DateTime(prev.year, prev.month, daysInMonth(prev)))
+      .map((rows) => forMember(rows, person, me));
+});
+
 /// What Home shows for the selected month, computed from the local database.
 /// The next bill and the featured goal come from the bills and goals the household set up.
 final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
@@ -54,6 +66,8 @@ final homeSummaryProvider = Provider<AsyncValue<HomeSummary>>((ref) {
       addedByLabel: ref.watch(addedByLabelProvider),
       nextBill: _nextBill(ref.watch(upcomingBillsProvider).value ?? const []),
       goal: _goal(ref.watch(goalViewsProvider).value ?? const []),
+      previousExpenses:
+          ref.watch(homePreviousExpensesProvider).value ?? const [],
     ),
   );
 });

@@ -116,6 +116,36 @@ class ExpenseRepository {
         ),
       );
 
+  /// Soft deletes several at once (select and delete).
+  Future<void> softDeleteMany(Iterable<String> ids) =>
+      (_db.update(_db.expenses)..where((e) => e.id.isIn(ids.toList()))).write(
+        ExpensesCompanion(
+          deletedAt: Value(_clock()),
+          updatedAt: Value(_clock()),
+          dirty: const Value(true),
+        ),
+      );
+
+  /// Undo for [softDeleteMany].
+  Future<void> restoreMany(Iterable<String> ids) =>
+      (_db.update(_db.expenses)..where((e) => e.id.isIn(ids.toList()))).write(
+        ExpensesCompanion(
+          deletedAt: const Value(null),
+          updatedAt: Value(_clock()),
+          dirty: const Value(true),
+        ),
+      );
+
+  /// Moves several expenses to one category.
+  Future<void> setCategoryMany(Iterable<String> ids, String categoryId) =>
+      (_db.update(_db.expenses)..where((e) => e.id.isIn(ids.toList()))).write(
+        ExpensesCompanion(
+          categoryId: Value(categoryId),
+          updatedAt: Value(_clock()),
+          dirty: const Value(true),
+        ),
+      );
+
   /// Undo for [softDelete].
   Future<void> restore(String id) =>
       (_db.update(_db.expenses)..where((e) => e.id.equals(id))).write(

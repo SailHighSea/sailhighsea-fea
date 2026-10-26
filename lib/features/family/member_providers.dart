@@ -77,7 +77,10 @@ final currentRoleProvider = Provider<Role>((ref) {
 
 /// What the UI may offer. The server enforces the same rules with Row Level Security.
 final permissionsProvider = Provider<Permissions>(
-  (ref) => Permissions(ref.watch(currentRoleProvider)),
+  (ref) => Permissions(
+    ref.watch(currentRoleProvider),
+    localData: ref.watch(isSheetsModeProvider),
+  ),
 );
 
 final _uuidPattern = RegExp(

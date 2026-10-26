@@ -15,6 +15,7 @@ class HomeSummary {
     required this.last7,
     required this.monthDaily,
     required this.recent,
+    this.comparison = const [],
     this.nextBill,
     this.goal,
   });
@@ -35,6 +36,9 @@ class HomeSummary {
   final List<DayBar> last7;
   final List<DayBar> monthDaily;
   final List<RecentExpense> recent;
+
+  /// Every category with spending this month or at the same point last month.
+  final List<CategoryCompare> comparison;
   final UpcomingBill? nextBill;
   final GoalProgress? goal;
 
@@ -59,6 +63,36 @@ class CategorySpend {
   final String name;
   final String colorKey;
   final int cents;
+}
+
+/// A category's spending this month against the same days of the previous month.
+@immutable
+class CategoryCompare {
+  const CategoryCompare({
+    required this.name,
+    required this.colorKey,
+    required this.cents,
+    required this.previousCents,
+    this.icon,
+  });
+
+  final String name;
+  final String colorKey;
+  final String? icon;
+  final int cents;
+
+  /// Last month, up to the same day of the month.
+  final int previousCents;
+
+  /// Whole percent change (rounded, integer maths); null when there was nothing last month.
+  int? get changePercent {
+    if (previousCents <= 0) return null;
+    final diff = (cents - previousCents) * 100;
+    final half = previousCents ~/ 2;
+    return diff >= 0
+        ? (diff + half) ~/ previousCents
+        : -((-diff + half) ~/ previousCents);
+  }
 }
 
 @immutable
