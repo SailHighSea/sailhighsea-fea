@@ -12,6 +12,7 @@ import '../../core/money/money_provider.dart';
 import '../family/member_providers.dart';
 import '../../core/time.dart';
 import '../overview/overview_providers.dart';
+import '../overview/widgets/category_by_person_card.dart';
 import '../overview/widgets/everyone_card.dart';
 import '../overview/widgets/member_filter_chips.dart';
 import 'home_providers.dart';
@@ -123,6 +124,11 @@ class HomeScreen extends ConsumerWidget {
                 ref.read(memberFilterProvider.notifier).select(null);
                 goTo(AppDestination.insights);
               },
+            )
+          : null,
+      byPerson: ref.watch(canSeeEveryoneProvider)
+          ? (context, mode) => CategoryByPersonCard(
+              horizontalPadding: mode == DashboardMode.wide ? 20 : 16,
             )
           : null,
       recent: (context, mode) => RecentCard(

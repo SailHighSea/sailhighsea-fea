@@ -187,12 +187,19 @@ class _TabItem extends StatelessWidget {
           children: [
             NavIcon(destination, size: 24, color: color),
             const SizedBox(height: 4),
-            Text(
-              destination.label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: color,
+            // One line, shrunk a little rather than wrapped, so four tabs fit at large text.
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  destination.label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: color,
+                  ),
+                ),
               ),
             ),
           ],

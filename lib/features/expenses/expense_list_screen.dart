@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../import/category_guess.dart';
 
 import 'widgets/new_category.dart';
 import '../../core/widgets/pill_button.dart';
@@ -79,6 +82,19 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
       );
   }
 
+  Future<void> _pickRange(DateTimeRange? current) async {
+    final now = ref.read(clockProvider)();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(now.year + 1, 12, 31),
+      initialDateRange: current,
+      helpText: 'From and to',
+      saveText: 'Show',
+    );
+    if (picked != null) ref.read(expenseRangeProvider.notifier).set(picked);
+  }
+
   bool _selecting = false;
   final _selected = <String>{};
 
@@ -86,6 +102,27 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
     _selecting = true;
     if (first != null) _selected.add(first);
   });
+
+  /// Selects every listed expense that looks like [source]: the same shop (same words in the
+  /// note, ignoring digits and punctuation), or the same category when there is no note.
+  void _selectSimilar(
+    ExpenseRow source,
+    List<ExpenseRow> rows,
+    bool Function(String? createdBy) canEdit,
+  ) {
+    final key = descriptionKey(source.note);
+    bool same(ExpenseRow e) => key.isEmpty
+        ? e.note.trim().isEmpty && e.categoryId == source.categoryId
+        : descriptionKey(e.note) == key;
+    setState(() {
+      _selecting = true;
+      for (final e in rows) {
+        if (e.id == source.id || (same(e) && canEdit(e.createdBy))) {
+          _selected.add(e.id);
+        }
+      }
+    });
+  }
 
   void _stopSelecting() => setState(() {
     _selecting = false;
@@ -168,6 +205,7 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
         );
       }
     });
+    final range = ref.watch(expenseRangeProvider);
     final month = ref.watch(selectedMonthProvider);
     final months = ref.read(selectedMonthProvider.notifier);
     final filter = ref.watch(expenseFilterProvider);
@@ -190,26 +228,44 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextLinkButton(
+                  _PillAction(
                     key: ValueKey(
                       _selecting ? 'select-cancel' : 'select-start',
                     ),
                     label: _selecting ? 'Cancel' : 'Select',
                     onTap: _selecting ? _stopSelecting : _startSelecting,
                   ),
-                  if (!_selecting)
+                  if (!_selecting) ...[
+                    const SizedBox(width: 8),
                     _AddButton(onTap: () => context.push('/add')),
+                  ],
                 ],
               )
             : null,
       ),
       children: [
-        MonthNavigator(
-          month: month,
-          onPrevious: months.previous,
-          onNext: months.next,
-          titleSize: 18,
-        ),
+        if (range == null)
+          MonthNavigator(
+            month: month,
+            onPrevious: months.previous,
+            onNext: months.next,
+            titleSize: 18,
+          )
+        else
+          _RangeBar(
+            range: range,
+            onChange: () => _pickRange(range),
+            onClear: ref.read(expenseRangeProvider.notifier).clear,
+          ),
+        if (range == null)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextLinkButton(
+              key: const ValueKey('range-start'),
+              label: 'Choose a date range',
+              onTap: () => _pickRange(null),
+            ),
+          ),
         if (ref.watch(canSeeEveryoneProvider)) ...[
           const SizedBox(height: 12),
           const MemberFilterChips(),
@@ -315,6 +371,8 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                           selected: _selected.contains(rows[i].id),
                           onToggle: () => _toggle(rows[i].id),
                           onLongPress: () => _startSelecting(rows[i].id),
+                          onSelectSimilar: () =>
+                              _selectSimilar(rows[i], rows, canEdit),
                           onEdit: () =>
                               context.push('/expenses/${rows[i].id}/edit'),
                           onDelete: () => _delete(rows[i]),
@@ -409,6 +467,7 @@ class _SearchField extends StatelessWidget {
               focusNode: focusNode,
               onChanged: onChanged,
               textInputAction: TextInputAction.search,
+              textAlignVertical: TextAlignVertical.center,
               style: TextStyle(fontSize: 15, color: t.text),
               cursorColor: t.primary,
               decoration: InputDecoration(
@@ -456,61 +515,66 @@ class _CategoryFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tokens;
     final chips = <(String?, String)>[
       (null, 'All'),
       for (final c in categories) (c.id, c.name),
     ];
-    return SizedBox(
-      height: kMinTapTarget,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: chips.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final t = context.tokens;
-          final (id, label) = chips[i];
-          final selected = id == selectedId;
-          return Semantics(
+    // Wrapped, so every category is visible and none is cut off at the edge.
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final (id, label) in chips)
+          Semantics(
             button: true,
-            selected: selected,
+            selected: id == selectedId,
             label: id == null ? 'All categories' : 'Category $label',
             excludeSemantics: true,
             child: Material(
-              color: selected ? t.navActiveBackground : t.surface,
+              color: id == selectedId ? t.navActiveBackground : t.surface,
               shape: StadiumBorder(
                 side: BorderSide(
-                  color: selected ? t.primary : t.chipBorder,
-                  width: selected ? 2 : 1,
+                  color: id == selectedId ? t.primary : t.chipBorder,
+                  width: id == selectedId ? 2 : 1,
                 ),
               ),
               child: InkWell(
                 customBorder: const StadiumBorder(),
                 onTap: () => onSelect(id),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Center(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: selected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: selected ? t.navActiveText : t.text,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: kMinTapTarget,
+                    minWidth: kMinTapTarget,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Center(
+                      widthFactor: 1,
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: id == selectedId
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: id == selectedId ? t.navActiveText : t.text,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+      ],
     );
   }
 }
 
-enum _RowAction { edit, delete }
+enum _RowAction { edit, selectSimilar, delete }
 
 class _ExpenseTile extends StatelessWidget {
   const _ExpenseTile({
@@ -527,6 +591,7 @@ class _ExpenseTile extends StatelessWidget {
     required this.onToggle,
     required this.onLongPress,
     required this.onEdit,
+    required this.onSelectSimilar,
     required this.onDelete,
   });
 
@@ -546,6 +611,7 @@ class _ExpenseTile extends StatelessWidget {
   final VoidCallback onToggle;
   final VoidCallback onLongPress;
   final VoidCallback onEdit;
+  final VoidCallback onSelectSimilar;
   final VoidCallback onDelete;
 
   @override
@@ -640,13 +706,21 @@ class _ExpenseTile extends StatelessWidget {
                   PopupMenuButton<_RowAction>(
                     tooltip: 'More actions for $title',
                     icon: Icon(Icons.more_vert, color: t.muted),
-                    onSelected: (action) =>
-                        action == _RowAction.edit ? onEdit() : onDelete(),
+                    onSelected: (action) => switch (action) {
+                      _RowAction.edit => onEdit(),
+                      _RowAction.selectSimilar => onSelectSimilar(),
+                      _RowAction.delete => onDelete(),
+                    },
                     itemBuilder: (context) => const [
                       PopupMenuItem(
                         value: _RowAction.edit,
                         height: kMinTapTarget,
                         child: Text('Edit'),
+                      ),
+                      PopupMenuItem(
+                        value: _RowAction.selectSimilar,
+                        height: kMinTapTarget,
+                        child: Text('Select similar'),
                       ),
                       PopupMenuItem(
                         value: _RowAction.delete,
@@ -665,6 +739,7 @@ class _ExpenseTile extends StatelessWidget {
     return ContextMenuRegion(
       items: [
         ContextMenuItem('Edit', onEdit),
+        ContextMenuItem('Select similar', onSelectSimilar),
         ContextMenuItem('Delete', onDelete, destructive: true),
       ],
       child: Dismissible(
@@ -805,6 +880,109 @@ class _ChangeCategoryDialogState extends State<_ChangeCategoryDialog> {
           child: const Text('Move'),
         ),
       ],
+    );
+  }
+}
+
+/// A small outlined pill next to the Add button (Select, Cancel).
+class _PillAction extends StatelessWidget {
+  const _PillAction({super.key, required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        shape: StadiumBorder(side: BorderSide(color: t.chipBorder)),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: kMinTapTarget,
+              minWidth: kMinTapTarget,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                widthFactor: 1,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: t.primary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown instead of the month arrows while a custom date range is active.
+class _RangeBar extends StatelessWidget {
+  const _RangeBar({
+    required this.range,
+    required this.onChange,
+    required this.onClear,
+  });
+
+  final DateTimeRange range;
+  final VoidCallback onChange;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    String d(DateTime x) => DateFormat('d MMM yyyy', 'en_US').format(x);
+    return SurfaceCard(
+      key: const ValueKey('range-bar'),
+      child: Row(
+        children: [
+          Icon(Icons.date_range, color: t.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Semantics(
+              button: true,
+              label: 'Change the date range',
+              excludeSemantics: true,
+              child: InkWell(
+                onTap: onChange,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: kMinTapTarget),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '${d(range.start)} to ${d(range.end)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: t.text,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          TextLinkButton(
+            key: const ValueKey('range-clear'),
+            label: 'Back to months',
+            onTap: onClear,
+          ),
+        ],
+      ),
     );
   }
 }

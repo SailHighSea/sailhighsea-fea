@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../core/layout/dashboard_layout.dart';
 import '../../../core/layout/destinations.dart';
-import '../../../core/layout/overflow_menu.dart';
-import '../../../core/layout/window_class.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/widgets/month_navigator.dart';
 
-/// Month navigator, Add button and (phone only) the overflow menu.
+/// Month navigator and the Add button. (Family, Goals, Bills and Appearance are on the phone's
+/// Settings tab.)
 class HomeHeader extends StatelessWidget {
   const HomeHeader({
     super.key,
@@ -81,10 +80,6 @@ class HomeHeader extends StatelessWidget {
               ),
             ),
           ),
-        ],
-        if (context.layout.isCompact) ...[
-          const SizedBox(width: 8),
-          OverflowMenuButton(onSelect: onSelectDestination),
         ],
       ],
     );

@@ -16,6 +16,7 @@ import '../../features/import/import_screen.dart';
 import '../../features/pairing/sheets_family_screen.dart';
 import '../../features/pairing/suggestions_screen.dart';
 import '../../features/privacy/privacy_screen.dart';
+import '../../features/settings/settings_screen.dart';
 import '../sheets_sync/sheets_settings.dart';
 import '../../features/scan/scan_screen.dart';
 import '../../features/expenses/widgets/fold_add_panel.dart';
@@ -137,6 +138,10 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
           GoRoute(
             path: '/family',
             pageBuilder: (c, s) => _page(s, const _FamilyEntry()),
+          ),
+          GoRoute(
+            path: '/settings',
+            pageBuilder: (c, s) => _page(s, const SettingsScreen()),
           ),
           GoRoute(
             path: '/appearance',

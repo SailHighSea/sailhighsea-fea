@@ -24,7 +24,10 @@ enum AppDestination {
     '/appearance',
     Icons.settings_outlined,
     Icons.settings,
-  );
+  ),
+
+  /// The phone's Settings tab: a page that lists Family, Goals, Bills and Appearance.
+  settings('Settings', '/settings', Icons.settings_outlined, Icons.settings);
 
   const AppDestination(this.label, this.path, this.icon, this.activeIcon);
 
@@ -37,12 +40,12 @@ enum AppDestination {
   String get railLabel => this == appearance ? 'Settings' : label;
 
   /// Items in the phone's bottom tab bar.
-  static const tabs = [home, budgets, insights];
+  static const tabs = [home, budgets, insights, settings];
 
   /// Items in the rail and sidebar, above the pinned bottom item.
   static const main = [home, budgets, insights, goals, bills, family];
 
-  /// Phone overflow menu (items not in the tab bar).
+  /// Listed on the phone's Settings tab (items not in the tab bar).
   static const overflow = [family, goals, bills, appearance];
 
   bool get isTab => tabs.contains(this);

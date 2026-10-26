@@ -1,6 +1,13 @@
 # Changelog
 
 ## Fixes after Phase 8
+
+- Settings tab: the phone now has four tabs (Home, Budgets, Insights, Settings). Settings lists Family, Goals, Bills, Appearance and Import a statement; the Home header menu is gone. Tab labels shrink to one line at large text.
+- Expenses page: Select is an outlined pill with a gap before + Add (no overlap), search text is centred, category chips wrap instead of being cut off, and a custom date range ("Choose a date range") replaces the month navigator until cleared.
+- Home: "Who spent it" card (each top category as one bar split by person, with a legend), shown only to people who see everyone.
+- Expenses: "Select similar" in a row's menu selects every expense from the same shop.
+- PDF import: statements whose columns run together (dates glued to the shop name, foreign amount before the amount in the card currency, CR glued to a reference) now read correctly; a real card statement now adds up to the statement's purchases.
+- Android updates: release builds are signed with a permanent key from GitHub secrets and the version code follows the CI run number, so a new APK installs over the old one. Setup in docs/ANDROID_SIGNING.md (one reinstall is needed the first time; back up first).
 - **Home gets two category cards on every size** (mockups D and G): "Compared with last month" (a bar per category in its colour, a tick where it stood at the same point last month, and a change chip such as `+7%`, `−20%`, `same` or `new`) and "By category" (tiles with the category icon, amount and bar, two or three across). Last month is counted only up to the same day of the month, so a big expense on the 28th does not distort the 23rd, and a short month is capped at its last day. Percentages use integer maths. The member filter applies to both. Phone and tablet stack them, the desktop shows them side by side under the existing three cards. The Home image tests need to be recreated on Windows (`HOME_GOLDENS=1 flutter test --update-goldens tests/goldens/home_golden_test.dart`) and are skipped until then.
 - **Start page**: the last intro page now also lets you choose the theme (System, Light, Dark, Pure black; applied at once) and any currency (an inline searchable list), besides where the data lives.
 - **Statement import, shops once**: the import shows each different shop once ("3 different shops", rows and total each); choosing a category for a shop fills all of its rows. Shops that still need an answer come first and are outlined. The table below stays editable per row.

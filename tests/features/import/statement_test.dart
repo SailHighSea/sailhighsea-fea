@@ -37,6 +37,7 @@ Continued on next page...
 ''';
 
 void main() {
+  glued();
   setUpAll(loadTestFonts);
 
   group('more kinds of spreadsheet', () {
@@ -591,4 +592,26 @@ class _Source implements ReceiptImageSource {
   Future<String?> takePhoto() async => path;
   @override
   Future<String?> chooseFile() async => path;
+}
+
+void glued() {
+  group('a card statement whose PDF runs the columns together', () {
+    const text = '''
+Description & ReferanceForeign CurrencyAmount in QAR
+20/08/2620/08/26Paid using bankDirect 200826K10120CR 1,529.00
+28/07/2626/07/26WILPATTU RESTAURANT, DOHA, 028807 12.00
+02/08/2630/07/26Noon, DUBAI, 025389USD 117.37 435.95
+07/08/2605/08/26Noon, DUBAI, 032983USD 6.79CR 24.23
+31/07/2629/07/26AZZCO HYPERMARKET, DOHA, 015503 3.75
+''';
+    test('reads both dates, the QAR amount of a foreign purchase, and skips credits', () {
+      final r = rowsFromStatementText(text, defaultYear: 2026);
+      expect(r.rows.skip(1).toList(), [
+        ['28/07/26', 'WILPATTU RESTAURANT, DOHA', '12.00', '', 'QAR'],
+        ['02/08/26', 'Noon, DUBAI', '435.95', '', 'QAR'],
+        ['31/07/26', 'AZZCO HYPERMARKET, DOHA', '3.75', '', 'QAR'],
+      ]);
+      expect(r.moneyIn, 2);
+    });
+  });
 }
