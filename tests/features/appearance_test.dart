@@ -98,6 +98,7 @@ void main() {
     );
     expect(container.read(appearanceProvider).largerText, isFalse);
 
+    await tester.ensureVisible(find.text('Larger text'));
     await tester.tap(find.text('Larger text'));
     await tester.pumpAndSettle();
     expect(container.read(appearanceProvider).largerText, isTrue);
@@ -106,6 +107,7 @@ void main() {
     ).scale(10);
     expect(scale, closeTo(12, 0.01));
 
+    await tester.ensureVisible(find.text('Colour-blind friendly charts'));
     await tester.tap(find.text('Colour-blind friendly charts'));
     await tester.pumpAndSettle();
     expect(container.read(appearanceProvider).colorBlindCharts, isTrue);
@@ -119,6 +121,7 @@ void main() {
       size: const Size(1024, 720),
       location: '/appearance',
     );
+    await tester.ensureVisible(find.textContaining('Singapore dollar'));
     await tester.tap(find.textContaining('Singapore dollar'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('currency-EUR')));
@@ -169,7 +172,7 @@ void main() {
         (tester) async {
           final reference = await homeTexts(tester, size, 'light', 'forest');
           for (final mode in ['dark', 'pureBlack']) {
-            for (final theme in ['forest', 'ocean', 'sunset', 'graphite']) {
+            for (final theme in ColorThemeId.values.map((t) => t.name)) {
               expect(
                 await homeTexts(tester, size, mode, theme),
                 reference,

@@ -16,7 +16,13 @@ enum ColorThemeId {
   forest('Forest'),
   ocean('Ocean'),
   sunset('Sunset'),
-  graphite('Graphite');
+  graphite('Graphite'),
+  lavender('Lavender'),
+  rose('Rose'),
+  lagoon('Lagoon'),
+  indigo('Indigo'),
+  mocha('Mocha'),
+  citrus('Citrus');
 
   const ColorThemeId(this.label);
   final String label;
