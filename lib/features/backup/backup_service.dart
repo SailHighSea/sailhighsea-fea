@@ -103,6 +103,8 @@ class BackupService {
         await (_db.select(_db.bills)..where((b) => b.deletedAt.isNull())).get(),
       ),
       'categoryRules': rows(await _db.select(_db.categoryRules).get()),
+      'incomeEntries': rows(await _db.select(_db.incomeEntries).get()),
+      'savingsBalances': rows(await _db.select(_db.savingsBalances).get()),
     };
     return const JsonEncoder.withIndent('  ').convert(doc);
   }
@@ -282,6 +284,23 @@ class BackupService {
           if (old != null && !row.updatedAt.isAfter(old.updatedAt)) continue;
           await _db.into(_db.categoryRules).insertOnConflictUpdate(row);
           ru++;
+        }
+        // Income and savings totals: the newer copy of each month or day wins.
+        for (final j in list('incomeEntries')) {
+          final row = IncomeRow.fromJson(j);
+          final old = await (_db.select(
+            _db.incomeEntries,
+          )..where((r) => r.month.equals(row.month))).getSingleOrNull();
+          if (old != null && !row.updatedAt.isAfter(old.updatedAt)) continue;
+          await _db.into(_db.incomeEntries).insertOnConflictUpdate(row);
+        }
+        for (final j in list('savingsBalances')) {
+          final row = SavingsBalanceRow.fromJson(j);
+          final old = await (_db.select(
+            _db.savingsBalances,
+          )..where((r) => r.asOn.equals(row.asOn))).getSingleOrNull();
+          if (old != null && !row.updatedAt.isAfter(old.updatedAt)) continue;
+          await _db.into(_db.savingsBalances).insertOnConflictUpdate(row);
         }
       });
     } on BackupFailure {

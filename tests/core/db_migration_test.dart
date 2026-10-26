@@ -6,6 +6,7 @@ import 'package:family_expenses/core/db/app_database.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  migration8();
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
 
   test(
@@ -179,4 +180,37 @@ void main() {
       expect(await db.select(db.categoryRules).get(), hasLength(1));
     },
   );
+}
+
+void migration8() {
+  test('a version 7 database gains the income and savings tables', () async {
+    final dir = Directory.systemTemp.createTempSync('migration7');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final file = File('${dir.path}/app.db');
+    var db = AppDatabase(NativeDatabase(file));
+    await db.select(db.categories).get();
+    await db.close();
+    db = AppDatabase(
+      NativeDatabase(
+        file,
+        setup: (raw) => raw
+          ..execute('DROP TABLE income_entries')
+          ..execute('DROP TABLE savings_balances')
+          ..execute('PRAGMA user_version = 7'),
+      ),
+    );
+    addTearDown(db.close);
+    expect(await db.select(db.incomeEntries).get(), isEmpty);
+    await db
+        .into(db.incomeEntries)
+        .insert(
+          IncomeEntriesCompanion.insert(
+            month: '2026-10',
+            amountCents: 420000,
+            updatedAt: DateTime(2026, 10, 1),
+          ),
+        );
+    expect(await db.select(db.incomeEntries).get(), hasLength(1));
+    expect(await db.select(db.savingsBalances).get(), isEmpty);
+  });
 }

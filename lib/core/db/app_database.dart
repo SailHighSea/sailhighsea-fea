@@ -47,6 +47,8 @@ const otherCategoryId = 'default-other';
     SheetPairs,
     Suggestions,
     CategoryRules,
+    IncomeEntries,
+    SavingsBalances,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -57,7 +59,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump when a table changes and add a step to [migration].
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -97,6 +99,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 7) {
         // Remembered shop -> category decisions for imports.
         await m.createTable(categoryRules);
+      }
+      if (from < 8) {
+        // Monthly income and total savings (on this device only).
+        await m.createTable(incomeEntries);
+        await m.createTable(savingsBalances);
       }
       // Future versions add steps here, for example:
       //   if (from < 6) await m.addColumn(expenses, expenses.someNewColumn);

@@ -14,12 +14,16 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/time.dart';
 import '../../core/widgets/hero_panel.dart';
+import '../../core/widgets/month_navigator.dart';
 import '../../core/widgets/pill_button.dart';
 import '../../core/widgets/surface_card.dart';
 import '../auth/auth_providers.dart';
 import '../family/member_providers.dart';
 import 'domain/goal_calculations.dart';
 import 'goal_providers.dart';
+import 'savings_providers.dart';
+import 'widgets/savings_cards.dart';
+import 'widgets/savings_sheet.dart';
 import 'widgets/goal_card.dart';
 import 'widgets/goal_sheets.dart';
 
@@ -106,6 +110,25 @@ class GoalsScreen extends ConsumerWidget {
       await repo.addMoney(r.goalId, cents: r.cents, addedBy: me);
     }
 
+    final plan = ref.watch(savingsPlanProvider).value;
+    final month = ref.watch(selectedMonthProvider);
+    Future<void> editIncome() async {
+      if (plan == null) return;
+      final r = await showIncomeSheet(
+        context,
+        money: money,
+        month: month,
+        incomeCents: plan.incomeCents,
+        totalCents: plan.totalSavingsCents,
+      );
+      if (r == null) return;
+      final savings = ref.read(savingsRepositoryProvider);
+      if (r.incomeCents != null) {
+        await savings.setIncome(r.from ?? month, r.incomeCents!);
+      }
+      if (r.totalCents != null) await savings.setTotal(r.totalCents!);
+    }
+
     final memberCount = members.isEmpty ? 1 : members.length;
     return AdaptivePage(
       header: PageHeader(
@@ -140,6 +163,20 @@ class GoalsScreen extends ConsumerWidget {
               : null,
         ),
         const SizedBox(height: 14),
+        if (plan != null) ...[
+          MonthNavigator(
+            month: month,
+            onPrevious: ref.read(selectedMonthProvider.notifier).previous,
+            onNext: ref.read(selectedMonthProvider.notifier).next,
+          ),
+          const SizedBox(height: 6),
+          SavingsSection(
+            plan: plan,
+            money: money,
+            onEdit: permissions.canManageGoals ? editIncome : null,
+          ),
+          const SizedBox(height: 14),
+        ],
         if (goals.isEmpty)
           _EmptyGoals(canAdd: permissions.canManageGoals)
         else
