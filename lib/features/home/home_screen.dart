@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/layout/dashboard_layout.dart';
 import '../../core/layout/destinations.dart';
+import '../../core/layout/window_class.dart';
 import '../../core/money/money_provider.dart';
 import '../family/member_providers.dart';
 import '../../core/theme/appearance_provider.dart';
@@ -22,7 +23,6 @@ import 'home_providers.dart';
 import 'widgets/bill_goal_cards.dart';
 import 'widgets/categories_card.dart';
 import 'widgets/category_cards.dart';
-import '../../core/widgets/overlap_bottom.dart';
 import 'widgets/gradient_home_header.dart';
 import 'widgets/hero_card.dart';
 import 'widgets/personal_hero.dart';
@@ -63,34 +63,24 @@ class HomeScreen extends ConsumerWidget {
         ref.watch(appearanceProvider).homeHeader == HomeHeaderStyle.gradient;
     final cardStyle = ref.watch(personalLookProvider).card;
 
-    return DashboardLayout(
-      header: (context, mode) {
-        VoidCallback? add = permissions.canWriteExpenses
-            ? () => context.push('/add')
-            : null;
-        if (!gradientHeader) {
-          return HomeHeader(
-            month: month,
-            onPrevious: months.previous,
-            onNext: months.next,
-            onAdd: add,
-            onSelectDestination: goTo,
-            mode: mode,
-          );
-        }
-        // The overview card below reaches up into the band (the gap between them is 14 or 16).
-        return OverlapBottom(
-          amount: kHeaderOverlap + (mode == DashboardMode.stacked ? 14 : 16),
-          child: GradientHomeHeader(
-            month: month,
-            onPrevious: months.previous,
-            onNext: months.next,
-            onAdd: add,
-            onSelectDestination: goTo,
-            mode: mode,
-          ),
-        );
-      },
+    final add = permissions.canWriteExpenses
+        ? () => context.push('/add')
+        : null;
+
+    final layout = DashboardLayout(
+      header: (context, mode) => HomeHeader(
+        month: month,
+        onPrevious: months.previous,
+        onNext: months.next,
+        onAdd: add,
+        onSelectDestination: goTo,
+        mode: mode,
+      ),
+      // The gradient look: a full-width band, with the overview card reaching up into it and the
+      // month switch inside that card. The Add button floats at the bottom right.
+      band: gradientHeader ? (context, mode) => GradientBand(mode: mode) : null,
+      bandOverlap: kHeaderOverlap,
+      bottomSpace: gradientHeader && add != null ? 84 : 0,
       // Swipe the card sideways to change month: left for the next, right for the previous.
       hero: (context, mode) => GestureDetector(
         key: const ValueKey('hero-swipe'),
@@ -103,11 +93,31 @@ class HomeScreen extends ConsumerWidget {
         },
         child: PersonalHero(
           style: cardStyle,
-          child: gradientHeader && !cardStyle.active
-              ? OverviewOnGradient(
-                  child: HeroCard(summary: summary, money: money),
+          child: !gradientHeader
+              ? HeroCard(summary: summary, money: money)
+              : cardStyle.active
+              ? HeroCard(
+                  summary: summary,
+                  money: money,
+                  top: OverviewTitle(
+                    month: month,
+                    now: now,
+                    onPrevious: months.previous,
+                    onNext: months.next,
+                  ),
                 )
-              : HeroCard(summary: summary, money: money),
+              : OverviewOnGradient(
+                  child: HeroCard(
+                    summary: summary,
+                    money: money,
+                    top: OverviewTitle(
+                      month: month,
+                      now: now,
+                      onPrevious: months.previous,
+                      onNext: months.next,
+                    ),
+                  ),
+                ),
         ),
       ),
       trend: (context, mode) => switch (mode) {
@@ -189,6 +199,20 @@ class HomeScreen extends ConsumerWidget {
             : null,
         canOpen: (e) => ref.read(canEditExpenseProvider)(e.createdBy),
       ),
+    );
+    if (!gradientHeader || add == null) return layout;
+    return Stack(
+      children: [
+        Positioned.fill(child: layout),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: HomeAddButton(
+            onTap: add,
+            long: context.layout.windowClass != WindowClass.compact,
+          ),
+        ),
+      ],
     );
   }
 }

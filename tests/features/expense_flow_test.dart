@@ -515,12 +515,12 @@ void main() {
         day: '2026-10-10',
         note: 'October shop',
       );
-      expect(find.text('October 2026'), findsOneWidget);
+      expect(find.text('October Budget Overview'), findsOneWidget);
       expect(find.text('S\$45'), findsWidgets);
 
       await tester.tap(find.bySemanticsLabel('Previous month'));
       await tester.pumpAndSettle();
-      expect(find.text('September 2026'), findsOneWidget);
+      expect(find.text('September Budget Overview'), findsOneWidget);
       expect(find.text('S\$123'), findsWidgets);
       expect(find.text('September shop'), findsOneWidget);
       expect(find.text('October shop'), findsNothing);
@@ -529,7 +529,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('Next month'));
       await tester.pumpAndSettle();
-      expect(find.text('November 2026'), findsOneWidget);
+      expect(find.text('November Budget Overview'), findsOneWidget);
       expect(find.text('No spending yet this month'), findsOneWidget);
     });
   });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'page_layout.dart';
+import '../widgets/overlap_bottom.dart';
 import 'window_class.dart';
 
 /// How the Home sections are arranged. Chosen here, from the window width, so the Home
@@ -35,6 +36,9 @@ class DashboardLayout extends StatelessWidget {
     this.filters,
     this.everyone,
     this.byPerson,
+    this.band,
+    this.bandOverlap = 0,
+    this.bottomSpace = 0,
   });
 
   final SlotBuilder header;
@@ -59,6 +63,14 @@ class DashboardLayout extends StatelessWidget {
 
   /// Categories split by person; only when several people's spending is visible.
   final SlotBuilder? byPerson;
+
+  /// A full-width band above everything (the gradient header). The page content reaches up into
+  /// it by [bandOverlap]. When set, [header] is not drawn.
+  final SlotBuilder? band;
+  final double bandOverlap;
+
+  /// Empty room at the very bottom (for a floating button).
+  final double bottomSpace;
 
   static const double _splitMinContent = 760;
   static const double _heroColumn = 380;
@@ -196,24 +208,42 @@ class DashboardLayout extends StatelessWidget {
           ],
         };
 
-        return SingleChildScrollView(
-          padding: metrics.pagePadding,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: kMaxContentWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  slot(header),
-                  SizedBox(height: gap),
-                  if (filters != null) ...[
-                    slot(filters!),
-                    SizedBox(height: gap),
-                  ],
-                  ...body,
-                ],
-              ),
+        final content = Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: kMaxContentWidth),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (band == null) ...[slot(header), SizedBox(height: gap)],
+                if (filters != null) ...[slot(filters!), SizedBox(height: gap)],
+                ...body,
+                if (bottomSpace > 0) SizedBox(height: bottomSpace),
+              ],
             ),
+          ),
+        );
+        if (band == null) {
+          return SingleChildScrollView(
+            padding: metrics.pagePadding,
+            child: content,
+          );
+        }
+        final pad = metrics.pagePadding;
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              OverlapBottom(amount: bandOverlap, child: slot(band!)),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  pad.left,
+                  0,
+                  pad.right,
+                  pad.bottom,
+                ),
+                child: content,
+              ),
+            ],
           ),
         );
       },

@@ -1,5 +1,9 @@
 import 'package:drift_flutter/drift_flutter.dart';
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,6 +32,8 @@ import 'core/sync/supabase_sync_backend.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('en_US');
+  // Phones: pages may draw under the status bar (Home's gradient band does).
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
   // Desktop: hide the system title bar; the app draws its own in the theme's colours.
   final windowControls = isDesktopPlatform ? await setUpDesktopWindow() : null;
   final prefs = await SharedPreferences.getInstance();

@@ -20,11 +20,16 @@ class AdaptiveShell extends StatelessWidget {
     this.foldBottom,
     this.showBottomTabs = true,
     this.syncIndicator,
+    this.immersiveTop = false,
   });
 
   final AppDestination destination;
   final ValueChanged<AppDestination> onSelect;
   final Widget child;
+
+  /// Phone only: the page draws under the status bar (Home's gradient band), so the shell adds
+  /// no top margin and the sync status floats over the page instead of sitting above it.
+  final bool immersiveTop;
 
   /// Initials shown in the sidebar footer.
   final List<String> memberInitials;
@@ -50,6 +55,7 @@ class AdaptiveShell extends StatelessWidget {
         onSelect: onSelect,
         showTabs: showBottomTabs,
         syncIndicator: syncIndicator?.call(false),
+        immersiveTop: immersiveTop,
         child: child,
       ),
       WindowClass.medium => Row(
@@ -87,8 +93,10 @@ class _CompactShell extends StatelessWidget {
     required this.showTabs,
     required this.child,
     this.syncIndicator,
+    this.immersiveTop = false,
   });
 
+  final bool immersiveTop;
   final AppDestination destination;
   final ValueChanged<AppDestination> onSelect;
   final bool showTabs;
@@ -98,6 +106,31 @@ class _CompactShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final indicator = syncIndicator;
+    if (immersiveTop) {
+      return Column(
+        children: [
+          Expanded(
+            child: SafeArea(
+              top: false,
+              bottom: !showTabs,
+              child: Stack(
+                children: [
+                  Positioned.fill(child: child),
+                  if (indicator != null)
+                    Positioned(
+                      right: 8,
+                      top: MediaQuery.viewPaddingOf(context).top + 2,
+                      child: indicator,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          if (showTabs)
+            _BottomTabs(destination: destination, onSelect: onSelect),
+        ],
+      );
+    }
     return Column(
       children: [
         if (indicator != null)
