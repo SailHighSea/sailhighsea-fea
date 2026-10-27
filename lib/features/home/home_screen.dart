@@ -22,6 +22,7 @@ import 'home_providers.dart';
 import 'widgets/bill_goal_cards.dart';
 import 'widgets/categories_card.dart';
 import 'widgets/category_cards.dart';
+import '../../core/widgets/overlap_bottom.dart';
 import 'widgets/gradient_home_header.dart';
 import 'widgets/hero_card.dart';
 import 'widgets/personal_hero.dart';
@@ -58,29 +59,38 @@ class HomeScreen extends ConsumerWidget {
         : daysInMonth(month);
     final monthShort = DateFormat('MMM', 'en_US').format(month);
 
+    final gradientHeader =
+        ref.watch(appearanceProvider).homeHeader == HomeHeaderStyle.gradient;
+    final cardStyle = ref.watch(personalLookProvider).card;
+
     return DashboardLayout(
-      header: (context, mode) =>
-          ref.watch(appearanceProvider).homeHeader == HomeHeaderStyle.gradient
-          ? GradientHomeHeader(
-              month: month,
-              onPrevious: months.previous,
-              onNext: months.next,
-              onAdd: permissions.canWriteExpenses
-                  ? () => context.push('/add')
-                  : null,
-              onSelectDestination: goTo,
-              mode: mode,
-            )
-          : HomeHeader(
-              month: month,
-              onPrevious: months.previous,
-              onNext: months.next,
-              onAdd: permissions.canWriteExpenses
-                  ? () => context.push('/add')
-                  : null,
-              onSelectDestination: goTo,
-              mode: mode,
-            ),
+      header: (context, mode) {
+        VoidCallback? add = permissions.canWriteExpenses
+            ? () => context.push('/add')
+            : null;
+        if (!gradientHeader) {
+          return HomeHeader(
+            month: month,
+            onPrevious: months.previous,
+            onNext: months.next,
+            onAdd: add,
+            onSelectDestination: goTo,
+            mode: mode,
+          );
+        }
+        // The overview card below reaches up into the band (the gap between them is 14 or 16).
+        return OverlapBottom(
+          amount: kHeaderOverlap + (mode == DashboardMode.stacked ? 14 : 16),
+          child: GradientHomeHeader(
+            month: month,
+            onPrevious: months.previous,
+            onNext: months.next,
+            onAdd: add,
+            onSelectDestination: goTo,
+            mode: mode,
+          ),
+        );
+      },
       // Swipe the card sideways to change month: left for the next, right for the previous.
       hero: (context, mode) => GestureDetector(
         key: const ValueKey('hero-swipe'),
@@ -92,8 +102,12 @@ class HomeScreen extends ConsumerWidget {
           if (v > 300) months.previous();
         },
         child: PersonalHero(
-          style: ref.watch(personalLookProvider).card,
-          child: HeroCard(summary: summary, money: money),
+          style: cardStyle,
+          child: gradientHeader && !cardStyle.active
+              ? OverviewOnGradient(
+                  child: HeroCard(summary: summary, money: money),
+                )
+              : HeroCard(summary: summary, money: money),
         ),
       ),
       trend: (context, mode) => switch (mode) {

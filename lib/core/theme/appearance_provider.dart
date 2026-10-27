@@ -47,7 +47,7 @@ class AppearanceController extends Notifier<AppearanceSettings> {
       homeHeader: _enumByName(
         HomeHeaderStyle.values,
         _prefs.getString(_kHomeHeader),
-        HomeHeaderStyle.classic,
+        HomeHeaderStyle.gradient,
       ),
     );
   }

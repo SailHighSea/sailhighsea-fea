@@ -13,6 +13,9 @@ import '../../../core/theme/header_gradient.dart';
 import '../../family/member_providers.dart';
 import 'home_header.dart';
 
+/// How far the overview card reaches up into the gradient band.
+const double kHeaderOverlap = 40;
+
 /// The Home header with a gradient: the logo and name on the left, the signed-in person on the
 /// right, and the month switch and Add button beneath, all on the theme's gradient.
 class GradientHomeHeader extends ConsumerWidget {
@@ -60,7 +63,7 @@ class GradientHomeHeader extends ConsumerWidget {
       label: '$kAppName, $name',
       child: Container(
         key: const ValueKey('gradient-header'),
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 8 + kHeaderOverlap),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
@@ -112,20 +115,24 @@ class GradientHomeHeader extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Flexible(
-                  child: Text(
-                    name,
-                    key: const ValueKey('header-person'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
+                // On your own the name is just "You": the picture says it, and the full app name
+                // gets the room.
+                if (name != 'You') ...[
+                  Flexible(
+                    child: Text(
+                      name,
+                      key: const ValueKey('header-person'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
+                ],
                 ExcludeSemantics(
                   child: Container(
                     width: 40,
@@ -164,6 +171,42 @@ class GradientHomeHeader extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Under the gradient band the overview is a light card with a soft shadow, as in the proposal.
+/// The card keeps all its content; only its colours change.
+class OverviewOnGradient extends StatelessWidget {
+  const OverviewOnGradient({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final themed = t.copyWith(
+      hero: t.surface,
+      heroBorder: t.border,
+      heroText: t.text,
+      heroMuted: t.muted,
+      heroTrack: t.border,
+    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(extensions: [themed]),
+        child: child,
       ),
     );
   }

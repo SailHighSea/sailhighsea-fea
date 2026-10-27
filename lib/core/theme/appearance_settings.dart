@@ -45,7 +45,7 @@ class AppearanceSettings {
     this.largerText = false,
     this.colorBlindCharts = false,
     this.currencyCode = 'SGD',
-    this.homeHeader = HomeHeaderStyle.classic,
+    this.homeHeader = HomeHeaderStyle.gradient,
   });
 
   final AppearanceMode mode;

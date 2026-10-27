@@ -45,10 +45,40 @@ void main() {
   });
 
   group('the gradient Home header', () {
-    testWidgets('is off by default', (tester) async {
+    testWidgets('is the default look of Home', (tester) async {
       await pumpApp(tester, size: const Size(390, 844));
-      expect(key('gradient-header'), findsNothing);
+      expect(key('gradient-header'), findsOneWidget);
     });
+
+    testWidgets('Classic brings back the plain month row', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'appearance.homeHeader': 'classic'},
+      );
+      expect(key('gradient-header'), findsNothing);
+      expect(find.text('Spent this month'), findsOneWidget);
+    });
+
+    testWidgets(
+      'the overview card overlaps the band and stays tappable and swipeable',
+      (tester) async {
+        await pumpApp(tester, size: const Size(390, 844));
+        final band = tester.getRect(key('gradient-header'));
+        final card = tester.getRect(key('hero-swipe'));
+        expect(
+          card.top,
+          lessThan(band.bottom),
+          reason: 'the card reaches into the band',
+        );
+        expect(
+          card.top,
+          greaterThan(band.top + 60),
+          reason: 'but not over the logo row',
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('shows the logo, name and person when chosen', (tester) async {
       await pumpApp(
@@ -59,7 +89,11 @@ void main() {
       expect(key('gradient-header'), findsOneWidget);
       expect(find.text('FET'), findsOneWidget);
       expect(find.text('Family Expenses Tracker'), findsOneWidget);
-      expect(key('header-person'), findsOneWidget);
+      expect(
+        find.text('You'),
+        findsNothing,
+        reason: 'alone, the picture says it',
+      );
       expect(find.text('+ Add'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
