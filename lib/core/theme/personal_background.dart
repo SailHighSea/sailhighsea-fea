@@ -11,9 +11,13 @@ import 'preset_pictures.dart';
 /// Paints a [BackgroundStyle] to fill its parent: a colour, a gradient, or a picture with blur
 /// and dimming. Draws nothing for [BackgroundStyle.none].
 class PersonalBackground extends StatelessWidget {
-  const PersonalBackground({super.key, required this.style});
+  const PersonalBackground({super.key, required this.style, this.minBlur = 0});
 
   final BackgroundStyle style;
+
+  /// At least this much blur (the Glass look softens a picture once, here, instead of blurring
+  /// behind every card).
+  final int minBlur;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +39,11 @@ class PersonalBackground extends StatelessWidget {
           ),
           child: const SizedBox.expand(),
         ),
-        BackgroundKind.picture => _Picture(style: style),
+        BackgroundKind.picture => RepaintBoundary(
+          child: _Picture(
+            style: minBlur > style.blur ? style.copyWith(blur: minBlur) : style,
+          ),
+        ),
         BackgroundKind.none => const SizedBox.shrink(),
       },
     );

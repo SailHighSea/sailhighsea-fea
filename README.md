@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/icon/icon.png" width="112" alt="FET icon"></p>
+<p align="center"><img src="assets/icon/icon_rounded.png" width="112" alt="FET icon"></p>
 
 <h1 align="center">FET Family Expenses Tracker</h1>
 
@@ -7,37 +7,41 @@
 [![Build](https://github.com/SailHighSea/sailhighsea-fea/actions/workflows/build.yml/badge.svg)](https://github.com/SailHighSea/sailhighsea-fea/actions/workflows/build.yml)
 
 <p align="center">
-  <img src="docs/screenshots/home-light.png" width="240" alt="Home: spent this month, last 7 days and top categories">
-  <img src="docs/screenshots/home-dark.png" width="240" alt="Home in dark mode">
-  <img src="docs/screenshots/home-rose.png" width="240" alt="Home in the Rose colour theme">
+  <img src="docs/screenshots/home-light.png" width="230" alt="Home with the gradient header and the overview card">
+  <img src="docs/screenshots/home-glass.png" width="230" alt="Home in the Glass look">
+  <img src="docs/screenshots/home-glass-dark.png" width="230" alt="Home in the Glass look, dark">
 </p>
 
 ## What it does
 
 - **Add expenses in seconds.** Type an amount, pick a category, done. Scan a receipt, or import a bank or card statement from a sheet, CSV, Excel, PDF or even a photo. The app reads the date, description and amount, guesses the category, shows you a table to check first, and remembers your choices for next time.
-- **A clear month at a glance.** Spent, left, today, this week and a safe amount per day, with a daily chart, top categories, a comparison with last month and, for families, who spent what.
+- **No double entries.** If an imported row looks like an expense you already have, or two family members both wrote down the same purchase, the app shows both and asks "Is this a duplicate?" before anything is added or removed.
+- **A clear month at a glance.** A gradient header with the logo and your name, and an overview card with spent, left, today, this week and a safe amount per day. Swipe the card to change month. Below: a daily chart, top categories, a comparison with last month and, for families, who spent what.
 - **Budgets, bills and goals.** A budget for the month and for each category, bills with reminders, and savings goals that show when they will be done.
 - **Income and savings.** Enter your monthly income and what you hold in savings to see what is left to save, where your income goes, your savings rate over six months, and whether your goals fit.
 - **Made for families.** Share one household through your own Google Drive (or a server). Organisers and members have different rights, and each person sees only what the organiser allows.
-- **Yours to arrange.** Categories with your own icons and colours (and 38 ready-made ones), ten colour themes in Light, Dark and Pure black, and your own colour, gradient or picture behind the app or the Home card.
-- **Private by design.** Works offline. No ads and no tracking. An app lock, local backups you can protect with a password, and nothing shared with the app developer.
-- **On every screen.** Phones, tablets, foldables, Windows, Mac and Linux, with a layout that follows the window width, so every feature is the same everywhere.
+- **Your look.** Choose **Standard** or **Glass** (see-through cards and a floating glass bottom bar) on the welcome screen or in Settings. Ten colour themes in Light, Dark and Pure black, a gradient or classic Home header, and your own colour, gradient or picture behind the app (six pictures come with it).
+- **Your categories.** Your own icons (48) and colours (26) for every category, with 38 ready-made ones such as Groceries, Rent, Fuel and Pets.
+- **Private by design.** Works offline. No ads and no tracking. An app lock, and backups saved wherever you like that can be protected with a password (encrypted with AES-256) and hold your theme and settings too. Nothing is shared with the app developer.
+- **On every screen.** Phones, tablets, foldables, Windows, Mac and Linux, with a layout that follows the window width, so every feature is the same everywhere. Desktop windows get a title bar in the theme's colours.
 
 ## Screenshots
 
 | | | |
 |:--:|:--:|:--:|
-| <img src="docs/screenshots/expenses.png" width="220"><br>Expenses | <img src="docs/screenshots/budgets.png" width="220"><br>Budgets | <img src="docs/screenshots/insights.png" width="220"><br>Insights |
-| <img src="docs/screenshots/goals-and-savings.png" width="220"><br>Goals and savings | <img src="docs/screenshots/categories.png" width="220"><br>Categories with icons and colours | <img src="docs/screenshots/home-who-spent-it.png" width="220"><br>Who spent it (families) |
+| <img src="docs/screenshots/welcome.png" width="220"><br>Welcome: where your data lives, theme, look and currency | <img src="docs/screenshots/expenses.png" width="220"><br>Expenses | <img src="docs/screenshots/budgets.png" width="220"><br>Budgets |
+| <img src="docs/screenshots/goals-and-savings.png" width="220"><br>Goals and savings | <img src="docs/screenshots/insights.png" width="220"><br>Insights | <img src="docs/screenshots/home-who-spent-it.png" width="220"><br>Who spent it (families) |
+| <img src="docs/screenshots/categories.png" width="220"><br>Categories with icons and colours | <img src="docs/screenshots/settings.png" width="220"><br>Settings | <img src="docs/screenshots/privacy-and-data.png" width="220"><br>Privacy and data: backup, restore, import |
+| <img src="docs/screenshots/backgrounds.png" width="220"><br>Backgrounds and pictures | <img src="docs/screenshots/about.png" width="220"><br>About | <img src="docs/screenshots/home-rose.png" width="220"><br>Rose colour theme |
 
 <p align="center">
   <img src="docs/screenshots/home-tablet.png" width="420" alt="Home on a tablet">
   <img src="docs/screenshots/home-desktop.png" width="520" alt="Home on a desktop">
 </p>
 
-<p align="center"><img src="docs/screenshots/appearance.png" width="560" alt="Appearance: colour themes"></p>
+<p align="center"><img src="docs/screenshots/appearance.png" width="560" alt="Appearance: look, home header and colour themes"></p>
 
-The screenshots are made by the tests (`SCREENSHOTS=1 flutter test tests/screenshots`), so they always match the app.
+The screenshots are made by the tests (`SCREENSHOTS=1 flutter test tests/screenshots`), so they always match the app. (Shadows look heavier in the test renderer than on a phone.)
 
 ## Where your data lives
 

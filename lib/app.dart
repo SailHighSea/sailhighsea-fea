@@ -129,7 +129,10 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
             children: [
               Positioned.fill(
                 child: page.active
-                    ? PersonalBackground(style: page)
+                    ? PersonalBackground(
+                        style: page,
+                        minBlur: glassLook ? 10 : 0,
+                      )
                     : glassLook
                     ? GlassBackdrop(
                         theme: settings.colorTheme,

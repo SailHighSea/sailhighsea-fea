@@ -48,6 +48,7 @@ void main() {
     bool sampleHome = false,
     bool member = false,
     double scroll = 0,
+    Future<void> Function(WidgetTester tester)? afterPump,
   }) {
     testWidgets(name, (tester) async {
       if (member) {
@@ -67,6 +68,10 @@ void main() {
           sampleHome: sampleHome,
           seedAsync: _seedAll,
         );
+      }
+      if (afterPump != null) {
+        await afterPump(tester);
+        await settle(tester);
       }
       if (scroll > 0) {
         await tester.drag(find.byType(Scrollable).first, Offset(0, -scroll));
@@ -108,6 +113,32 @@ void main() {
   shot('insights', phone, location: '/insights');
   shot('goals-and-savings', phone, location: '/goals');
   shot('categories', phone, location: '/categories');
+  shot('settings', phone, location: '/settings');
+  shot('about', phone, location: '/about');
+  shot('backgrounds', phone, location: '/personalise', scroll: 0);
+  shot('privacy-and-data', phone, location: '/data');
+  shot(
+    'welcome',
+    phone,
+    prefs: {'onboarding.done': false},
+    afterPump: (tester) async {
+      await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+      await tester.pump();
+    },
+  );
+  shot('settings', phone, location: '/settings');
+  shot('about', phone, location: '/about');
+  shot('backgrounds', phone, location: '/personalise');
+  shot('privacy-and-data', phone, location: '/data');
+  shot(
+    'welcome',
+    phone,
+    prefs: {'onboarding.done': false},
+    afterPump: (tester) async {
+      await tester.tap(find.byKey(const ValueKey('onboarding-skip')));
+      await tester.pump();
+    },
+  );
   shot('appearance', const Size(1024, 900), location: '/appearance');
   shot('home-tablet', const Size(1024, 720), sampleHome: true);
   shot('home-desktop', const Size(1280, 800), sampleHome: true);

@@ -2,6 +2,8 @@
 
 ## Fixes after Phase 8
 
+- Glass look is much lighter to draw: no live blur behind each card or the bar (that was the lag). Cards are a see-through tint with a light edge over a backdrop that is painted once and kept; a picture is softened once, not on every frame.
+- The bottom bar is a floating rounded pill in the Standard look too (solid, with a thin edge and a soft shadow); Glass keeps the see-through version.
 - Home gradient look rebuilt to match the proposal: the band runs the full width and under the status bar, the overview card ("October Budget Overview", "Day 23 of 31", with the month switch inside) reaches up into it, and + Add floats at the bottom right. Swiping the card still changes month.
 - Glass look (Appearance → Look, and on the welcome screen): Standard or Glass. Glass makes cards, the overview card and the side rail see-through and blurred over a soft backdrop in your colour theme (or your own picture), and the bottom bar a floating rounded glass pill with the chosen tab in a lighter pill. Saved with the backup.
 - The gradient Home header is now the default look, with the overview as a light card lifted over the band (Appearance → Home header → Classic brings back the old one). On your own the header shows just your picture, so the full app name has room.

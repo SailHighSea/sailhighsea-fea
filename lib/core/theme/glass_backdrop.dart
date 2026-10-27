@@ -36,19 +36,26 @@ class GlassBackdrop extends StatelessWidget {
         ),
       ),
     );
-    return ExcludeSemantics(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          ColoredBox(color: base),
-          patch(const Alignment(-0.8, -0.7), tone(a, light ? 0.55 : 0.55), 0.9),
-          patch(const Alignment(0.9, -0.2), tone(b, light ? 0.5 : 0.5), 0.8),
-          patch(
-            const Alignment(-0.3, 0.9),
-            tone(accent, light ? 0.45 : 0.30),
-            0.9,
-          ),
-        ],
+    // Painted once and kept as a picture: scrolling the page above never redraws it.
+    return RepaintBoundary(
+      child: ExcludeSemantics(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ColoredBox(color: base),
+            patch(
+              const Alignment(-0.8, -0.7),
+              tone(a, light ? 0.55 : 0.55),
+              0.9,
+            ),
+            patch(const Alignment(0.9, -0.2), tone(b, light ? 0.5 : 0.5), 0.8),
+            patch(
+              const Alignment(-0.3, 0.9),
+              tone(accent, light ? 0.45 : 0.30),
+              0.9,
+            ),
+          ],
+        ),
       ),
     );
   }

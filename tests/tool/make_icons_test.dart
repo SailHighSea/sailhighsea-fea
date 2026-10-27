@@ -182,6 +182,17 @@ void main() {
       c.drawRect(Rect.fromLTWH(0, 0, s, s), Paint()..color = _bg);
       _art(c, s, scale: 1.05);
     });
+    // The README icon: GitHub ignores CSS on images, so the rounded corners are in the picture.
+    await _save(tester, 'icon_rounded', (c, s) {
+      c.clipRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, s, s),
+          Radius.circular(s * 0.225),
+        ),
+      );
+      c.drawRect(Rect.fromLTWH(0, 0, s, s), Paint()..color = _bg);
+      _art(c, s, scale: 1.05);
+    });
     // Android adaptive icon: only the middle 66% is always visible, so the artwork is smaller.
     await _save(tester, 'icon_foreground', (c, s) {
       _art(c, s, scale: 0.9);
