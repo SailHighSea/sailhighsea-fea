@@ -58,6 +58,10 @@ class HomeScreen extends ConsumerWidget {
         ? now.day
         : daysInMonth(month);
     final monthShort = DateFormat('MMM', 'en_US').format(month);
+    // The card says which month it shows once it is not the current one.
+    final heroTitle = now.month == month.month && now.year == month.year
+        ? 'Spent this month'
+        : 'Spent in ${DateFormat('MMMM', 'en_US').format(month)}';
 
     final gradientHeader =
         ref.watch(appearanceProvider).homeHeader == HomeHeaderStyle.gradient;
@@ -94,11 +98,12 @@ class HomeScreen extends ConsumerWidget {
         child: PersonalHero(
           style: cardStyle,
           child: !gradientHeader
-              ? HeroCard(summary: summary, money: money)
+              ? HeroCard(summary: summary, money: money, title: heroTitle)
               : cardStyle.active
               ? HeroCard(
                   summary: summary,
                   money: money,
+                  title: heroTitle,
                   top: OverviewTitle(
                     month: month,
                     now: now,
@@ -110,6 +115,7 @@ class HomeScreen extends ConsumerWidget {
                   child: HeroCard(
                     summary: summary,
                     money: money,
+                    title: heroTitle,
                     top: OverviewTitle(
                       month: month,
                       now: now,

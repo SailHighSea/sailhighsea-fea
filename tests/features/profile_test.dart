@@ -11,6 +11,7 @@ import '../helpers/test_app.dart';
 
 void main() {
   setUpAll(loadTestFonts);
+  homeHeaderTests();
 
   testWidgets('the header picture opens the profile; name and avatar stick', (
     tester,
@@ -72,4 +73,26 @@ void main() {
     await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
   });
+}
+
+void homeHeaderTests() {
+  testWidgets(
+    'classic header shows the name and picture; the card names a past month',
+    (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'appearance.homeHeader': 'classic', 'profile.name': 'Mina'},
+      );
+      expect(find.byKey(const ValueKey('header-person')), findsOneWidget);
+      expect(find.text('Mina'), findsOneWidget);
+      expect(find.text('Spent this month'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Previous month'));
+      await tester.pumpAndSettle();
+      expect(find.text('Spent this month'), findsNothing);
+      expect(find.textContaining('Spent in '), findsOneWidget);
+      await tapKey(tester, 'header-avatar');
+      expect(find.byKey(const ValueKey('profile-name')), findsOneWidget);
+    },
+  );
 }
