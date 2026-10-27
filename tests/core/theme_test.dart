@@ -129,12 +129,24 @@ void main() {
       }
     }
 
-    test('themes differ in hero colour but share surfaces', () {
-      final forest = tokensFor(ColorThemeId.forest, ThemeVariant.light);
-      final ocean = tokensFor(ColorThemeId.ocean, ThemeVariant.light);
-      expect(forest.hero, isNot(ocean.hero));
-      expect(forest.surface, ocean.surface);
-      expect(forest.background, ocean.background);
+    test('themes tint the page and cards too, not only the accent', () {
+      for (final v in [ThemeVariant.dark, ThemeVariant.pure]) {
+        final forest = tokensFor(ColorThemeId.forest, v);
+        final rose = tokensFor(ColorThemeId.rose, v);
+        expect(forest.hero, isNot(rose.hero));
+        expect(forest.surface, isNot(rose.surface), reason: '$v');
+        expect(forest.border, isNot(rose.border), reason: '$v');
+      }
+      // Dark: the card is the theme's hue (rose is red-leaning), not forest's green-grey.
+      final dark = tokensFor(ColorThemeId.rose, ThemeVariant.dark);
+      expect(dark.surface.r, greaterThan(dark.surface.g));
+      final forest = tokensFor(ColorThemeId.forest, ThemeVariant.dark);
+      expect(forest.surface.g, greaterThan(forest.surface.r));
+      // Pure black stays black.
+      expect(
+        tokensFor(ColorThemeId.rose, ThemeVariant.pure).background,
+        const Color(0xFF000000),
+      );
     });
   });
 

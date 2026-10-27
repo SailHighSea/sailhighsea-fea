@@ -43,7 +43,7 @@ void main() {
     expect(_tokens(tester).background, const Color(0xFFF4F6F5));
   });
 
-  testWidgets('colour theme swaps hero colours without touching surfaces', (
+  testWidgets('colour theme changes the hero and tints the surfaces too', (
     tester,
   ) async {
     await pumpApp(tester, size: const Size(1024, 720), location: '/appearance');
@@ -55,8 +55,9 @@ void main() {
 
     expect(ocean.hero, isNot(forest.hero));
     expect(ocean.hero, previewFor(ColorThemeId.ocean).hero);
-    expect(ocean.surface, forest.surface);
-    expect(ocean.background, forest.background);
+    // Light cards stay white; the page and the edges take the theme's hue.
+    expect(ocean.border, isNot(forest.border));
+    expect(ocean.background, isNot(forest.background));
   });
 
   testWidgets('preview buttons use the real theme switch', (tester) async {

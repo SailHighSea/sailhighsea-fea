@@ -235,6 +235,8 @@ class OverviewOnGradient extends StatelessWidget {
     if (glass) {
       return GlassBox(
         color: t.surface,
+        // Frosted over the band's edge, so no hard line shows through the card.
+        blur: 16,
         borderRadius: BorderRadius.circular(AppRadii.card),
         child: Theme(
           data: Theme.of(context).copyWith(extensions: [themed]),

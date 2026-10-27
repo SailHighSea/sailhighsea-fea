@@ -198,7 +198,10 @@ class _BottomTabs extends StatelessWidget {
                 key: const ValueKey('glass-bar'),
                 color: t.navRail,
                 borderRadius: radius,
-                strength: 1.2,
+                // Frosted: what scrolls under the bar is blurred, and the tint is strong enough
+                // that the labels never fight with the cards behind.
+                strength: 1.25,
+                blur: 22,
                 child: row,
               )
             : DecoratedBox(

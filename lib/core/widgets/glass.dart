@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 /// Whether cards and bars are drawn as frosted glass: translucent, blurring what is behind them,
@@ -28,6 +30,7 @@ class GlassBox extends StatelessWidget {
     this.borderRadius = BorderRadius.zero,
     this.onlyTopEdge = false,
     this.strength = 1,
+    this.blur = 0,
   });
 
   final Widget child;
@@ -41,11 +44,16 @@ class GlassBox extends StatelessWidget {
   /// background always shows through).
   final double strength;
 
+  /// Frosted blur of what scrolls behind, in pixels. Only for the one or two surfaces that
+  /// content passes under (the bottom bar, the overview card); a blur on every card is what made
+  /// scrolling slow, and over the still backdrop it would show nothing.
+  final double blur;
+
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final edge = Colors.white.withValues(alpha: dark ? 0.16 : 0.55);
-    return DecoratedBox(
+    final box = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: borderRadius,
         color: color.withValues(
@@ -64,6 +72,18 @@ class GlassBox extends StatelessWidget {
             : Border.all(color: edge),
       ),
       child: ClipRRect(borderRadius: borderRadius, child: child),
+    );
+    if (blur <= 0) return box;
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(
+          sigmaX: blur,
+          sigmaY: blur,
+          tileMode: TileMode.clamp,
+        ),
+        child: box,
+      ),
     );
   }
 }

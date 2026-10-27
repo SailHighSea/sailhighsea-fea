@@ -533,12 +533,45 @@ const _colorBlindPalette = {
   'slate': Color(0xFF6C7A89),
 };
 
+/// Moves a neutral (page, card, text) colour to the theme's hue, keeping how light it is, so every
+/// theme gives the whole app its own tint and not only the accent. Forest is the SPEC's own
+/// green-grey, so it is left as it is.
+Color _retint(Color c, double hue, double satScale) {
+  final h = HSLColor.fromColor(c);
+  return h
+      .withHue(hue)
+      .withSaturation((h.saturation * satScale).clamp(0.0, 1.0))
+      .toColor();
+}
+
+_ModeBase _tintedBase(_ModeBase b, ColorThemeId theme) {
+  if (theme == ColorThemeId.forest) return b;
+  final hero = HSLColor.fromColor(_previews[theme]!.hero);
+  final hue = hero.hue;
+  // A grey theme (Graphite) stays nearly colourless; a rich one tints fully.
+  final scale = (hero.saturation / 0.69).clamp(0.0, 1.0);
+  Color t(Color c) => _retint(c, hue, scale);
+  return _ModeBase(
+    background: t(b.background),
+    surface: t(b.surface),
+    border: t(b.border),
+    text: t(b.text),
+    muted: t(b.muted),
+    onPrimary: t(b.onPrimary),
+    navRail: t(b.navRail),
+    amberText: b.amberText,
+    grey: t(b.grey),
+    toggleOff: t(b.toggleOff),
+    chipBorder: t(b.chipBorder),
+  );
+}
+
 AppTokens tokensFor(
   ColorThemeId theme,
   ThemeVariant variant, {
   bool colorBlind = false,
 }) {
-  final base = _modeBases[variant]!;
+  final base = _tintedBase(_modeBases[variant]!, theme);
   final colors = _themeColors[theme]![variant]!;
   final palette = colorBlind
       ? _colorBlindPalette
