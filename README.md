@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/icon/icon.png" width="112" alt="FET icon"></p>
+<p align="center"><img src="assets/icon/icon_rounded.png" width="112" alt="FET icon"></p>
 
 <h1 align="center">FET Family Expenses Tracker</h1>
 
