@@ -2,6 +2,10 @@
 
 ## Fixes after Phase 8
 
+- The app is called **FET** where a launcher, title bar or explorer shows its name; "FET Family Expenses Tracker" is the description (About page, sign-in, Windows file description, Linux comment, notifications).
+- Profile: tap your picture on Home, or the new row at the top of Settings, to change your name and picture. Ten built-in avatars, or upload (or take) your own. Both travel with the backup.
+- Appearance now holds the background and picture controls on the same page, instead of a sub-menu.
+- Android: the back button steps back (Settings pages return to Settings, tabs to Home, Home leaves the app) and predictive back is on. Every page keeps its margin below the status bar. The bottom pill now floats over the page.
 - Glass look is much lighter to draw: no live blur behind each card or the bar (that was the lag). Cards are a see-through tint with a light edge over a backdrop that is painted once and kept; a picture is softened once, not on every frame.
 - The bottom bar is a floating rounded pill in the Standard look too (solid, with a thin edge and a soft shadow); Glass keeps the see-through version.
 - Home gradient look rebuilt to match the proposal: the band runs the full width and under the status bar, the overview card ("October Budget Overview", "Day 23 of 31", with the month switch inside) reaches up into it, and + Add floats at the bottom right. Swiping the card still changes month.

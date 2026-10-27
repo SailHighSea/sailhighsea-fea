@@ -156,7 +156,7 @@ class InviteCard extends ConsumerWidget {
 
   Future<void> _share(BuildContext context, CreatedInvite invite) async {
     final text =
-        'Join our household on $kAppName with this code: ${invite.display}. '
+        'Join our household on $kAppFullName with this code: ${invite.display}. '
         'It works once and expires in 24 hours.';
     try {
       await SharePlus.instance.share(ShareParams(text: text));

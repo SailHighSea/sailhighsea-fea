@@ -72,7 +72,7 @@ class LocalNotificationsScheduler implements ReminderScheduler {
           ),
           linux: LinuxInitializationSettings(defaultActionName: 'Open'),
           windows: WindowsInitializationSettings(
-            appName: kAppName,
+            appName: kAppFullName,
             appUserModelId: 'app.familyexpenses.FamilyExpenses',
             guid: '6f3b2a54-7d7e-4c55-9d52-3d5c4f9a0b11',
           ),

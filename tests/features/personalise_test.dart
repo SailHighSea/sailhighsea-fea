@@ -296,16 +296,16 @@ void main() {
       );
     });
 
-    testWidgets('reachable from Appearance, on every size', (tester) async {
+    testWidgets('shown on the Appearance page itself, on every size', (
+      tester,
+    ) async {
       for (final w in [390.0, 1280.0]) {
         await pumpApp(tester, size: Size(w, 900), location: '/appearance');
-        await tester.ensureVisible(key('open-personalise'));
-        await tapKey(tester, 'open-personalise');
-        expect(
-          find.text('Backgrounds and pictures'),
-          findsWidgets,
-          reason: '$w',
-        );
+        expect(find.text('Backgrounds and pictures'), findsOneWidget);
+        await tester.ensureVisible(key('bg-kind-picture'));
+        await tapKey(tester, 'bg-kind-picture');
+        expect(find.byKey(const ValueKey('bg-gallery')), findsOneWidget);
+        expect(find.byKey(const ValueKey('open-personalise')), findsNothing);
         await tester.pumpWidget(const SizedBox());
       }
     });

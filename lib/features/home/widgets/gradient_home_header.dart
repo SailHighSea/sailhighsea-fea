@@ -12,7 +12,9 @@ import '../../../core/theme/appearance_settings.dart';
 import '../../../core/theme/color_themes.dart';
 import '../../../core/theme/header_gradient.dart';
 import '../../../core/widgets/glass.dart';
-import '../../family/member_providers.dart';
+import '../../profile/profile_avatar.dart';
+import '../../profile/profile_provider.dart';
+import '../../profile/profile_sheet.dart';
 
 /// How far the overview card reaches up into the gradient band.
 const double kHeaderOverlap = 56;
@@ -34,11 +36,7 @@ class GradientBand extends ConsumerWidget {
               ? ThemeVariant.pure
               : ThemeVariant.dark);
     final (a, b) = headerGradientFor(settings.colorTheme, variant);
-    final me = ref.watch(myMemberProvider).value;
-    final name = (me?.displayName.trim().isEmpty ?? true)
-        ? 'You'
-        : me!.displayName.trim();
-    final initial = String.fromCharCode(name.runes.first).toUpperCase();
+    final name = ref.watch(displayNameProvider);
     final top = MediaQuery.viewPaddingOf(context).top;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       // White clock and icons on the gradient.
@@ -49,7 +47,7 @@ class GradientBand extends ConsumerWidget {
       ),
       child: Semantics(
         container: true,
-        label: '$kAppName, $name',
+        label: '$kAppFullName, $name',
         child: Container(
           key: const ValueKey('gradient-header'),
           padding: EdgeInsets.fromLTRB(20, top + 14, 20, kHeaderOverlap + 20),
@@ -118,26 +116,18 @@ class GradientBand extends ConsumerWidget {
                 ),
                 const SizedBox(width: 10),
               ],
-              ExcludeSemantics(
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.26),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.75),
-                      width: 2,
-                    ),
-                  ),
-                  child: Text(
-                    initial,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
+              Semantics(
+                button: true,
+                label: 'Edit profile',
+                excludeSemantics: true,
+                child: InkWell(
+                  key: const ValueKey('header-avatar'),
+                  customBorder: const CircleBorder(),
+                  onTap: () => showProfileSheet(context),
+                  child: ProfileAvatar(
+                    ring: Colors.white.withValues(alpha: 0.75),
+                    initialFill: Colors.white.withValues(alpha: 0.26),
+                    initialColor: Colors.white,
                   ),
                 ),
               ),

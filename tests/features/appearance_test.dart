@@ -29,7 +29,7 @@ void main() {
       reason: 'System in a light test env',
     );
 
-    await tester.tap(find.text('Dark'));
+    await tester.tap(find.text('Dark').first);
     await tester.pumpAndSettle();
     expect(_tokens(tester).background, const Color(0xFF0E1512));
     expect(container.read(appearanceProvider).mode, AppearanceMode.dark);
@@ -38,7 +38,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_tokens(tester).background, const Color(0xFF000000));
 
-    await tester.tap(find.text('Light'));
+    await tester.tap(find.text('Light').first);
     await tester.pumpAndSettle();
     expect(_tokens(tester).background, const Color(0xFFF4F6F5));
   });

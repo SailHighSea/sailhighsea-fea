@@ -1,8 +1,11 @@
-/// The app's name, in one place.
-const kAppName = 'FET Family Expenses Tracker';
+/// The app's name, as the launcher, the title bar and the explorer show it.
+const kAppName = 'FET';
+
+/// What FET stands for: the description, used where there is room (About, store listing).
+const kAppFullName = 'FET Family Expenses Tracker';
 
 /// The short form, for tight spaces.
-const kAppShortName = 'FET';
+const kAppShortName = kAppName;
 
 /// One line about the app (store listing, About page, README).
 const kAppTagline =
