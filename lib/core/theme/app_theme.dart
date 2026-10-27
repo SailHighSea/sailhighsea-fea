@@ -57,6 +57,12 @@ ThemeData buildTheme(
     focusColor: tokens.primary.withValues(alpha: 0.22),
     hoverColor: tokens.primary.withValues(alpha: 0.08),
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    // Android's predictive back: the page under a pushed page shows as it is swiped away.
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+      },
+    ),
     extensions: [tokens],
   );
   return base.copyWith(

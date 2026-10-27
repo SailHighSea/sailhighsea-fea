@@ -159,7 +159,7 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
           ),
           GoRoute(
             path: '/expenses/:id/edit',
-            pageBuilder: (c, s) => _page(
+            pageBuilder: (c, s) => _pushed(
               s,
               ExpenseFormScreen(
                 key: ValueKey(s.pathParameters['id']),
@@ -173,7 +173,7 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
           ),
           GoRoute(
             path: '/import',
-            pageBuilder: (c, s) => _page(s, const ImportScreen()),
+            pageBuilder: (c, s) => _pushed(s, const ImportScreen()),
           ),
           GoRoute(
             path: '/about',
@@ -204,16 +204,42 @@ GoRouter buildRouter({String initialLocation = '/home', RouteGate? gate}) {
           ),
           GoRoute(
             path: '/scan',
-            pageBuilder: (c, s) => _page(s, const ScanScreen()),
+            pageBuilder: (c, s) => _pushed(s, const ScanScreen()),
           ),
           GoRoute(
             path: '/add',
-            pageBuilder: (c, s) => _page(s, const ExpenseFormScreen()),
+            pageBuilder: (c, s) => _pushed(s, const ExpenseFormScreen()),
           ),
         ],
       ),
     ],
   );
+}
+
+/// Where the Android back button goes from a page that was opened with `go` (so it has nothing
+/// to pop): sub-pages return to Settings or their parent, tabs return to Home. Null on Home, where
+/// back leaves the app.
+String? backTarget(String location) {
+  switch (location) {
+    case '/home':
+      return null;
+    case '/bills':
+    case '/family':
+    case '/categories':
+    case '/appearance':
+    case '/data':
+    case '/about':
+      return '/settings';
+    case '/personalise':
+      return '/appearance';
+    case '/data/restore':
+    case '/privacy':
+      return '/data';
+    case '/suggestions':
+      return '/family';
+    default:
+      return '/home';
+  }
 }
 
 /// The Family page: the server version, or the Google Sheets pairing page in Sheets mode.
@@ -226,6 +252,11 @@ class _FamilyEntry extends ConsumerWidget {
       ? const SheetsFamilyScreen()
       : const FamilyScreen();
 }
+
+/// Pages opened with `push` (forms, scan, import): a real route transition, so Android's
+/// predictive back gesture can peel them away.
+Page<void> _pushed(GoRouterState state, Widget child) =>
+    MaterialPage<void>(key: state.pageKey, child: child);
 
 Page<void> _page(GoRouterState state, Widget child) =>
     NoTransitionPage<void>(key: state.pageKey, child: child);
@@ -250,33 +281,41 @@ class _Shell extends ConsumerWidget {
         location == '/import' ||
         location.endsWith('/edit');
     // Keyboard: Ctrl or Cmd with N, 1 to 6, comma, F and slash; Esc goes back to Home.
-    return Focus(
-      autofocus: true,
-      child: AppShortcuts(
-        onAdd: openAdd,
-        onGo: (d) => context.go(d.path),
-        onFind: () {
-          ref.read(searchFocusRequestProvider.notifier).request();
-          context.go('/expenses');
-        },
-        onHelp: () => showShortcutHelp(context),
-        onEscape: () {
-          if (location != '/home' && !isFormRoute) context.go('/home');
-        },
-        child: AdaptiveShell(
-          destination: AppDestination.fromLocation(location),
-          onSelect: (d) => context.go(d.path),
-          memberInitials: ref.watch(memberInitialsProvider),
-          showBottomTabs: onTabRoot,
-          immersiveTop:
-              location == '/home' &&
-              ref.watch(appearanceProvider).homeHeader ==
-                  HomeHeaderStyle.gradient,
-          syncIndicator: (dense) => SyncIndicator(dense: dense),
-          // Half-open foldable: this page above the hinge and the Add form below it, on
-          // every page except the add and edit forms themselves.
-          foldBottom: canAdd && !isFormRoute ? const FoldAddPanel() : null,
-          child: DuplicatePrompt(child: child),
+    final back = backTarget(location);
+    return PopScope(
+      // Pushed pages (the add form, scan) pop normally; the rest step back through `go`.
+      canPop: back == null || context.canPop(),
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && back != null) context.go(back);
+      },
+      child: Focus(
+        autofocus: true,
+        child: AppShortcuts(
+          onAdd: openAdd,
+          onGo: (d) => context.go(d.path),
+          onFind: () {
+            ref.read(searchFocusRequestProvider.notifier).request();
+            context.go('/expenses');
+          },
+          onHelp: () => showShortcutHelp(context),
+          onEscape: () {
+            if (location != '/home' && !isFormRoute) context.go('/home');
+          },
+          child: AdaptiveShell(
+            destination: AppDestination.fromLocation(location),
+            onSelect: (d) => context.go(d.path),
+            memberInitials: ref.watch(memberInitialsProvider),
+            showBottomTabs: onTabRoot,
+            immersiveTop:
+                location == '/home' &&
+                ref.watch(appearanceProvider).homeHeader ==
+                    HomeHeaderStyle.gradient,
+            syncIndicator: (dense) => SyncIndicator(dense: dense),
+            // Half-open foldable: this page above the hinge and the Add form below it, on
+            // every page except the add and edit forms themselves.
+            foldBottom: canAdd && !isFormRoute ? const FoldAddPanel() : null,
+            child: DuplicatePrompt(child: child),
+          ),
         ),
       ),
     );

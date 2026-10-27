@@ -125,7 +125,6 @@ class _CompactShell extends StatelessWidget {
           child: immersiveTop
               ? page
               : SafeArea(
-                  top: indicator == null,
                   bottom: !showTabs,
                   child: Column(
                     children: [
