@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import 'app_tokens.dart';
@@ -533,12 +535,62 @@ const _colorBlindPalette = {
   'slate': Color(0xFF6C7A89),
 };
 
+/// Moves a neutral (page, card, text) colour to the theme's hue, keeping how light it is, so every
+/// theme gives the whole app its own tint and not only the accent. [minSat] is how much colour a
+/// near-grey colour gets, so the tint is easy to see; [light] sets its lightness when given.
+Color _retint(
+  Color c,
+  double hue,
+  double satScale, {
+  double minSat = 0,
+  double? light,
+}) {
+  final h = HSLColor.fromColor(c);
+  return h
+      .withHue(hue)
+      .withSaturation((math.max(h.saturation, minSat) * satScale).clamp(0, 1))
+      .withLightness(light ?? h.lightness)
+      .toColor();
+}
+
+/// Forest is the SPEC's own green-grey, so it is left as it is; every other theme tints the
+/// page, the cards, the edges and the text with its own hue.
+_ModeBase _tintedBase(_ModeBase b, ColorThemeId theme, ThemeVariant variant) {
+  if (theme == ColorThemeId.forest) return b;
+  final hero = HSLColor.fromColor(_previews[theme]!.hero);
+  final hue = hero.hue;
+  // A grey theme (Graphite) stays nearly colourless; a rich one tints fully.
+  final scale = (hero.saturation / 0.69).clamp(0.0, 1.0);
+  final light = variant == ThemeVariant.light;
+  final pure = variant == ThemeVariant.pure;
+  Color t(Color c, {double minSat = 0, double? l}) =>
+      _retint(c, hue, scale, minSat: minSat, light: l);
+  return _ModeBase(
+    background: t(b.background, minSat: light ? 0.40 : 0.42),
+    // White cards get a faint tint of the theme in Light; dark cards a clear one.
+    surface: t(b.surface, minSat: light ? 0.70 : 0.50, l: light ? 0.985 : null),
+    border: t(b.border, minSat: 0.40),
+    text: t(b.text, minSat: 0.2),
+    muted: t(b.muted, minSat: 0.12),
+    onPrimary: pure ? b.onPrimary : t(b.onPrimary, minSat: 0.28),
+    navRail: t(
+      b.navRail,
+      minSat: pure ? 0 : (light ? 0.70 : 0.50),
+      l: light ? 0.985 : null,
+    ),
+    amberText: b.amberText,
+    grey: t(b.grey, minSat: 0.1),
+    toggleOff: t(b.toggleOff, minSat: 0.25),
+    chipBorder: t(b.chipBorder, minSat: 0.25),
+  );
+}
+
 AppTokens tokensFor(
   ColorThemeId theme,
   ThemeVariant variant, {
   bool colorBlind = false,
 }) {
-  final base = _modeBases[variant]!;
+  final base = _tintedBase(_modeBases[variant]!, theme, variant);
   final colors = _themeColors[theme]![variant]!;
   final palette = colorBlind
       ? _colorBlindPalette

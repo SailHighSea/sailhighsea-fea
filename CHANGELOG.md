@@ -2,6 +2,8 @@
 
 ## Fixes after Phase 8
 
+- Colour themes now tint the whole app: page, cards, edges and text take the theme's hue (Forest keeps the original green-grey; Graphite stays nearly colourless; Pure black stays black). Before, only the accent and the Home card changed.
+- Glass: the bottom bar and the overview card are frosted (a real blur of what scrolls behind them, and a firmer tint so the bar is never see-through); the other cards stay light to draw, so scrolling stays smooth.
 - The app is called **FET** where a launcher, title bar or explorer shows its name; "FET Family Expenses Tracker" is the description (About page, sign-in, Windows file description, Linux comment, notifications).
 - Profile: tap your picture on Home, or the new row at the top of Settings, to change your name and picture. Ten built-in avatars, or upload (or take) your own. Both travel with the backup.
 - Appearance now holds the background and picture controls on the same page, instead of a sub-menu.
