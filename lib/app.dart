@@ -15,6 +15,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/appearance_provider.dart';
 import 'core/theme/color_themes.dart';
 import 'core/theme/personal_background.dart';
+import 'core/widgets/glass.dart';
 import 'core/theme/personal_look.dart';
 import 'core/window/desktop_title_bar.dart';
 import 'core/window/window_controls.dart';
@@ -109,17 +110,20 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
         // "Larger text" scales on top of whatever the system text size already is.
         final media = MediaQuery.of(context);
         final extra = settings.largerText ? 1.2 : 1.0;
-        final app = Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(child: PersonalBackground(style: page)),
-            MediaQuery(
-              data: media.copyWith(
-                textScaler: _MultipliedScaler(media.textScaler, extra),
+        final app = GlassScope(
+          enabled: page.active && page.glass,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(child: PersonalBackground(style: page)),
+              MediaQuery(
+                data: media.copyWith(
+                  textScaler: _MultipliedScaler(media.textScaler, extra),
+                ),
+                child: OnboardingGate(child: LockGate(child: child!)),
               ),
-              child: OnboardingGate(child: LockGate(child: child!)),
-            ),
-          ],
+            ],
+          ),
         );
         // Desktop: our own title bar in the theme's colours above everything, even the intro.
         final controls = ref.watch(windowControlsProvider);

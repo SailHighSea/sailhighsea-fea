@@ -63,6 +63,7 @@ class BackgroundStyle {
     this.blur = 0,
     this.dim = 35,
     this.tone = TextTone.auto,
+    this.glass = true,
   });
 
   static const none = BackgroundStyle();
@@ -86,6 +87,9 @@ class BackgroundStyle {
   /// How much black is laid over a picture, percent, 0 to 80.
   final int dim;
   final TextTone tone;
+
+  /// Cards and the bottom bar drawn as frosted glass over the background (the page style only).
+  final bool glass;
 
   bool get active =>
       kind != BackgroundKind.none &&
@@ -139,6 +143,7 @@ class BackgroundStyle {
     int? blur,
     int? dim,
     TextTone? tone,
+    bool? glass,
   }) => BackgroundStyle(
     kind: kind ?? this.kind,
     color: color ?? this.color,
@@ -149,6 +154,7 @@ class BackgroundStyle {
     blur: blur ?? this.blur,
     dim: dim ?? this.dim,
     tone: tone ?? this.tone,
+    glass: glass ?? this.glass,
   );
 
   Map<String, Object?> toJson() => {
@@ -161,6 +167,7 @@ class BackgroundStyle {
     'blur': blur,
     'dim': dim,
     'tone': tone.name,
+    'glass': glass,
   };
 
   static BackgroundStyle fromJson(Map<String, Object?> j) {
@@ -184,6 +191,7 @@ class BackgroundStyle {
       blur: n(j['blur'], 0, 0, 24),
       dim: n(j['dim'], 35, 0, 80),
       tone: byName(TextTone.values, j['tone'], TextTone.auto),
+      glass: j['glass'] is bool ? j['glass']! as bool : true,
     );
   }
 

@@ -23,6 +23,7 @@ double _contrast(Color a, Color b) {
 
 void main() {
   setUpAll(loadTestFonts);
+  glassTests();
 
   group('header gradient colours', () {
     test('white text reads on both ends of every theme, in every mode', () {
@@ -267,5 +268,92 @@ void main() {
         );
       },
     );
+  });
+}
+
+void glassTests() {
+  group('glass cards and bar', () {
+    String look({bool glass = true}) => jsonEncode({
+      'page': BackgroundStyle(
+        kind: BackgroundKind.picture,
+        picturePath: 'asset:assets/backgrounds/sunset.png',
+        pictureLuminance: 0.334,
+        glass: glass,
+      ).toJson(),
+      'card': BackgroundStyle.none.toJson(),
+    });
+
+    testWidgets('are off without a background', (tester) async {
+      await pumpApp(tester, size: const Size(390, 844));
+      expect(find.byType(BackdropFilter), findsNothing);
+    });
+
+    testWidgets(
+      'with a picture, cards and the bottom bar blur what is behind them',
+      (tester) async {
+        await pumpApp(
+          tester,
+          size: const Size(390, 844),
+          prefs: {'personal.look': look()},
+        );
+        expect(find.byType(BackdropFilter), findsWidgets);
+        final bar = find.ancestor(
+          of: find.text('Budgets'),
+          matching: find.byType(BackdropFilter),
+        );
+        expect(bar, findsOneWidget, reason: 'the bottom bar is glass');
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('can be switched off', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'personal.look': look(glass: false)},
+      );
+      expect(find.byType(BackdropFilter), findsNothing);
+    });
+
+    testWidgets('the switch is on the Backgrounds page and is saved', (
+      tester,
+    ) async {
+      final c = await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        location: '/personalise',
+        prefs: {'personal.look': look()},
+      );
+      await tester.ensureVisible(key('bg-glass'));
+      await tapKey(tester, 'bg-glass');
+      expect(c.read(personalLookProvider).page.glass, isFalse);
+    });
+
+    for (final size in const {
+      'phone': Size(390, 844),
+      'phone small, large text': Size(320, 640),
+      'tablet': Size(840, 900),
+      'desktop': Size(1280, 800),
+    }.entries) {
+      for (final route in [
+        '/home',
+        '/expenses',
+        '/budgets',
+        '/goals',
+        '/insights',
+        '/settings',
+      ]) {
+        testWidgets('$route fits with glass on ${size.key}', (tester) async {
+          await pumpApp(
+            tester,
+            size: size.value,
+            textScale: size.key.contains('large') ? 1.6 : 1,
+            location: route,
+            prefs: {'personal.look': look()},
+          );
+          expect(tester.takeException(), isNull);
+        });
+      }
+    }
   });
 }

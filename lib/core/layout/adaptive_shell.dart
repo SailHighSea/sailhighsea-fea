@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/glass.dart';
 import 'destinations.dart';
 import 'hinge.dart';
 import 'nav_icon.dart';
@@ -166,29 +167,39 @@ class _BottomTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final bar = SafeArea(
+      top: false,
+      child: SizedBox(
+        height: 76,
+        child: Row(
+          children: [
+            for (final d in AppDestination.tabs)
+              Expanded(
+                child: _TabItem(
+                  destination: d,
+                  selected: d == destination,
+                  onTap: () => onSelect(d),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+    // Glass: the bar is a frosted, see-through strip over the page behind it.
+    if (GlassScope.of(context)) {
+      return GlassBox(
+        color: t.navRail,
+        onlyTopEdge: true,
+        strength: 1.3,
+        child: bar,
+      );
+    }
     return Container(
       decoration: BoxDecoration(
         color: t.navRail,
         border: Border(top: BorderSide(color: t.border)),
       ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 76,
-          child: Row(
-            children: [
-              for (final d in AppDestination.tabs)
-                Expanded(
-                  child: _TabItem(
-                    destination: d,
-                    selected: d == destination,
-                    onTap: () => onSelect(d),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+      child: bar,
     );
   }
 }

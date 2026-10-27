@@ -85,6 +85,14 @@ void main() {
     prefs: {'appearance.mode': 'dark'},
   );
   shot(
+    'home-glass',
+    phone,
+    sampleHome: true,
+    prefs: {
+      'personal.look': '{"page":{"kind":"picture","picturePath":"asset:assets/backgrounds/dunes.png","pictureLuminance":0.674,"blur":6,"dim":10,"tone":"dark","glass":true},"card":{"kind":"none"}}',
+    },
+  );
+  shot(
     'home-rose',
     phone,
     sampleHome: true,
