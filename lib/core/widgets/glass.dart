@@ -1,5 +1,3 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 
 /// Whether cards and bars are drawn as frosted glass: translucent, blurring what is behind them,
@@ -18,16 +16,16 @@ class GlassScope extends InheritedWidget {
   bool updateShouldNotify(GlassScope old) => old.enabled != enabled;
 }
 
-/// The glass look around [child]: the blur, a tint of [color], a soft light sheen from the top
-/// left and a thin edge. [color] is the solid surface it replaces; the glass is a see-through
-/// version of it so text keeps its contrast.
+/// The glass look around [child]: a see-through tint of [color], a soft light sheen from the top
+/// left and a thin light edge. No live blur: the backdrop behind is already soft (or blurred once
+/// when it is a picture), and a blur filter per card is what made scrolling slow. [color] is the
+/// solid surface it replaces; the tint keeps enough of it for text to keep its contrast.
 class GlassBox extends StatelessWidget {
   const GlassBox({
     super.key,
     required this.child,
     required this.color,
     this.borderRadius = BorderRadius.zero,
-    this.blur = 22,
     this.onlyTopEdge = false,
     this.strength = 1,
   });
@@ -35,7 +33,6 @@ class GlassBox extends StatelessWidget {
   final Widget child;
   final Color color;
   final BorderRadius borderRadius;
-  final double blur;
 
   /// A bar along the bottom of the screen draws its edge on top only.
   final bool onlyTopEdge;
@@ -48,31 +45,25 @@ class GlassBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final edge = Colors.white.withValues(alpha: dark ? 0.16 : 0.55);
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: borderRadius,
-            color: color.withValues(
-              alpha: ((dark ? 0.58 : 0.64) * strength).clamp(0.0, 0.88),
-            ),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: dark ? 0.10 : 0.30),
-                Colors.white.withValues(alpha: 0),
-              ],
-            ),
-            border: onlyTopEdge
-                ? Border(top: BorderSide(color: edge))
-                : Border.all(color: edge),
-          ),
-          child: child,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        color: color.withValues(
+          alpha: ((dark ? 0.58 : 0.64) * strength).clamp(0.0, 0.88),
         ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: dark ? 0.10 : 0.30),
+            Colors.white.withValues(alpha: 0),
+          ],
+        ),
+        border: onlyTopEdge
+            ? Border(top: BorderSide(color: edge))
+            : Border.all(color: edge),
       ),
+      child: ClipRRect(borderRadius: borderRadius, child: child),
     );
   }
 }

@@ -167,15 +167,16 @@ class _BottomTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final bar = SafeArea(
-      top: false,
-      child: SizedBox(
-        height: 76,
+    final glass = GlassScope.of(context);
+    final row = SizedBox(
+      height: 74,
+      child: Padding(
+        padding: const EdgeInsets.all(5),
         child: Row(
           children: [
             for (final d in AppDestination.tabs)
               Expanded(
-                child: _TabItem(
+                child: _PillTab(
                   destination: d,
                   selected: d == destination,
                   onTap: () => onSelect(d),
@@ -185,45 +186,38 @@ class _BottomTabs extends StatelessWidget {
         ),
       ),
     );
-    // Glass: a floating, rounded glass pill over the backdrop, the chosen tab in a lighter pill.
-    if (GlassScope.of(context)) {
-      return SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
-          child: GlassBox(
-            key: const ValueKey('glass-bar'),
-            color: t.navRail,
-            borderRadius: BorderRadius.circular(36),
-            strength: 1.2,
-            child: SizedBox(
-              height: 74,
-              child: Padding(
-                padding: const EdgeInsets.all(5),
-                child: Row(
-                  children: [
-                    for (final d in AppDestination.tabs)
-                      Expanded(
-                        child: _PillTab(
-                          destination: d,
-                          selected: d == destination,
-                          onTap: () => onSelect(d),
-                        ),
-                      ),
+    final radius = BorderRadius.circular(36);
+    // A floating, rounded pill with the chosen tab in a lighter pill. Glass is see-through over
+    // the backdrop; Standard is a solid surface with a thin edge and a soft shadow.
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
+        child: glass
+            ? GlassBox(
+                key: const ValueKey('glass-bar'),
+                color: t.navRail,
+                borderRadius: radius,
+                strength: 1.2,
+                child: row,
+              )
+            : DecoratedBox(
+                key: const ValueKey('pill-bar'),
+                decoration: BoxDecoration(
+                  color: t.navRail,
+                  borderRadius: radius,
+                  border: Border.all(color: t.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.10),
+                      blurRadius: 12,
+                      offset: const Offset(0, 3),
+                    ),
                   ],
                 ),
+                child: row,
               ),
-            ),
-          ),
-        ),
-      );
-    }
-    return Container(
-      decoration: BoxDecoration(
-        color: t.navRail,
-        border: Border(top: BorderSide(color: t.border)),
       ),
-      child: bar,
     );
   }
 }
@@ -284,55 +278,6 @@ class _PillTab extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TabItem extends StatelessWidget {
-  const _TabItem({
-    required this.destination,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final AppDestination destination;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.tokens;
-    final color = selected ? t.primary : t.muted;
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: destination.label,
-      excludeSemantics: true,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            NavIcon(destination, size: 24, color: color),
-            const SizedBox(height: 4),
-            // One line, shrunk a little rather than wrapped, so four tabs fit at large text.
-            Flexible(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  destination.label,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                    color: color,
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

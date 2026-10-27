@@ -8,6 +8,7 @@ import 'package:family_expenses/core/theme/glass_backdrop.dart';
 import 'package:family_expenses/core/theme/header_gradient.dart';
 import 'package:family_expenses/core/theme/personal_look.dart';
 import 'package:family_expenses/core/theme/preset_pictures.dart';
+import 'package:family_expenses/core/widgets/glass.dart';
 import 'package:family_expenses/features/backup/settings_backup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -286,15 +287,20 @@ void glassTests() {
 
     testWidgets('Standard has no glass', (tester) async {
       await pumpApp(tester, size: const Size(390, 844));
-      expect(find.byType(BackdropFilter), findsNothing);
+      expect(find.byType(GlassBox), findsNothing);
       expect(key('glass-bar'), findsNothing);
+      expect(
+        key('pill-bar'),
+        findsOneWidget,
+        reason: 'Standard has the pill bar too, solid',
+      );
     });
 
     testWidgets(
       'Glass blurs the cards, floats the bottom bar and brings its own backdrop',
       (tester) async {
         await pumpApp(tester, size: const Size(390, 844), prefs: glass);
-        expect(find.byType(BackdropFilter), findsWidgets);
+        expect(find.byType(GlassBox), findsWidgets);
         expect(key('glass-bar'), findsOneWidget);
         expect(find.byType(GlassBackdrop), findsOneWidget);
         // The bar is a rounded pill inset from the edges, not a full-width strip.
@@ -323,7 +329,7 @@ void glassTests() {
         size: const Size(390, 844),
         prefs: {'personal.look': picture},
       );
-      expect(find.byType(BackdropFilter), findsNothing);
+      expect(find.byType(GlassBox), findsNothing);
     });
 
     testWidgets(
