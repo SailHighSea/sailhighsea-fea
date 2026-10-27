@@ -206,7 +206,7 @@ class HomeScreen extends ConsumerWidget {
         Positioned.fill(child: layout),
         Positioned(
           right: 16,
-          bottom: 16,
+          bottom: 16 + MediaQuery.paddingOf(context).bottom,
           child: HomeAddButton(
             onTap: add,
             long: context.layout.windowClass != WindowClass.compact,
