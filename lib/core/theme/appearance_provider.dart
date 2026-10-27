@@ -14,6 +14,7 @@ const _kTheme = 'appearance.colorTheme';
 const _kLargerText = 'appearance.largerText';
 const _kColorBlind = 'appearance.colorBlindCharts';
 const _kCurrency = 'appearance.currency';
+const _kHomeHeader = 'appearance.homeHeader';
 
 T _enumByName<T extends Enum>(List<T> values, String? name, T fallback) {
   for (final value in values) {
@@ -43,6 +44,11 @@ class AppearanceController extends Notifier<AppearanceSettings> {
       largerText: _prefs.getBool(_kLargerText) ?? false,
       colorBlindCharts: _prefs.getBool(_kColorBlind) ?? false,
       currencyCode: _prefs.getString(_kCurrency) ?? 'SGD',
+      homeHeader: _enumByName(
+        HomeHeaderStyle.values,
+        _prefs.getString(_kHomeHeader),
+        HomeHeaderStyle.classic,
+      ),
     );
   }
 
@@ -64,6 +70,11 @@ class AppearanceController extends Notifier<AppearanceSettings> {
   Future<void> setColorBlindCharts(bool value) {
     state = state.copyWith(colorBlindCharts: value);
     return _prefs.setBool(_kColorBlind, value);
+  }
+
+  Future<void> setHomeHeader(HomeHeaderStyle style) {
+    state = state.copyWith(homeHeader: style);
+    return _prefs.setString(_kHomeHeader, style.name);
   }
 
   Future<void> setCurrency(String code) {

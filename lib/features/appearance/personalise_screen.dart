@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/personal_look.dart';
 import '../../core/theme/picture_store.dart';
+import '../../core/theme/preset_pictures.dart';
 import '../../core/widgets/pill_button.dart';
 import '../../core/widgets/surface_card.dart';
 
@@ -170,6 +171,46 @@ class _PersonaliseScreenState extends ConsumerState<PersonaliseScreen> {
                   spacing: 10,
                   runSpacing: 10,
                   children: [
+                    for (final p in kPresetPictures)
+                      Semantics(
+                        button: true,
+                        selected: style.picturePath == p.path,
+                        label: '${p.name} picture',
+                        excludeSemantics: true,
+                        child: InkWell(
+                          key: ValueKey('bg-preset-${p.id}'),
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: () => _set(
+                            style.copyWith(
+                              kind: BackgroundKind.picture,
+                              picturePath: p.path,
+                              pictureLuminance: p.luminance,
+                            ),
+                          ),
+                          child: Container(
+                            width: 92,
+                            height: 68,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: style.picturePath == p.path
+                                    ? t.primary
+                                    : t.border,
+                                width: style.picturePath == p.path ? 3 : 1,
+                              ),
+                            ),
+                            child: Image.asset(p.asset, fit: BoxFit.cover),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
                     PillButton(
                       key: const ValueKey('bg-gallery'),
                       label: canTakePhoto
@@ -202,7 +243,7 @@ class _PersonaliseScreenState extends ConsumerState<PersonaliseScreen> {
                   ),
                 const SizedBox(height: 6),
                 Text(
-                  'Pictures stay on this device. They are shrunk to a sensible size, and are not part of the backup file.',
+                  'Your own pictures stay on this device, shrunk to a sensible size, and travel with your backup file. The six above come with the app.',
                   style: TextStyle(fontSize: 13, color: t.muted),
                 ),
                 if (style.picturePath != null) ...[

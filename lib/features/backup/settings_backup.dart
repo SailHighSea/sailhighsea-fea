@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/personal_look.dart';
 import '../../core/theme/picture_store.dart';
+import '../../core/theme/preset_pictures.dart';
 
 /// The settings a backup carries: theme, mode, text size, chart colours, currency, the personal
 /// background and the bill reminder choices. Device-only things (app lock, Google sign-in, which
@@ -15,6 +16,7 @@ const backedUpSettingKeys = <String>{
   'appearance.largerText',
   'appearance.colorBlindCharts',
   'appearance.currency',
+  'appearance.homeHeader',
   'personal.look',
   'bills.remindersOn',
   'bills.reminderLeadDays',
@@ -40,7 +42,9 @@ Future<Map<String, Object?>> exportSettings(SharedPreferences prefs) async {
           (j[slot] as Map?)?.cast<String, Object?>() ?? const {},
         );
         final path = style.picturePath;
-        if (style.kind == BackgroundKind.picture && path != null) {
+        if (style.kind == BackgroundKind.picture &&
+            path != null &&
+            !isPresetPath(path)) {
           final f = File(path);
           if (f.existsSync() && f.lengthSync() <= _maxPictureBytes) {
             pictures[slot] = base64.encode(f.readAsBytesSync());
@@ -84,6 +88,7 @@ Future<void> restoreSettings(
     for (final slot in ['page', 'card']) {
       final style = (look[slot] as Map?)?.cast<String, Object?>();
       if (style == null || style['kind'] != 'picture') continue;
+      if (isPresetPath(style['picturePath'] as String?)) continue;
       final data = pictures[slot];
       if (data is String) {
         style['picturePath'] = await storePictureBytes(
