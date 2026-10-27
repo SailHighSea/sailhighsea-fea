@@ -117,7 +117,10 @@ class AdaptivePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final metrics = context.layout;
     return SingleChildScrollView(
-      padding: metrics.pagePadding,
+      padding: metrics.pagePadding.copyWith(
+        bottom:
+            metrics.pagePadding.bottom + MediaQuery.paddingOf(context).bottom,
+      ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: kMaxContentWidth),
@@ -163,7 +166,10 @@ class AdaptiveTwoPane extends StatelessWidget {
     final metrics = context.layout;
     if (metrics.isCompact && scrollWhenStacked) {
       return SingleChildScrollView(
-        padding: metrics.pagePadding,
+        padding: metrics.pagePadding.copyWith(
+          bottom:
+              metrics.pagePadding.bottom + MediaQuery.paddingOf(context).bottom,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -208,7 +214,11 @@ class AdaptiveTwoPane extends StatelessWidget {
         // Too narrow for two columns (a 600 wide window with the rail): stack them and scroll.
         if (room < secondaryWidth + 24 + 320) {
           return SingleChildScrollView(
-            padding: metrics.pagePadding,
+            padding: metrics.pagePadding.copyWith(
+              bottom:
+                  metrics.pagePadding.bottom +
+                  MediaQuery.paddingOf(context).bottom,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -222,7 +232,11 @@ class AdaptiveTwoPane extends StatelessWidget {
           );
         }
         return SingleChildScrollView(
-          padding: metrics.pagePadding,
+          padding: metrics.pagePadding.copyWith(
+            bottom:
+                metrics.pagePadding.bottom +
+                MediaQuery.paddingOf(context).bottom,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: kMaxContentWidth),

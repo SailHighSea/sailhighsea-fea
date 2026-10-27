@@ -80,7 +80,10 @@ class AdaptiveFormLayout extends StatelessWidget {
     }
     final showTip = metrics.windowClass == WindowClass.expanded && tip != null;
     return SingleChildScrollView(
-      padding: metrics.pagePadding,
+      padding: metrics.pagePadding.copyWith(
+        bottom:
+            metrics.pagePadding.bottom + MediaQuery.paddingOf(context).bottom,
+      ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: kMaxContentWidth),

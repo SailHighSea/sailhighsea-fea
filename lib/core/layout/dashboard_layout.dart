@@ -224,7 +224,11 @@ class DashboardLayout extends StatelessWidget {
         );
         if (band == null) {
           return SingleChildScrollView(
-            padding: metrics.pagePadding,
+            padding: metrics.pagePadding.copyWith(
+              bottom:
+                  metrics.pagePadding.bottom +
+                  MediaQuery.paddingOf(context).bottom,
+            ),
             child: content,
           );
         }
@@ -239,7 +243,7 @@ class DashboardLayout extends StatelessWidget {
                   pad.left,
                   0,
                   pad.right,
-                  pad.bottom,
+                  pad.bottom + MediaQuery.paddingOf(context).bottom,
                 ),
                 child: content,
               ),

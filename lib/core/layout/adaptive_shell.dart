@@ -107,56 +107,57 @@ class _CompactShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final indicator = syncIndicator;
-    if (immersiveTop) {
-      return Column(
-        children: [
-          Expanded(
-            child: SafeArea(
-              top: false,
-              bottom: !showTabs,
-              child: Stack(
-                children: [
-                  Positioned.fill(child: child),
-                  if (indicator != null)
-                    Positioned(
-                      right: 8,
-                      top: MediaQuery.viewPaddingOf(context).top + 2,
-                      child: indicator,
-                    ),
-                ],
-              ),
-            ),
-          ),
-          if (showTabs)
-            _BottomTabs(destination: destination, onSelect: onSelect),
-        ],
-      );
-    }
-    return Column(
-      children: [
-        if (indicator != null)
-          SafeArea(
-            bottom: false,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: indicator,
-              ),
-            ),
-          ),
-        Expanded(
-          child: SafeArea(
-            top: indicator == null,
-            bottom: !showTabs,
-            child: child,
-          ),
+    final media = MediaQuery.of(context);
+    // The pill floats over the page: the page runs behind it and scrolls clear of it.
+    final barSpace = showTabs ? _kBarSpace + media.viewPadding.bottom : 0.0;
+    final page = MediaQuery(
+      data: media.copyWith(
+        padding: media.padding.copyWith(
+          bottom: showTabs ? barSpace : media.padding.bottom,
         ),
-        if (showTabs) _BottomTabs(destination: destination, onSelect: onSelect),
+      ),
+      child: child,
+    );
+    final top = immersiveTop ? MediaQuery.viewPaddingOf(context).top + 2 : null;
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: immersiveTop
+              ? page
+              : SafeArea(
+                  top: indicator == null,
+                  bottom: !showTabs,
+                  child: Column(
+                    children: [
+                      if (indicator != null)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: indicator,
+                          ),
+                        ),
+                      Expanded(child: page),
+                    ],
+                  ),
+                ),
+        ),
+        if (immersiveTop && indicator != null)
+          Positioned(right: 8, top: top, child: indicator),
+        if (showTabs)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _BottomTabs(destination: destination, onSelect: onSelect),
+          ),
       ],
     );
   }
 }
+
+/// Height of the floating pill with its margins (the system inset is added on top).
+const double _kBarSpace = 90;
 
 class _BottomTabs extends StatelessWidget {
   const _BottomTabs({required this.destination, required this.onSelect});
