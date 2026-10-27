@@ -19,6 +19,8 @@ const backedUpSettingKeys = <String>{
   'appearance.homeHeader',
   'appearance.look',
   'personal.look',
+  'profile.name',
+  'profile.avatar',
   'bills.remindersOn',
   'bills.reminderLeadDays',
 };
@@ -56,6 +58,13 @@ Future<Map<String, Object?>> exportSettings(SharedPreferences prefs) async {
       // A damaged look setting: the rest is still backed up.
     }
   }
+  final avatar = prefs.getString('profile.avatar');
+  if (avatar != null && avatar.startsWith('file:')) {
+    final f = File(avatar.substring(5));
+    if (f.existsSync() && f.lengthSync() <= _maxPictureBytes) {
+      pictures['avatar'] = base64.encode(f.readAsBytesSync());
+    }
+  }
   return {'values': values, if (pictures.isNotEmpty) 'pictures': pictures};
 }
 
@@ -82,6 +91,20 @@ Future<void> restoreSettings(
   // Pictures go back into the app's folder, and the look points at the new files.
   final pictures =
       (settings['pictures'] as Map?)?.cast<String, Object?>() ?? {};
+  final avatar = prefs.getString('profile.avatar');
+  if (avatar != null && avatar.startsWith('file:')) {
+    final data = pictures['avatar'];
+    if (data is String) {
+      try {
+        final path = await storePictureBytes(base64.decode(data), 'avatar');
+        await prefs.setString('profile.avatar', 'file:$path');
+      } on Object {
+        await prefs.remove('profile.avatar');
+      }
+    } else {
+      await prefs.remove('profile.avatar');
+    }
+  }
   final raw = prefs.getString('personal.look');
   if (raw == null) return;
   try {

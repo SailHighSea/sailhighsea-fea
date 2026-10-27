@@ -15,6 +15,7 @@ import '../../core/theme/appearance_provider.dart';
 import '../../core/theme/appearance_settings.dart';
 import '../../core/theme/color_themes.dart';
 import '../../core/widgets/currency_picker.dart';
+import 'personalise_screen.dart';
 
 /// Appearance settings (Themes, TabAppearance and DeskAppearance mockups). Every control
 /// is wired to the real theme switch, so changes apply live and persist.
@@ -60,6 +61,10 @@ class AppearanceScreen extends ConsumerWidget {
             onChanged: controller.setHomeHeader,
           ),
           const SizedBox(height: 18),
+          const _SectionLabel('Backgrounds and pictures'),
+          const SizedBox(height: 10),
+          const PersonaliseSections(),
+          const SizedBox(height: 18),
           _SettingsCard(
             settings: settings,
             controller: controller,
@@ -81,14 +86,6 @@ class AppearanceScreen extends ConsumerWidget {
               key: const ValueKey('open-about'),
               label: 'About FET',
               onTap: () => context.go('/about'),
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextLinkButton(
-              key: const ValueKey('open-personalise'),
-              label: 'Backgrounds and pictures',
-              onTap: () => context.go('/personalise'),
             ),
           ),
           Align(

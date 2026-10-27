@@ -285,19 +285,31 @@ void main() {
     }
   });
 
-  test('the app is called FET Family Expenses Tracker', () {
-    expect(kAppName, 'FET Family Expenses Tracker');
-    expect(
-      File('android/app/src/main/AndroidManifest.xml').readAsStringSync(),
-      contains('android:label="FET Family Expenses Tracker"'),
-    );
-    expect(
-      File('windows/runner/main.cpp').readAsStringSync(),
-      contains('FET Family Expenses Tracker'),
-    );
-    expect(
-      File('linux/runner/my_application.cc').readAsStringSync(),
-      contains('FET Family Expenses Tracker'),
-    );
-  });
+  test(
+    'launchers and window titles say FET; the description is the full name',
+    () {
+      expect(kAppName, 'FET');
+      expect(kAppFullName, 'FET Family Expenses Tracker');
+      expect(
+        File('android/app/src/main/AndroidManifest.xml').readAsStringSync(),
+        contains('android:label="FET"'),
+      );
+      expect(
+        File('windows/runner/main.cpp').readAsStringSync(),
+        contains('L"FET"'),
+      );
+      expect(
+        File('windows/runner/Runner.rc').readAsStringSync(),
+        contains('VALUE "FileDescription", "FET Family Expenses Tracker"'),
+      );
+      expect(
+        File('linux/runner/my_application.cc').readAsStringSync(),
+        contains('"FET"'),
+      );
+      expect(
+        File('scripts/package_linux.sh').readAsStringSync(),
+        contains('Comment=FET Family Expenses Tracker'),
+      );
+    },
+  );
 }

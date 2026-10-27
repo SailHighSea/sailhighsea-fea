@@ -15,14 +15,29 @@ enum _Target { page, card }
 
 /// Backgrounds and pictures: a colour, a gradient or the person's own picture behind every
 /// screen, and the same for the Home card that shows what was spent. Changes apply at once.
-class PersonaliseScreen extends ConsumerStatefulWidget {
+class PersonaliseScreen extends StatelessWidget {
   const PersonaliseScreen({super.key});
 
   @override
-  ConsumerState<PersonaliseScreen> createState() => _PersonaliseScreenState();
+  Widget build(BuildContext context) => AdaptivePage(
+    header: PageHeader(
+      title: 'Backgrounds and pictures',
+      onBackWhenCompact: () => context.go('/appearance'),
+    ),
+    children: const [PersonaliseSections()],
+  );
 }
 
-class _PersonaliseScreenState extends ConsumerState<PersonaliseScreen> {
+/// The background and picture controls, shown inside the Appearance page.
+class PersonaliseSections extends ConsumerStatefulWidget {
+  const PersonaliseSections({super.key});
+
+  @override
+  ConsumerState<PersonaliseSections> createState() =>
+      _PersonaliseSectionsState();
+}
+
+class _PersonaliseSectionsState extends ConsumerState<PersonaliseSections> {
   _Target _target = _Target.page;
   String? _message;
 
@@ -72,11 +87,8 @@ class _PersonaliseScreenState extends ConsumerState<PersonaliseScreen> {
         ? BackgroundKind.solid
         : style.kind;
     final ratio = style.active ? style.contrast : null;
-    return AdaptivePage(
-      header: PageHeader(
-        title: 'Backgrounds and pictures',
-        onBackWhenCompact: () => context.go('/appearance'),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _Section(
           title: 'What to change',

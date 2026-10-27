@@ -152,6 +152,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    kAppFullName,
+                    style: TextStyle(fontSize: 14, color: t.muted),
+                  ),
                   const SizedBox(height: 6),
                   Text(
                     codeStep

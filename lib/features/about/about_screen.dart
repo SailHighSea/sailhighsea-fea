@@ -116,6 +116,11 @@ class AboutScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
+                          kAppFullName,
+                          key: const ValueKey('about-full-name'),
+                          style: TextStyle(fontSize: 14, color: t.text),
+                        ),
+                        Text(
                           version == null
                               ? 'Version not available'
                               : 'Version $version',
