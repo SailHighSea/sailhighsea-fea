@@ -306,6 +306,35 @@ class _StartSettingsState extends ConsumerState<_StartSettings> {
         Semantics(
           header: true,
           child: Text(
+            'Look',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: t.muted,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final l in AppLook.values)
+              ChoiceChip(
+                key: ValueKey('start-look-${l.name}'),
+                label: Text(
+                  l == AppLook.glass ? 'Glass (see-through)' : 'Standard',
+                ),
+                selected: settings.look == l,
+                materialTapTargetSize: MaterialTapTargetSize.padded,
+                onSelected: (_) => controller.setLook(l),
+              ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Semantics(
+          header: true,
+          child: Text(
             'Currency',
             style: TextStyle(
               fontSize: 13,

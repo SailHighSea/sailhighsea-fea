@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/layout/dashboard_layout.dart';
 import '../../core/layout/destinations.dart';
+import '../../core/layout/window_class.dart';
 import '../../core/money/money_provider.dart';
 import '../family/member_providers.dart';
 import '../../core/theme/appearance_provider.dart';
@@ -58,29 +59,28 @@ class HomeScreen extends ConsumerWidget {
         : daysInMonth(month);
     final monthShort = DateFormat('MMM', 'en_US').format(month);
 
-    return DashboardLayout(
-      header: (context, mode) =>
-          ref.watch(appearanceProvider).homeHeader == HomeHeaderStyle.gradient
-          ? GradientHomeHeader(
-              month: month,
-              onPrevious: months.previous,
-              onNext: months.next,
-              onAdd: permissions.canWriteExpenses
-                  ? () => context.push('/add')
-                  : null,
-              onSelectDestination: goTo,
-              mode: mode,
-            )
-          : HomeHeader(
-              month: month,
-              onPrevious: months.previous,
-              onNext: months.next,
-              onAdd: permissions.canWriteExpenses
-                  ? () => context.push('/add')
-                  : null,
-              onSelectDestination: goTo,
-              mode: mode,
-            ),
+    final gradientHeader =
+        ref.watch(appearanceProvider).homeHeader == HomeHeaderStyle.gradient;
+    final cardStyle = ref.watch(personalLookProvider).card;
+
+    final add = permissions.canWriteExpenses
+        ? () => context.push('/add')
+        : null;
+
+    final layout = DashboardLayout(
+      header: (context, mode) => HomeHeader(
+        month: month,
+        onPrevious: months.previous,
+        onNext: months.next,
+        onAdd: add,
+        onSelectDestination: goTo,
+        mode: mode,
+      ),
+      // The gradient look: a full-width band, with the overview card reaching up into it and the
+      // month switch inside that card. The Add button floats at the bottom right.
+      band: gradientHeader ? (context, mode) => GradientBand(mode: mode) : null,
+      bandOverlap: kHeaderOverlap,
+      bottomSpace: gradientHeader && add != null ? 84 : 0,
       // Swipe the card sideways to change month: left for the next, right for the previous.
       hero: (context, mode) => GestureDetector(
         key: const ValueKey('hero-swipe'),
@@ -92,8 +92,32 @@ class HomeScreen extends ConsumerWidget {
           if (v > 300) months.previous();
         },
         child: PersonalHero(
-          style: ref.watch(personalLookProvider).card,
-          child: HeroCard(summary: summary, money: money),
+          style: cardStyle,
+          child: !gradientHeader
+              ? HeroCard(summary: summary, money: money)
+              : cardStyle.active
+              ? HeroCard(
+                  summary: summary,
+                  money: money,
+                  top: OverviewTitle(
+                    month: month,
+                    now: now,
+                    onPrevious: months.previous,
+                    onNext: months.next,
+                  ),
+                )
+              : OverviewOnGradient(
+                  child: HeroCard(
+                    summary: summary,
+                    money: money,
+                    top: OverviewTitle(
+                      month: month,
+                      now: now,
+                      onPrevious: months.previous,
+                      onNext: months.next,
+                    ),
+                  ),
+                ),
         ),
       ),
       trend: (context, mode) => switch (mode) {
@@ -175,6 +199,20 @@ class HomeScreen extends ConsumerWidget {
             : null,
         canOpen: (e) => ref.read(canEditExpenseProvider)(e.createdBy),
       ),
+    );
+    if (!gradientHeader || add == null) return layout;
+    return Stack(
+      children: [
+        Positioned.fill(child: layout),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: HomeAddButton(
+            onTap: add,
+            long: context.layout.windowClass != WindowClass.compact,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:family_expenses/core/theme/appearance_provider.dart';
 import 'package:family_expenses/core/theme/appearance_settings.dart';
 import 'package:family_expenses/core/theme/color_themes.dart';
+import 'package:family_expenses/core/theme/glass_backdrop.dart';
 import 'package:family_expenses/core/theme/header_gradient.dart';
 import 'package:family_expenses/core/theme/personal_look.dart';
 import 'package:family_expenses/core/theme/preset_pictures.dart';
@@ -23,6 +24,7 @@ double _contrast(Color a, Color b) {
 
 void main() {
   setUpAll(loadTestFonts);
+  glassTests();
 
   group('header gradient colours', () {
     test('white text reads on both ends of every theme, in every mode', () {
@@ -45,10 +47,40 @@ void main() {
   });
 
   group('the gradient Home header', () {
-    testWidgets('is off by default', (tester) async {
+    testWidgets('is the default look of Home', (tester) async {
       await pumpApp(tester, size: const Size(390, 844));
-      expect(key('gradient-header'), findsNothing);
+      expect(key('gradient-header'), findsOneWidget);
     });
+
+    testWidgets('Classic brings back the plain month row', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'appearance.homeHeader': 'classic'},
+      );
+      expect(key('gradient-header'), findsNothing);
+      expect(find.text('Spent this month'), findsOneWidget);
+    });
+
+    testWidgets(
+      'the overview card overlaps the band and stays tappable and swipeable',
+      (tester) async {
+        await pumpApp(tester, size: const Size(390, 844));
+        final band = tester.getRect(key('gradient-header'));
+        final card = tester.getRect(key('hero-swipe'));
+        expect(
+          card.top,
+          lessThan(band.bottom),
+          reason: 'the card reaches into the band',
+        );
+        expect(
+          card.top,
+          greaterThan(band.top + 60),
+          reason: 'but not over the logo row',
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('shows the logo, name and person when chosen', (tester) async {
       await pumpApp(
@@ -59,7 +91,11 @@ void main() {
       expect(key('gradient-header'), findsOneWidget);
       expect(find.text('FET'), findsOneWidget);
       expect(find.text('Family Expenses Tracker'), findsOneWidget);
-      expect(key('header-person'), findsOneWidget);
+      expect(
+        find.text('You'),
+        findsNothing,
+        reason: 'alone, the picture says it',
+      );
       expect(find.text('+ Add'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
@@ -233,5 +269,136 @@ void main() {
         );
       },
     );
+  });
+}
+
+void glassTests() {
+  group('the Glass look', () {
+    const glass = {'appearance.look': 'glass'};
+    final picture = jsonEncode({
+      'page': const BackgroundStyle(
+        kind: BackgroundKind.picture,
+        picturePath: 'asset:assets/backgrounds/sunset.png',
+        pictureLuminance: 0.334,
+      ).toJson(),
+      'card': BackgroundStyle.none.toJson(),
+    });
+
+    testWidgets('Standard has no glass', (tester) async {
+      await pumpApp(tester, size: const Size(390, 844));
+      expect(find.byType(BackdropFilter), findsNothing);
+      expect(key('glass-bar'), findsNothing);
+    });
+
+    testWidgets(
+      'Glass blurs the cards, floats the bottom bar and brings its own backdrop',
+      (tester) async {
+        await pumpApp(tester, size: const Size(390, 844), prefs: glass);
+        expect(find.byType(BackdropFilter), findsWidgets);
+        expect(key('glass-bar'), findsOneWidget);
+        expect(find.byType(GlassBackdrop), findsOneWidget);
+        // The bar is a rounded pill inset from the edges, not a full-width strip.
+        final bar = tester.getRect(key('glass-bar'));
+        expect(bar.left, greaterThanOrEqualTo(14));
+        expect(bar.right, lessThanOrEqualTo(390 - 14));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('your own picture replaces the backdrop', (tester) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {...glass, 'personal.look': picture},
+      );
+      expect(find.byType(GlassBackdrop), findsNothing);
+      expect(key('glass-bar'), findsOneWidget);
+    });
+
+    testWidgets('a picture with the Standard look has no glass', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'personal.look': picture},
+      );
+      expect(find.byType(BackdropFilter), findsNothing);
+    });
+
+    testWidgets(
+      'the chosen tab sits in a lighter pill and tapping moves between tabs',
+      (tester) async {
+        await pumpApp(tester, size: const Size(390, 844), prefs: glass);
+        await tester.tap(find.text('Budgets'));
+        await settle(tester);
+        expect(find.text('Budgets'), findsWidgets);
+        expect(key('glass-bar'), findsOneWidget);
+      },
+    );
+
+    testWidgets('is switched on Appearance and saved', (tester) async {
+      final c = await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        location: '/appearance',
+      );
+      await tester.ensureVisible(key('look-glass'));
+      await tapKey(tester, 'look-glass');
+      expect(c.read(appearanceProvider).look, AppLook.glass);
+      expect(
+        c.read(sharedPreferencesProvider).getString('appearance.look'),
+        'glass',
+      );
+      await tapKey(tester, 'look-standard');
+      expect(c.read(appearanceProvider).look, AppLook.standard);
+    });
+
+    testWidgets('is chosen on the welcome screen', (tester) async {
+      final c = await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'onboarding.done': false},
+      );
+      await tester.tap(key('onboarding-skip'));
+      await tester.pump();
+      await tester.ensureVisible(key('start-look-glass'));
+      await tester.tap(key('start-look-glass'));
+      await tester.pump();
+      expect(c.read(appearanceProvider).look, AppLook.glass);
+    });
+
+    for (final size in const {
+      'phone': Size(390, 844),
+      'phone small, large text': Size(320, 640),
+      'tablet': Size(840, 900),
+      'laptop': Size(1024, 720),
+      'desktop': Size(1280, 800),
+    }.entries) {
+      for (final mode in ['light', 'dark', 'pureBlack']) {
+        testWidgets('Glass fits on ${size.key} in $mode on every tab', (
+          tester,
+        ) async {
+          for (final route in [
+            '/home',
+            '/budgets',
+            '/goals',
+            '/insights',
+            '/settings',
+            '/expenses',
+          ]) {
+            await pumpApp(
+              tester,
+              size: size.value,
+              textScale: size.key.contains('large') ? 1.6 : 1,
+              location: route,
+              prefs: {...glass, 'appearance.mode': mode},
+            );
+            expect(tester.takeException(), isNull, reason: route);
+            await tester.pumpWidget(const SizedBox());
+          }
+        });
+      }
+    }
   });
 }

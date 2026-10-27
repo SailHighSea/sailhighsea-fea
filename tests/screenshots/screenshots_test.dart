@@ -85,6 +85,18 @@ void main() {
     prefs: {'appearance.mode': 'dark'},
   );
   shot(
+    'home-glass',
+    phone,
+    sampleHome: true,
+    prefs: {'appearance.look': 'glass'},
+  );
+  shot(
+    'home-glass-dark',
+    phone,
+    sampleHome: true,
+    prefs: {'appearance.look': 'glass', 'appearance.mode': 'dark'},
+  );
+  shot(
     'home-rose',
     phone,
     sampleHome: true,

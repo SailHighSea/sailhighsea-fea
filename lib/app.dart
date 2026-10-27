@@ -13,8 +13,11 @@ import 'features/pairing/sheets_providers.dart';
 import 'features/privacy/lock_gate.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/appearance_provider.dart';
+import 'core/theme/appearance_settings.dart';
 import 'core/theme/color_themes.dart';
+import 'core/theme/glass_backdrop.dart';
 import 'core/theme/personal_background.dart';
+import 'core/widgets/glass.dart';
 import 'core/theme/personal_look.dart';
 import 'core/window/desktop_title_bar.dart';
 import 'core/window/window_controls.dart';
@@ -80,6 +83,10 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
         : page.lightText
         ? darkVariantFor(settings.mode)
         : ThemeVariant.light;
+    // Glass look: cards and bars are frosted glass over a backdrop, so the screens must be
+    // see-through. A picture of your own is the backdrop when one is set.
+    final glassLook = settings.look == AppLook.glass;
+    final seeThrough = page.active || glassLook;
     return MaterialApp.router(
       title: kAppName,
       debugShowCheckedModeBanner: false,
@@ -87,12 +94,12 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
       theme: buildTheme(
         settings,
         forced ?? ThemeVariant.light,
-        transparentScaffold: page.active,
+        transparentScaffold: seeThrough,
       ),
       darkTheme: buildTheme(
         settings,
         forced ?? darkVariantFor(settings.mode),
-        transparentScaffold: page.active,
+        transparentScaffold: seeThrough,
       ),
       themeMode: forced == null
           ? themeModeFor(settings.mode)
@@ -109,17 +116,35 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
         // "Larger text" scales on top of whatever the system text size already is.
         final media = MediaQuery.of(context);
         final extra = settings.largerText ? 1.2 : 1.0;
-        final app = Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(child: PersonalBackground(style: page)),
-            MediaQuery(
-              data: media.copyWith(
-                textScaler: _MultipliedScaler(media.textScaler, extra),
+        final dark = Theme.of(context).brightness == Brightness.dark;
+        final variant = !dark
+            ? ThemeVariant.light
+            : (settings.mode == AppearanceMode.pureBlack
+                  ? ThemeVariant.pure
+                  : ThemeVariant.dark);
+        final app = GlassScope(
+          enabled: glassLook,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: page.active
+                    ? PersonalBackground(style: page)
+                    : glassLook
+                    ? GlassBackdrop(
+                        theme: settings.colorTheme,
+                        variant: variant,
+                      )
+                    : const SizedBox.shrink(),
               ),
-              child: OnboardingGate(child: LockGate(child: child!)),
-            ),
-          ],
+              MediaQuery(
+                data: media.copyWith(
+                  textScaler: _MultipliedScaler(media.textScaler, extra),
+                ),
+                child: OnboardingGate(child: LockGate(child: child!)),
+              ),
+            ],
+          ),
         );
         // Desktop: our own title bar in the theme's colours above everything, even the intro.
         final controls = ref.watch(windowControlsProvider);

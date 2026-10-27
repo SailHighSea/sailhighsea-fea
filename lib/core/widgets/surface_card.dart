@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'glass.dart';
+
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
 
@@ -25,6 +27,23 @@ class SurfaceCard extends StatelessWidget {
     final t = context.tokens;
     final shape = BorderRadius.circular(radius);
     final content = Padding(padding: padding, child: child);
+    if (GlassScope.of(context)) {
+      return Semantics(
+        container: true,
+        label: semanticLabel,
+        button: onTap != null,
+        child: GlassBox(
+          color: t.surface,
+          borderRadius: shape,
+          child: Material(
+            type: MaterialType.transparency,
+            child: onTap == null
+                ? content
+                : InkWell(borderRadius: shape, onTap: onTap, child: content),
+          ),
+        ),
+      );
+    }
     return Semantics(
       container: true,
       label: semanticLabel,

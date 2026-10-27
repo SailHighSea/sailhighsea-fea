@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/about/about_screen.dart';
+import '../theme/appearance_provider.dart';
+import '../theme/appearance_settings.dart';
 import '../../features/duplicates/duplicate_prompt.dart';
 import '../../features/appearance/appearance_screen.dart';
 import '../../features/appearance/personalise_screen.dart';
@@ -266,6 +268,10 @@ class _Shell extends ConsumerWidget {
           onSelect: (d) => context.go(d.path),
           memberInitials: ref.watch(memberInitialsProvider),
           showBottomTabs: onTabRoot,
+          immersiveTop:
+              location == '/home' &&
+              ref.watch(appearanceProvider).homeHeader ==
+                  HomeHeaderStyle.gradient,
           syncIndicator: (dense) => SyncIndicator(dense: dense),
           // Half-open foldable: this page above the hinge and the Add form below it, on
           // every page except the add and edit forms themselves.

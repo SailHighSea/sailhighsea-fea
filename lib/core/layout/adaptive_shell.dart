@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/glass.dart';
 import 'destinations.dart';
 import 'hinge.dart';
 import 'nav_icon.dart';
@@ -20,11 +21,16 @@ class AdaptiveShell extends StatelessWidget {
     this.foldBottom,
     this.showBottomTabs = true,
     this.syncIndicator,
+    this.immersiveTop = false,
   });
 
   final AppDestination destination;
   final ValueChanged<AppDestination> onSelect;
   final Widget child;
+
+  /// Phone only: the page draws under the status bar (Home's gradient band), so the shell adds
+  /// no top margin and the sync status floats over the page instead of sitting above it.
+  final bool immersiveTop;
 
   /// Initials shown in the sidebar footer.
   final List<String> memberInitials;
@@ -50,6 +56,7 @@ class AdaptiveShell extends StatelessWidget {
         onSelect: onSelect,
         showTabs: showBottomTabs,
         syncIndicator: syncIndicator?.call(false),
+        immersiveTop: immersiveTop,
         child: child,
       ),
       WindowClass.medium => Row(
@@ -87,8 +94,10 @@ class _CompactShell extends StatelessWidget {
     required this.showTabs,
     required this.child,
     this.syncIndicator,
+    this.immersiveTop = false,
   });
 
+  final bool immersiveTop;
   final AppDestination destination;
   final ValueChanged<AppDestination> onSelect;
   final bool showTabs;
@@ -98,6 +107,31 @@ class _CompactShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final indicator = syncIndicator;
+    if (immersiveTop) {
+      return Column(
+        children: [
+          Expanded(
+            child: SafeArea(
+              top: false,
+              bottom: !showTabs,
+              child: Stack(
+                children: [
+                  Positioned.fill(child: child),
+                  if (indicator != null)
+                    Positioned(
+                      right: 8,
+                      top: MediaQuery.viewPaddingOf(context).top + 2,
+                      child: indicator,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          if (showTabs)
+            _BottomTabs(destination: destination, onSelect: onSelect),
+        ],
+      );
+    }
     return Column(
       children: [
         if (indicator != null)
@@ -133,25 +167,121 @@ class _BottomTabs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final bar = SafeArea(
+      top: false,
+      child: SizedBox(
+        height: 76,
+        child: Row(
+          children: [
+            for (final d in AppDestination.tabs)
+              Expanded(
+                child: _TabItem(
+                  destination: d,
+                  selected: d == destination,
+                  onTap: () => onSelect(d),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+    // Glass: a floating, rounded glass pill over the backdrop, the chosen tab in a lighter pill.
+    if (GlassScope.of(context)) {
+      return SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
+          child: GlassBox(
+            key: const ValueKey('glass-bar'),
+            color: t.navRail,
+            borderRadius: BorderRadius.circular(36),
+            strength: 1.2,
+            child: SizedBox(
+              height: 74,
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: Row(
+                  children: [
+                    for (final d in AppDestination.tabs)
+                      Expanded(
+                        child: _PillTab(
+                          destination: d,
+                          selected: d == destination,
+                          onTap: () => onSelect(d),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Container(
       decoration: BoxDecoration(
         color: t.navRail,
         border: Border(top: BorderSide(color: t.border)),
       ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 76,
-          child: Row(
+      child: bar,
+    );
+  }
+}
+
+/// A tab in the glass bar: icon over label, the chosen one inside a lighter rounded pill.
+class _PillTab extends StatelessWidget {
+  const _PillTab({
+    required this.destination,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final AppDestination destination;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final color = selected ? t.text : t.muted;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: destination.label,
+      excludeSemantics: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(32),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32),
+            color: selected
+                ? (dark
+                      ? Colors.white.withValues(alpha: 0.18)
+                      : t.primary.withValues(alpha: 0.16))
+                : Colors.transparent,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (final d in AppDestination.tabs)
-                Expanded(
-                  child: _TabItem(
-                    destination: d,
-                    selected: d == destination,
-                    onTap: () => onSelect(d),
+              NavIcon(destination, size: 24, color: color),
+              const SizedBox(height: 3),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    destination.label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      color: color,
+                    ),
                   ),
                 ),
+              ),
             ],
           ),
         ),
@@ -223,49 +353,56 @@ class _NavRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final rail = SafeArea(
+      right: false,
+      // Short windows (a half-open fold, large text) scroll the rail instead of overflowing.
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  const SizedBox(height: 28),
+                  for (final d in AppDestination.main) ...[
+                    _RailItem(
+                      destination: d,
+                      selected: d == destination,
+                      onTap: () => onSelect(d),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  const Spacer(),
+                  if (syncIndicator != null) ...[
+                    syncIndicator!,
+                    const SizedBox(height: 8),
+                  ],
+                  _RailItem(
+                    destination: AppDestination.appearance,
+                    selected: destination == AppDestination.appearance,
+                    onTap: () => onSelect(AppDestination.appearance),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    if (GlassScope.of(context)) {
+      return SizedBox(
+        width: 96,
+        child: GlassBox(color: t.navRail, strength: 1.1, child: rail),
+      );
+    }
     return Container(
       width: 96,
       decoration: BoxDecoration(
         color: t.navRail,
         border: Border(right: BorderSide(color: t.border)),
       ),
-      child: SafeArea(
-        right: false,
-        // Short windows (a half-open fold, large text) scroll the rail instead of overflowing.
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 28),
-                    for (final d in AppDestination.main) ...[
-                      _RailItem(
-                        destination: d,
-                        selected: d == destination,
-                        onTap: () => onSelect(d),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    const Spacer(),
-                    if (syncIndicator != null) ...[
-                      syncIndicator!,
-                      const SizedBox(height: 8),
-                    ],
-                    _RailItem(
-                      destination: AppDestination.appearance,
-                      selected: destination == AppDestination.appearance,
-                      onTap: () => onSelect(AppDestination.appearance),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      child: rail,
     );
   }
 }

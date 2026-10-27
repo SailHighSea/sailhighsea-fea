@@ -51,7 +51,7 @@ Choose with `--dart-define=BACKEND=sheets|supabase|local`. In every mode the app
 
 ## Download
 
-Every push to `main` builds Android and Windows on GitHub. Get the latest build from the **Releases** page ("latest"): Android APK and Windows zip (macOS and Linux builds are paused for now; run the workflow by hand to get a dmg, tar.xz, deb and AppImage). Android needs "install from unknown sources"; keep the signing key from [docs/ANDROID_SIGNING.md](docs/ANDROID_SIGNING.md) so updates install over the old app.
+Every push to `main` builds Android and Windows on GitHub. Get a build from the **Releases** page (they are numbered `v0.0.1-dev1`, `v0.0.1-dev2`, and so on; take the highest): Android APK and Windows zip (macOS and Linux builds are paused for now; run the workflow by hand to get a dmg, tar.xz, deb and AppImage). Android needs "install from unknown sources"; keep the signing key from [docs/ANDROID_SIGNING.md](docs/ANDROID_SIGNING.md) so updates install over the old app.
 
 ## Build it yourself
 

@@ -28,6 +28,16 @@ enum ColorThemeId {
   final String label;
 }
 
+/// Standard is solid cards and a flat bar; Glass is see-through cards over a soft backdrop with a
+/// floating glass bottom bar.
+enum AppLook {
+  standard('Standard'),
+  glass('Glass');
+
+  const AppLook(this.label);
+  final String label;
+}
+
 /// The top of Home: the plain month row, or a gradient band with the logo, name and person.
 enum HomeHeaderStyle {
   classic('Classic'),
@@ -45,7 +55,8 @@ class AppearanceSettings {
     this.largerText = false,
     this.colorBlindCharts = false,
     this.currencyCode = 'SGD',
-    this.homeHeader = HomeHeaderStyle.classic,
+    this.homeHeader = HomeHeaderStyle.gradient,
+    this.look = AppLook.standard,
   });
 
   final AppearanceMode mode;
@@ -54,6 +65,7 @@ class AppearanceSettings {
   final bool colorBlindCharts;
   final String currencyCode;
   final HomeHeaderStyle homeHeader;
+  final AppLook look;
 
   AppearanceSettings copyWith({
     AppearanceMode? mode,
@@ -62,6 +74,7 @@ class AppearanceSettings {
     bool? colorBlindCharts,
     String? currencyCode,
     HomeHeaderStyle? homeHeader,
+    AppLook? look,
   }) {
     return AppearanceSettings(
       mode: mode ?? this.mode,
@@ -70,6 +83,7 @@ class AppearanceSettings {
       colorBlindCharts: colorBlindCharts ?? this.colorBlindCharts,
       currencyCode: currencyCode ?? this.currencyCode,
       homeHeader: homeHeader ?? this.homeHeader,
+      look: look ?? this.look,
     );
   }
 
@@ -81,7 +95,8 @@ class AppearanceSettings {
       other.largerText == largerText &&
       other.colorBlindCharts == colorBlindCharts &&
       other.currencyCode == currencyCode &&
-      other.homeHeader == homeHeader;
+      other.homeHeader == homeHeader &&
+      other.look == look;
 
   @override
   int get hashCode => Object.hash(

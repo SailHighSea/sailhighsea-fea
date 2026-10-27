@@ -10,10 +10,18 @@ import '../home_data.dart';
 /// The green summary card: spent, budget, ring, and today / week / safe per day.
 /// Identical in every theme and size; only token colours change.
 class HeroCard extends StatelessWidget {
-  const HeroCard({super.key, required this.summary, required this.money});
+  const HeroCard({
+    super.key,
+    required this.summary,
+    required this.money,
+    this.top,
+  });
 
   final HomeSummary summary;
   final MoneyFormatter money;
+
+  /// Placed above the numbers (the month switch and title in the gradient look).
+  final Widget? top;
 
   @override
   Widget build(BuildContext context) {
@@ -24,94 +32,108 @@ class HeroCard extends StatelessWidget {
         : '${money.formatWhole(-remaining)} over';
     final spent = money.formatWhole(summary.spentCents);
     final budget = money.formatWhole(summary.budgetCents);
-    return Semantics(
-      container: true,
-      label:
-          'Spent this month $spent of $budget, ${summary.usedPercent} percent used, $remainingText. '
-          'Today ${money.formatWhole(summary.todayCents)}, this week ${money.formatWhole(summary.weekCents)}, '
-          'safe per day ${money.formatWhole(summary.safePerDayCents)}.',
-      child: ExcludeSemantics(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-          decoration: BoxDecoration(
-            color: t.hero,
-            borderRadius: BorderRadius.circular(AppRadii.card),
-            border: Border.all(color: t.heroBorder),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      decoration: BoxDecoration(
+        color: t.hero,
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        border: Border.all(color: t.heroBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Outside the summary below, so its buttons stay reachable by a screen reader.
+          if (top != null) ...[top!, const SizedBox(height: 6)],
+          Semantics(
+            container: true,
+            label:
+                'Spent this month $spent of $budget, ${summary.usedPercent} percent used, $remainingText. '
+                'Today ${money.formatWhole(summary.todayCents)}, this week ${money.formatWhole(summary.weekCents)}, '
+                'safe per day ${money.formatWhole(summary.safePerDayCents)}.',
+            child: ExcludeSemantics(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Spent this month',
-                          style: TextStyle(fontSize: 14, color: t.heroMuted),
-                        ),
-                        const SizedBox(height: 4),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            spent,
-                            style: TextStyle(
-                              fontSize: 38,
-                              height: 1.15,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -1,
-                              color: t.heroText,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Spent this month',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: t.heroMuted,
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 4),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                spent,
+                                style: TextStyle(
+                                  fontSize: 38,
+                                  height: 1.15,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -1,
+                                  color: t.heroText,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'of $budget · $remainingText',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: t.heroMuted,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'of $budget · $remainingText',
-                          style: TextStyle(fontSize: 14, color: t.heroMuted),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 12),
+                      UsedRing(
+                        fraction: summary.usedFraction,
+                        percent: summary.usedPercent,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  UsedRing(
-                    fraction: summary.usedFraction,
-                    percent: summary.usedPercent,
+                  const SizedBox(height: 14),
+                  Container(height: 1, color: t.heroTrack),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _Stat(
+                          label: 'Today',
+                          value: money.formatWhole(summary.todayCents),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _Stat(
+                          label: 'This week',
+                          value: money.formatWhole(summary.weekCents),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _Stat(
+                          label: 'Safe per day',
+                          value: money.formatWhole(summary.safePerDayCents),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
-              Container(height: 1, color: t.heroTrack),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _Stat(
-                      label: 'Today',
-                      value: money.formatWhole(summary.todayCents),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _Stat(
-                      label: 'This week',
-                      value: money.formatWhole(summary.weekCents),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _Stat(
-                      label: 'Safe per day',
-                      value: money.formatWhole(summary.safePerDayCents),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
