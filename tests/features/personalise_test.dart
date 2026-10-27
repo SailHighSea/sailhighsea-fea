@@ -98,14 +98,7 @@ void main() {
       'no background: nothing is painted and the theme is as chosen',
       (tester) async {
         await pumpApp(tester, size: const Size(390, 844));
-        expect(find.byType(PersonalBackground), findsOneWidget);
-        expect(
-          tester
-              .widget<PersonalBackground>(find.byType(PersonalBackground))
-              .style
-              .active,
-          isFalse,
-        );
+        expect(find.byType(PersonalBackground), findsNothing);
         expect(find.byType(PersonalHero), findsOneWidget);
       },
     );

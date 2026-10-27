@@ -88,9 +88,13 @@ void main() {
     'home-glass',
     phone,
     sampleHome: true,
-    prefs: {
-      'personal.look': '{"page":{"kind":"picture","picturePath":"asset:assets/backgrounds/dunes.png","pictureLuminance":0.674,"blur":6,"dim":10,"tone":"dark","glass":true},"card":{"kind":"none"}}',
-    },
+    prefs: {'appearance.look': 'glass'},
+  );
+  shot(
+    'home-glass-dark',
+    phone,
+    sampleHome: true,
+    prefs: {'appearance.look': 'glass', 'appearance.mode': 'dark'},
   );
   shot(
     'home-rose',

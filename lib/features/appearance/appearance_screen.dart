@@ -49,6 +49,10 @@ class AppearanceScreen extends ConsumerWidget {
             onChanged: controller.setColorTheme,
           ),
           const SizedBox(height: 18),
+          const _SectionLabel('Look'),
+          const SizedBox(height: 10),
+          _LookChoice(selected: settings.look, onChanged: controller.setLook),
+          const SizedBox(height: 18),
           const _SectionLabel('Home header'),
           const SizedBox(height: 10),
           _HeaderStyleChoice(
@@ -660,6 +664,100 @@ class _HeaderStyleChoice extends StatelessWidget {
                           color: style == selected ? t.onPrimary : t.text,
                         ),
                       ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Standard (solid cards) or Glass (see-through cards over a soft backdrop, floating glass bar).
+class _LookChoice extends StatelessWidget {
+  const _LookChoice({required this.selected, required this.onChanged});
+
+  final AppLook selected;
+  final ValueChanged<AppLook> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    const swatches = {
+      AppLook.standard: [Color(0xFFF4F6F5), Color(0xFFDCEFE6)],
+      AppLook.glass: [Color(0xFF9BD0FF), Color(0xFFD9A7FF), Color(0xFFFFD2A0)],
+    };
+    return Column(
+      children: [
+        for (final look in AppLook.values)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Semantics(
+              button: true,
+              selected: look == selected,
+              label: '${look.label} look',
+              excludeSemantics: true,
+              child: Material(
+                color: t.surface,
+                borderRadius: BorderRadius.circular(AppRadii.smallCard),
+                child: InkWell(
+                  key: ValueKey('look-${look.name}'),
+                  borderRadius: BorderRadius.circular(AppRadii.smallCard),
+                  onTap: () => onChanged(look),
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 60),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(AppRadii.smallCard),
+                      border: Border.all(
+                        color: look == selected ? t.primary : t.border,
+                        width: look == selected ? 2 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: t.border),
+                            gradient: LinearGradient(colors: swatches[look]!),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                look.label,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: t.text,
+                                ),
+                              ),
+                              Text(
+                                look == AppLook.glass
+                                    ? 'See-through cards over a soft backdrop, with a floating glass bar'
+                                    : 'Solid cards, clean and light',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: t.muted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (look == selected)
+                          Icon(Icons.check_circle, color: t.primary),
+                      ],
                     ),
                   ),
                 ),

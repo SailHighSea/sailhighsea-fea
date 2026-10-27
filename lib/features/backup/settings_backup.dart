@@ -17,6 +17,7 @@ const backedUpSettingKeys = <String>{
   'appearance.colorBlindCharts',
   'appearance.currency',
   'appearance.homeHeader',
+  'appearance.look',
   'personal.look',
   'bills.remindersOn',
   'bills.reminderLeadDays',

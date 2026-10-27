@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:family_expenses/core/theme/appearance_provider.dart';
 import 'package:family_expenses/core/theme/appearance_settings.dart';
 import 'package:family_expenses/core/theme/color_themes.dart';
+import 'package:family_expenses/core/theme/glass_backdrop.dart';
 import 'package:family_expenses/core/theme/header_gradient.dart';
 import 'package:family_expenses/core/theme/personal_look.dart';
 import 'package:family_expenses/core/theme/preset_pictures.dart';
@@ -272,86 +273,130 @@ void main() {
 }
 
 void glassTests() {
-  group('glass cards and bar', () {
-    String look({bool glass = true}) => jsonEncode({
-      'page': BackgroundStyle(
+  group('the Glass look', () {
+    const glass = {'appearance.look': 'glass'};
+    final picture = jsonEncode({
+      'page': const BackgroundStyle(
         kind: BackgroundKind.picture,
         picturePath: 'asset:assets/backgrounds/sunset.png',
         pictureLuminance: 0.334,
-        glass: glass,
       ).toJson(),
       'card': BackgroundStyle.none.toJson(),
     });
 
-    testWidgets('are off without a background', (tester) async {
+    testWidgets('Standard has no glass', (tester) async {
       await pumpApp(tester, size: const Size(390, 844));
       expect(find.byType(BackdropFilter), findsNothing);
+      expect(key('glass-bar'), findsNothing);
     });
 
     testWidgets(
-      'with a picture, cards and the bottom bar blur what is behind them',
+      'Glass blurs the cards, floats the bottom bar and brings its own backdrop',
       (tester) async {
-        await pumpApp(
-          tester,
-          size: const Size(390, 844),
-          prefs: {'personal.look': look()},
-        );
+        await pumpApp(tester, size: const Size(390, 844), prefs: glass);
         expect(find.byType(BackdropFilter), findsWidgets);
-        final bar = find.ancestor(
-          of: find.text('Budgets'),
-          matching: find.byType(BackdropFilter),
-        );
-        expect(bar, findsOneWidget, reason: 'the bottom bar is glass');
+        expect(key('glass-bar'), findsOneWidget);
+        expect(find.byType(GlassBackdrop), findsOneWidget);
+        // The bar is a rounded pill inset from the edges, not a full-width strip.
+        final bar = tester.getRect(key('glass-bar'));
+        expect(bar.left, greaterThanOrEqualTo(14));
+        expect(bar.right, lessThanOrEqualTo(390 - 14));
         expect(tester.takeException(), isNull);
       },
     );
 
-    testWidgets('can be switched off', (tester) async {
+    testWidgets('your own picture replaces the backdrop', (tester) async {
       await pumpApp(
         tester,
         size: const Size(390, 844),
-        prefs: {'personal.look': look(glass: false)},
+        prefs: {...glass, 'personal.look': picture},
+      );
+      expect(find.byType(GlassBackdrop), findsNothing);
+      expect(key('glass-bar'), findsOneWidget);
+    });
+
+    testWidgets('a picture with the Standard look has no glass', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'personal.look': picture},
       );
       expect(find.byType(BackdropFilter), findsNothing);
     });
 
-    testWidgets('the switch is on the Backgrounds page and is saved', (
-      tester,
-    ) async {
+    testWidgets(
+      'the chosen tab sits in a lighter pill and tapping moves between tabs',
+      (tester) async {
+        await pumpApp(tester, size: const Size(390, 844), prefs: glass);
+        await tester.tap(find.text('Budgets'));
+        await settle(tester);
+        expect(find.text('Budgets'), findsWidgets);
+        expect(key('glass-bar'), findsOneWidget);
+      },
+    );
+
+    testWidgets('is switched on Appearance and saved', (tester) async {
       final c = await pumpApp(
         tester,
         size: const Size(390, 844),
-        location: '/personalise',
-        prefs: {'personal.look': look()},
+        location: '/appearance',
       );
-      await tester.ensureVisible(key('bg-glass'));
-      await tapKey(tester, 'bg-glass');
-      expect(c.read(personalLookProvider).page.glass, isFalse);
+      await tester.ensureVisible(key('look-glass'));
+      await tapKey(tester, 'look-glass');
+      expect(c.read(appearanceProvider).look, AppLook.glass);
+      expect(
+        c.read(sharedPreferencesProvider).getString('appearance.look'),
+        'glass',
+      );
+      await tapKey(tester, 'look-standard');
+      expect(c.read(appearanceProvider).look, AppLook.standard);
+    });
+
+    testWidgets('is chosen on the welcome screen', (tester) async {
+      final c = await pumpApp(
+        tester,
+        size: const Size(390, 844),
+        prefs: {'onboarding.done': false},
+      );
+      await tester.tap(key('onboarding-skip'));
+      await tester.pump();
+      await tester.ensureVisible(key('start-look-glass'));
+      await tester.tap(key('start-look-glass'));
+      await tester.pump();
+      expect(c.read(appearanceProvider).look, AppLook.glass);
     });
 
     for (final size in const {
       'phone': Size(390, 844),
       'phone small, large text': Size(320, 640),
       'tablet': Size(840, 900),
+      'laptop': Size(1024, 720),
       'desktop': Size(1280, 800),
     }.entries) {
-      for (final route in [
-        '/home',
-        '/expenses',
-        '/budgets',
-        '/goals',
-        '/insights',
-        '/settings',
-      ]) {
-        testWidgets('$route fits with glass on ${size.key}', (tester) async {
-          await pumpApp(
-            tester,
-            size: size.value,
-            textScale: size.key.contains('large') ? 1.6 : 1,
-            location: route,
-            prefs: {'personal.look': look()},
-          );
-          expect(tester.takeException(), isNull);
+      for (final mode in ['light', 'dark', 'pureBlack']) {
+        testWidgets('Glass fits on ${size.key} in $mode on every tab', (
+          tester,
+        ) async {
+          for (final route in [
+            '/home',
+            '/budgets',
+            '/goals',
+            '/insights',
+            '/settings',
+            '/expenses',
+          ]) {
+            await pumpApp(
+              tester,
+              size: size.value,
+              textScale: size.key.contains('large') ? 1.6 : 1,
+              location: route,
+              prefs: {...glass, 'appearance.mode': mode},
+            );
+            expect(tester.takeException(), isNull, reason: route);
+            await tester.pumpWidget(const SizedBox());
+          }
         });
       }
     }

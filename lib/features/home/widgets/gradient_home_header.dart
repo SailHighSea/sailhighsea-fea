@@ -11,6 +11,7 @@ import '../../../core/theme/appearance_provider.dart';
 import '../../../core/theme/appearance_settings.dart';
 import '../../../core/theme/color_themes.dart';
 import '../../../core/theme/header_gradient.dart';
+import '../../../core/widgets/glass.dart';
 import '../../family/member_providers.dart';
 
 /// How far the overview card reaches up into the gradient band.
@@ -232,13 +233,25 @@ class OverviewOnGradient extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final glass = GlassScope.of(context);
     final themed = t.copyWith(
-      hero: t.surface,
+      // On glass the card is see-through: the glass box below supplies the tint.
+      hero: glass ? Colors.transparent : t.surface,
       heroBorder: Colors.transparent,
       heroText: t.text,
       heroMuted: t.muted,
       heroTrack: t.border,
     );
+    if (glass) {
+      return GlassBox(
+        color: t.surface,
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        child: Theme(
+          data: Theme.of(context).copyWith(extensions: [themed]),
+          child: child,
+        ),
+      );
+    }
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadii.card),

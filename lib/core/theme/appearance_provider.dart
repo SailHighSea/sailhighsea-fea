@@ -15,6 +15,7 @@ const _kLargerText = 'appearance.largerText';
 const _kColorBlind = 'appearance.colorBlindCharts';
 const _kCurrency = 'appearance.currency';
 const _kHomeHeader = 'appearance.homeHeader';
+const _kLook = 'appearance.look';
 
 T _enumByName<T extends Enum>(List<T> values, String? name, T fallback) {
   for (final value in values) {
@@ -49,6 +50,11 @@ class AppearanceController extends Notifier<AppearanceSettings> {
         _prefs.getString(_kHomeHeader),
         HomeHeaderStyle.gradient,
       ),
+      look: _enumByName(
+        AppLook.values,
+        _prefs.getString(_kLook),
+        AppLook.standard,
+      ),
     );
   }
 
@@ -70,6 +76,11 @@ class AppearanceController extends Notifier<AppearanceSettings> {
   Future<void> setColorBlindCharts(bool value) {
     state = state.copyWith(colorBlindCharts: value);
     return _prefs.setBool(_kColorBlind, value);
+  }
+
+  Future<void> setLook(AppLook look) {
+    state = state.copyWith(look: look);
+    return _prefs.setString(_kLook, look.name);
   }
 
   Future<void> setHomeHeader(HomeHeaderStyle style) {

@@ -262,26 +262,6 @@ class _PersonaliseScreenState extends ConsumerState<PersonaliseScreen> {
           ),
         ),
         const SizedBox(height: 14),
-        if (_target == _Target.page && style.active) ...[
-          _Section(
-            title: 'Glass',
-            child: SwitchListTile(
-              key: const ValueKey('bg-glass'),
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                'Glass cards and bottom bar',
-                style: TextStyle(fontSize: 15, color: t.text),
-              ),
-              subtitle: Text(
-                'Frosted, see-through cards and bar that blur the background behind them.',
-                style: TextStyle(fontSize: 13, color: t.muted),
-              ),
-              value: style.glass,
-              onChanged: (v) => _set(style.copyWith(glass: v)),
-            ),
-          ),
-          const SizedBox(height: 14),
-        ],
         _Section(
           title: 'Keep text readable',
           child: Column(

@@ -185,13 +185,37 @@ class _BottomTabs extends StatelessWidget {
         ),
       ),
     );
-    // Glass: the bar is a frosted, see-through strip over the page behind it.
+    // Glass: a floating, rounded glass pill over the backdrop, the chosen tab in a lighter pill.
     if (GlassScope.of(context)) {
-      return GlassBox(
-        color: t.navRail,
-        onlyTopEdge: true,
-        strength: 1.3,
-        child: bar,
+      return SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
+          child: GlassBox(
+            key: const ValueKey('glass-bar'),
+            color: t.navRail,
+            borderRadius: BorderRadius.circular(36),
+            strength: 1.2,
+            child: SizedBox(
+              height: 74,
+              child: Padding(
+                padding: const EdgeInsets.all(5),
+                child: Row(
+                  children: [
+                    for (final d in AppDestination.tabs)
+                      Expanded(
+                        child: _PillTab(
+                          destination: d,
+                          selected: d == destination,
+                          onTap: () => onSelect(d),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       );
     }
     return Container(
@@ -200,6 +224,68 @@ class _BottomTabs extends StatelessWidget {
         border: Border(top: BorderSide(color: t.border)),
       ),
       child: bar,
+    );
+  }
+}
+
+/// A tab in the glass bar: icon over label, the chosen one inside a lighter rounded pill.
+class _PillTab extends StatelessWidget {
+  const _PillTab({
+    required this.destination,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final AppDestination destination;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final color = selected ? t.text : t.muted;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: destination.label,
+      excludeSemantics: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(32),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32),
+            color: selected
+                ? (dark
+                      ? Colors.white.withValues(alpha: 0.18)
+                      : t.primary.withValues(alpha: 0.16))
+                : Colors.transparent,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              NavIcon(destination, size: 24, color: color),
+              const SizedBox(height: 3),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    destination.label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -267,49 +353,56 @@ class _NavRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
+    final rail = SafeArea(
+      right: false,
+      // Short windows (a half-open fold, large text) scroll the rail instead of overflowing.
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  const SizedBox(height: 28),
+                  for (final d in AppDestination.main) ...[
+                    _RailItem(
+                      destination: d,
+                      selected: d == destination,
+                      onTap: () => onSelect(d),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  const Spacer(),
+                  if (syncIndicator != null) ...[
+                    syncIndicator!,
+                    const SizedBox(height: 8),
+                  ],
+                  _RailItem(
+                    destination: AppDestination.appearance,
+                    selected: destination == AppDestination.appearance,
+                    onTap: () => onSelect(AppDestination.appearance),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    if (GlassScope.of(context)) {
+      return SizedBox(
+        width: 96,
+        child: GlassBox(color: t.navRail, strength: 1.1, child: rail),
+      );
+    }
     return Container(
       width: 96,
       decoration: BoxDecoration(
         color: t.navRail,
         border: Border(right: BorderSide(color: t.border)),
       ),
-      child: SafeArea(
-        right: false,
-        // Short windows (a half-open fold, large text) scroll the rail instead of overflowing.
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 28),
-                    for (final d in AppDestination.main) ...[
-                      _RailItem(
-                        destination: d,
-                        selected: d == destination,
-                        onTap: () => onSelect(d),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    const Spacer(),
-                    if (syncIndicator != null) ...[
-                      syncIndicator!,
-                      const SizedBox(height: 8),
-                    ],
-                    _RailItem(
-                      destination: AppDestination.appearance,
-                      selected: destination == AppDestination.appearance,
-                      onTap: () => onSelect(AppDestination.appearance),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      child: rail,
     );
   }
 }
