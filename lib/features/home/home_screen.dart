@@ -10,6 +10,8 @@ import '../../core/layout/dashboard_layout.dart';
 import '../../core/layout/destinations.dart';
 import '../../core/money/money_provider.dart';
 import '../family/member_providers.dart';
+import '../../core/theme/appearance_provider.dart';
+import '../../core/theme/appearance_settings.dart';
 import '../../core/theme/personal_look.dart';
 import '../../core/time.dart';
 import '../overview/overview_providers.dart';
@@ -20,6 +22,7 @@ import 'home_providers.dart';
 import 'widgets/bill_goal_cards.dart';
 import 'widgets/categories_card.dart';
 import 'widgets/category_cards.dart';
+import 'widgets/gradient_home_header.dart';
 import 'widgets/hero_card.dart';
 import 'widgets/personal_hero.dart';
 import 'widgets/home_header.dart';
@@ -56,14 +59,28 @@ class HomeScreen extends ConsumerWidget {
     final monthShort = DateFormat('MMM', 'en_US').format(month);
 
     return DashboardLayout(
-      header: (context, mode) => HomeHeader(
-        month: month,
-        onPrevious: months.previous,
-        onNext: months.next,
-        onAdd: permissions.canWriteExpenses ? () => context.push('/add') : null,
-        onSelectDestination: goTo,
-        mode: mode,
-      ),
+      header: (context, mode) =>
+          ref.watch(appearanceProvider).homeHeader == HomeHeaderStyle.gradient
+          ? GradientHomeHeader(
+              month: month,
+              onPrevious: months.previous,
+              onNext: months.next,
+              onAdd: permissions.canWriteExpenses
+                  ? () => context.push('/add')
+                  : null,
+              onSelectDestination: goTo,
+              mode: mode,
+            )
+          : HomeHeader(
+              month: month,
+              onPrevious: months.previous,
+              onNext: months.next,
+              onAdd: permissions.canWriteExpenses
+                  ? () => context.push('/add')
+                  : null,
+              onSelectDestination: goTo,
+              mode: mode,
+            ),
       // Swipe the card sideways to change month: left for the next, right for the previous.
       hero: (context, mode) => GestureDetector(
         key: const ValueKey('hero-swipe'),

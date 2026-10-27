@@ -2,6 +2,9 @@
 
 ## Fixes after Phase 8
 
+- Home header option (Appearance → Home header): Classic, or a gradient band with the logo, "FET" and the full name, the signed-in person, and the month switch and Add button. The gradient follows the colour theme (white text checked for contrast in every theme and mode). Works with every theme, mode, background and size.
+- Six built-in background pictures (Dunes, Harbour, Forest, Sunset, City night, Blossom) in Backgrounds and pictures. A backup remembers the choice; the pictures themselves ship with the app.
+- Releases: only Android and Windows are built on pushes for now (macOS and Linux only when the workflow is run by hand). The test release holds the installable files only.
 - New app icon: a tri-colour ring (green, blue, amber) with FET in the middle, on dark. Android gets a round, an adaptive and a themed (monochrome) version; iOS, macOS and Windows get theirs. Made by `ICONS=1 flutter test tests/tool/make_icons_test.dart` then `dart run flutter_launcher_icons`. It is also on the About page and the README.
 - The app is now called FET Family Expenses Tracker (app name, window titles, About page, notifications; the code and bundle ids keep their old names so updates still install over the old app).
 - About page (Settings tab on the phone, Appearance elsewhere): name, version, what the app does, privacy policy, source code and open-source licences.

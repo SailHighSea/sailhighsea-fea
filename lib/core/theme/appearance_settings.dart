@@ -28,6 +28,15 @@ enum ColorThemeId {
   final String label;
 }
 
+/// The top of Home: the plain month row, or a gradient band with the logo, name and person.
+enum HomeHeaderStyle {
+  classic('Classic'),
+  gradient('Gradient');
+
+  const HomeHeaderStyle(this.label);
+  final String label;
+}
+
 @immutable
 class AppearanceSettings {
   const AppearanceSettings({
@@ -36,6 +45,7 @@ class AppearanceSettings {
     this.largerText = false,
     this.colorBlindCharts = false,
     this.currencyCode = 'SGD',
+    this.homeHeader = HomeHeaderStyle.classic,
   });
 
   final AppearanceMode mode;
@@ -43,6 +53,7 @@ class AppearanceSettings {
   final bool largerText;
   final bool colorBlindCharts;
   final String currencyCode;
+  final HomeHeaderStyle homeHeader;
 
   AppearanceSettings copyWith({
     AppearanceMode? mode,
@@ -50,6 +61,7 @@ class AppearanceSettings {
     bool? largerText,
     bool? colorBlindCharts,
     String? currencyCode,
+    HomeHeaderStyle? homeHeader,
   }) {
     return AppearanceSettings(
       mode: mode ?? this.mode,
@@ -57,6 +69,7 @@ class AppearanceSettings {
       largerText: largerText ?? this.largerText,
       colorBlindCharts: colorBlindCharts ?? this.colorBlindCharts,
       currencyCode: currencyCode ?? this.currencyCode,
+      homeHeader: homeHeader ?? this.homeHeader,
     );
   }
 
@@ -67,9 +80,16 @@ class AppearanceSettings {
       other.colorTheme == colorTheme &&
       other.largerText == largerText &&
       other.colorBlindCharts == colorBlindCharts &&
-      other.currencyCode == currencyCode;
+      other.currencyCode == currencyCode &&
+      other.homeHeader == homeHeader;
 
   @override
-  int get hashCode =>
-      Object.hash(mode, colorTheme, largerText, colorBlindCharts, currencyCode);
+  int get hashCode => Object.hash(
+    mode,
+    colorTheme,
+    largerText,
+    colorBlindCharts,
+    currencyCode,
+    homeHeader,
+  );
 }

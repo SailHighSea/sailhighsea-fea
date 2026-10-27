@@ -49,6 +49,13 @@ class AppearanceScreen extends ConsumerWidget {
             onChanged: controller.setColorTheme,
           ),
           const SizedBox(height: 18),
+          const _SectionLabel('Home header'),
+          const SizedBox(height: 10),
+          _HeaderStyleChoice(
+            selected: settings.homeHeader,
+            onChanged: controller.setHomeHeader,
+          ),
+          const SizedBox(height: 18),
           _SettingsCard(
             settings: settings,
             controller: controller,
@@ -602,6 +609,64 @@ class _PillButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Classic month row, or the gradient header with the logo, name and person.
+class _HeaderStyleChoice extends StatelessWidget {
+  const _HeaderStyleChoice({required this.selected, required this.onChanged});
+
+  final HomeHeaderStyle selected;
+  final ValueChanged<HomeHeaderStyle> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Row(
+      children: [
+        for (final style in HomeHeaderStyle.values)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: style == HomeHeaderStyle.classic ? 8 : 0,
+              ),
+              child: Semantics(
+                button: true,
+                selected: style == selected,
+                label: '${style.label} Home header',
+                excludeSemantics: true,
+                child: Material(
+                  color: style == selected ? t.primary : t.surface,
+                  shape: StadiumBorder(
+                    side: BorderSide(
+                      color: style == selected ? t.primary : t.border,
+                    ),
+                  ),
+                  child: InkWell(
+                    key: ValueKey('home-header-${style.name}'),
+                    customBorder: const StadiumBorder(),
+                    onTap: () => onChanged(style),
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minHeight: kMinTapTarget,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        style.label,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: style == selected ? t.onPrimary : t.text,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

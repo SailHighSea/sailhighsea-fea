@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'app_tokens.dart';
 import 'personal_look.dart';
+import 'preset_pictures.dart';
 
 /// Paints a [BackgroundStyle] to fill its parent: a colour, a gradient, or a picture with blur
 /// and dimming. Draws nothing for [BackgroundStyle.none].
@@ -52,14 +53,24 @@ class _Picture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget image = Image.file(
-      File(style.picturePath!),
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      gaplessPlayback: true,
-      errorBuilder: (_, _, _) => ColoredBox(color: context.tokens.background),
-    );
+    final path = style.picturePath!;
+    final fallback = ColoredBox(color: context.tokens.background);
+    Widget image = isPresetPath(path)
+        ? Image.asset(
+            path.substring('asset:'.length),
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder: (_, _, _) => fallback,
+          )
+        : Image.file(
+            File(path),
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            gaplessPlayback: true,
+            errorBuilder: (_, _, _) => fallback,
+          );
     if (style.blur > 0) {
       image = ClipRect(
         child: ImageFiltered(
