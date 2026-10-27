@@ -10,6 +10,7 @@ import '../../core/db/tables.dart' show localHouseholdId;
 import '../../core/google/google_api.dart';
 import '../../core/money/currency.dart';
 import '../expenses/data/category_rule_repository.dart';
+import '../duplicates/duplicate_finder.dart';
 import 'category_guess.dart';
 import 'import_parser.dart';
 
@@ -25,8 +26,8 @@ class ImportPreview {
   /// New expenses.
   final List<ImportRow> ready;
 
-  /// Rows already in the app (same date, amount and description): skipped, so importing the same
-  /// sheet twice does not double anything.
+  /// Rows that look like expenses already in the app (same day, amount and about the same
+  /// description). They are not imported unless the person says so.
   final List<ImportRow> duplicates;
   final List<ImportProblem> problems;
 
@@ -77,22 +78,28 @@ class ImportService {
       today: today,
       decimal: decimal,
     );
-    final existing = <String, int>{};
+    // Expenses already in the app, by day and amount. A row that matches one (same day, same
+    // amount, about the same description) is a possible duplicate; each existing expense is
+    // matched once, so two real purchases of the same amount still both come in.
+    final existing = <String, List<String>>{};
     for (final e
         in await (_db.select(_db.expenses)..where(
               (x) => x.deletedAt.isNull() & x.householdId.equals(householdId),
             ))
             .get()) {
-      final key =
-          '${e.spentOn}|${e.amountCents}|${e.note.trim().toLowerCase()}';
-      existing[key] = (existing[key] ?? 0) + 1;
+      existing
+          .putIfAbsent('${e.spentOn}|${e.amountCents}', () => [])
+          .add(e.note);
     }
     final ready = <ImportRow>[];
     final dupes = <ImportRow>[];
     for (final r in parsed.rows) {
-      final left = existing[r.key] ?? 0;
-      if (left > 0) {
-        existing[r.key] = left - 1;
+      final notes = existing['${r.date}|${r.cents}'];
+      final at = notes?.indexWhere(
+        (n) => similarDescriptions(n, r.description),
+      );
+      if (notes != null && at != null && at >= 0) {
+        notes.removeAt(at);
         dupes.add(r);
       } else {
         ready.add(r);
@@ -242,6 +249,7 @@ class ImportDraft {
     this.categoryId,
     this.include = true,
     this.reason = 'none',
+    this.possibleDuplicate = false,
   });
 
   final ImportRow row;
@@ -250,4 +258,7 @@ class ImportDraft {
 
   /// How the category was decided: `history`, `keyword`, `none` (ask) or `you`.
   String reason;
+
+  /// Looks like an expense already in the app, and was kept because the person said so.
+  final bool possibleDuplicate;
 }

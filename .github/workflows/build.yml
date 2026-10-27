@@ -58,11 +58,20 @@ jobs:
           @{ SUPABASE_URL = $env:SUPABASE_URL; SUPABASE_ANON_KEY = $env:SUPABASE_ANON_KEY; GOOGLE_CLIENT_ID = $env:GOOGLE_CLIENT_ID; GOOGLE_CLIENT_SECRET = $env:GOOGLE_CLIENT_SECRET } | ConvertTo-Json | Set-Content .env.json
 
       - name: Build Windows release
-        run: flutter build windows --release --dart-define-from-file=.env.json
+        # Debug symbols are split out of the app: a smaller download, the same behaviour.
+        run: flutter build windows --release --split-debug-info=build/symbols --dart-define-from-file=.env.json
 
       - name: Zip
         shell: pwsh
-        run: Compress-Archive -Path build\windows\${{ matrix.arch }}\runner\Release\* -DestinationPath windows-${{ matrix.arch }}.zip
+        # 7-Zip at maximum is smaller than Compress-Archive (about 10 to 20 percent) and the file is
+        # still an ordinary zip that Windows opens.
+        run: |
+          $src = ".\build\windows\${{ matrix.arch }}\runner\Release"
+          if (Get-Command 7z -ErrorAction SilentlyContinue) {
+            7z a -tzip -mx=9 -mfb=258 -mpass=15 windows-${{ matrix.arch }}.zip "$src\*"
+          } else {
+            Compress-Archive -Path "$src\*" -DestinationPath windows-${{ matrix.arch }}.zip
+          }
 
       - uses: actions/upload-artifact@v4
         with:
@@ -180,7 +189,7 @@ jobs:
           printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s","GOOGLE_CLIENT_ID":"%s","GOOGLE_CLIENT_SECRET":"%s"}' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" > .env.json
 
       - name: Build macOS release
-        run: flutter build macos --release --dart-define-from-file=.env.json
+        run: flutter build macos --release --split-debug-info=build/symbols --dart-define-from-file=.env.json
 
       # iOS: built without code signing, so it proves the target compiles. A signed build for
       # TestFlight needs the Apple certificates (docs/RELEASE.md).
@@ -193,7 +202,7 @@ jobs:
       - name: Make dmg
         run: |
           APP=$(ls -d build/macos/Build/Products/Release/*.app | head -1)
-          hdiutil create -volname "FET Family Expenses Tracker" -srcfolder "$APP" -ov -format UDZO family-expenses-macos.dmg
+          hdiutil create -volname "FET Family Expenses Tracker" -srcfolder "$APP" -ov -format ULMO family-expenses-macos.dmg
 
       - uses: actions/upload-artifact@v4
         with:
@@ -237,9 +246,10 @@ jobs:
           printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s","GOOGLE_CLIENT_ID":"%s","GOOGLE_CLIENT_SECRET":"%s"}' "$SUPABASE_URL" "$SUPABASE_ANON_KEY" "$GOOGLE_CLIENT_ID" "$GOOGLE_CLIENT_SECRET" > .env.json
 
       - name: Build Linux release
-        run: flutter build linux --release --dart-define-from-file=.env.json
+        run: flutter build linux --release --split-debug-info=build/symbols --dart-define-from-file=.env.json
 
-      - run: tar -czf family-expenses-linux-x64.tar.gz -C build/linux/x64/release/bundle .
+      # xz makes the archive about a quarter smaller than gzip.
+      - run: tar -cJf family-expenses-linux-x64.tar.xz -C build/linux/x64/release/bundle .
 
       - name: Make the .deb
         run: bash scripts/package_linux.sh deb build/linux/x64/release/bundle
@@ -253,7 +263,7 @@ jobs:
         with:
           name: linux-x64
           path: |
-            family-expenses-linux-x64.tar.gz
+            family-expenses-linux-x64.tar.xz
             family-expenses_*.deb
             Family_Expenses-*.AppImage
           if-no-files-found: error
@@ -280,7 +290,7 @@ jobs:
           ls -l dist
           gh release delete latest --cleanup-tag --yes || true
           # Only the files people install: the Play bundle (.aab) stays an Actions artifact.
-          FILES=$(ls dist/*.apk dist/*.zip dist/*.dmg dist/*.tar.gz dist/*.deb dist/*.AppImage 2>/dev/null || true)
+          FILES=$(ls dist/*.apk dist/*.zip dist/*.dmg dist/*.tar.xz dist/*.deb dist/*.AppImage 2>/dev/null || true)
           gh release create latest $FILES --target "$GITHUB_SHA" --prerelease \
             --title "Test build ($(echo $GITHUB_SHA | cut -c1-7))" \
             --notes "Built from commit $GITHUB_SHA. For testing: Android and Windows only. Windows: unzip and run family_expenses.exe. Android: install family-expenses.apk (allow unknown sources); family-expenses-older-phones.apk is only for phones from before about 2017. macOS and Linux builds are paused."

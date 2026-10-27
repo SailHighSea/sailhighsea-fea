@@ -2,6 +2,8 @@
 
 ## Fixes after Phase 8
 
+- Duplicates: importing now asks. Rows that look like expenses you already have (same day, same amount, about the same description) are listed in a dialog: "Skip duplicates" (the default) or "Import them anyway", and kept rows are marked "Possible duplicate" in the table. When another person's entries arrive (sheet or server) and two people have written down what looks like the same expense, the app asks "Is this a duplicate?" with both entries: "Same, remove one" (removes the newer one you are allowed to remove, with Undo), "Different, keep both" (not asked again) or "Ask me later". Two identical purchases by the same person are never flagged.
+- Smaller downloads: the Windows zip is packed at maximum compression and without debug symbols, the Linux .deb uses xz, the Linux archive is .tar.xz, the macOS dmg uses LZMA (ULMO). APK files are already compressed (they are zip files), so they are made smaller by building per processor type and removing debug symbols instead.
 - Home header option (Appearance → Home header): Classic, or a gradient band with the logo, "FET" and the full name, the signed-in person, and the month switch and Add button. The gradient follows the colour theme (white text checked for contrast in every theme and mode). Works with every theme, mode, background and size.
 - Six built-in background pictures (Dunes, Harbour, Forest, Sunset, City night, Blossom) in Backgrounds and pictures. A backup remembers the choice; the pictures themselves ship with the app.
 - Releases: only Android and Windows are built on pushes for now (macOS and Linux only when the workflow is run by hand). The test release holds the installable files only.

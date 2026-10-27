@@ -240,12 +240,93 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
           return ImportDraft(r, categoryId: g.categoryId, reason: g.reason);
         }(),
     ];
+    var keptDuplicates = false;
+    if (preview.duplicates.isNotEmpty && mounted) {
+      keptDuplicates = await _askAboutDuplicates(preview.duplicates) ?? false;
+      if (keptDuplicates) {
+        for (final r in preview.duplicates) {
+          final g = guesser.guess(r.description);
+          drafts.add(
+            ImportDraft(
+              r,
+              categoryId: g.categoryId,
+              reason: g.reason,
+              possibleDuplicate: true,
+            ),
+          );
+        }
+        drafts.sort((a, b) => b.row.date.compareTo(a.row.date));
+      }
+    }
     if (mounted) {
       setState(() {
         _preview = preview;
         _drafts = drafts;
+        _keptDuplicates = keptDuplicates;
       });
     }
+  }
+
+  bool _keptDuplicates = false;
+
+  /// "These look like expenses you already have": skip them (the default) or import them too.
+  /// `null` when the dialog was closed (treated as skip).
+  Future<bool?> _askAboutDuplicates(List<ImportRow> dupes) {
+    final money = ref.read(moneyFormatterProvider);
+    final t = context.tokens;
+    return showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        key: const ValueKey('import-duplicates-dialog'),
+        backgroundColor: t.surface,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          dupes.length == 1
+              ? 'Is this a duplicate?'
+              : '${dupes.length} look like duplicates',
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                dupes.length == 1
+                    ? 'This one matches an expense you already have (same day, amount and description).'
+                    : 'These match expenses you already have (same day, amount and description).',
+                style: TextStyle(fontSize: 14, color: t.muted),
+              ),
+              const SizedBox(height: 10),
+              for (final r in dupes.take(6))
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Text(
+                    '${r.date} · ${r.description.isEmpty ? '(no description)' : r.description} · ${money.format(r.cents)}',
+                    style: TextStyle(fontSize: 13.5, color: t.text),
+                  ),
+                ),
+              if (dupes.length > 6)
+                Text(
+                  'and ${dupes.length - 6} more',
+                  style: TextStyle(fontSize: 13, color: t.muted),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            key: const ValueKey('dup-keep'),
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('Import them anyway'),
+          ),
+          FilledButton(
+            key: const ValueKey('dup-skip'),
+            onPressed: () => Navigator.pop(c, false),
+            child: const Text('Skip duplicates'),
+          ),
+        ],
+      ),
+    );
   }
 
   int get _missing =>
@@ -279,7 +360,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       children: [
         SurfaceCard(
           child: Text(
-            'Choose a CSV, Excel (.xlsx) or PDF statement, a photo or screenshot of one, or read a Google Sheet. The date, description and amount are filled in for you and each expense gets a category when it can be worked out. You check everything in a table before anything is saved. Rows already in the app are skipped, money received is left out, and amounts are never converted.',
+            'Choose a CSV, Excel (.xlsx) or PDF statement, a photo or screenshot of one, or read a Google Sheet. The date, description and amount are filled in for you and each expense gets a category when it can be worked out. You check everything in a table before anything is saved. If a row looks like an expense you already have, you are asked whether to skip it. Money received is left out, and amounts are never converted.',
             style: TextStyle(fontSize: 14, color: t.muted),
           ),
         ),
@@ -359,7 +440,12 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         if (ask) const SizedBox.shrink(),
         if (p != null) ...[
           const SizedBox(height: 16),
-          _Summary(preview: p, money: money, drafts: _drafts),
+          _Summary(
+            preview: p,
+            money: money,
+            drafts: _drafts,
+            keptDuplicates: _keptDuplicates,
+          ),
           if (_drafts.isNotEmpty) ...[
             const SizedBox(height: 12),
             _Shops(
@@ -504,10 +590,12 @@ class _Summary extends StatelessWidget {
     required this.preview,
     required this.money,
     required this.drafts,
+    required this.keptDuplicates,
   });
   final ImportPreview preview;
   final dynamic money;
   final List<ImportDraft> drafts;
+  final bool keptDuplicates;
 
   @override
   Widget build(BuildContext context) {
@@ -531,7 +619,9 @@ class _Summary extends StatelessWidget {
           ),
           if (p.duplicates.isNotEmpty)
             Text(
-              '${p.duplicates.length} already in the app (skipped)',
+              keptDuplicates
+                  ? '${p.duplicates.length} look like duplicates (added to the table, marked)'
+                  : '${p.duplicates.length} looked like duplicates (skipped)',
               style: TextStyle(fontSize: 13, color: t.muted),
             ),
           if (p.incomeSkipped > 0)
@@ -704,12 +794,12 @@ class _Row extends StatelessWidget {
               SizedBox(
                 width: widths[2],
                 child: Text(
-                  d.row.description.isEmpty
-                      ? '(no description)'
-                      : d.row.description,
+                  '${d.possibleDuplicate ? 'Possible duplicate · ' : ''}${d.row.description.isEmpty ? '(no description)' : d.row.description}',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: style,
+                  style: d.possibleDuplicate
+                      ? style.copyWith(color: context.tokens.amberText)
+                      : style,
                 ),
               ),
               SizedBox(
