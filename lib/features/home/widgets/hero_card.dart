@@ -15,6 +15,7 @@ class HeroCard extends StatelessWidget {
     required this.summary,
     required this.money,
     this.top,
+    this.title = 'Spent this month',
   });
 
   final HomeSummary summary;
@@ -22,6 +23,9 @@ class HeroCard extends StatelessWidget {
 
   /// Placed above the numbers (the month switch and title in the gradient look).
   final Widget? top;
+
+  /// "Spent this month", or "Spent in August" when another month is on show.
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +52,7 @@ class HeroCard extends StatelessWidget {
           Semantics(
             container: true,
             label:
-                'Spent this month $spent of $budget, ${summary.usedPercent} percent used, $remainingText. '
+                '$title $spent of $budget, ${summary.usedPercent} percent used, $remainingText. '
                 'Today ${money.formatWhole(summary.todayCents)}, this week ${money.formatWhole(summary.weekCents)}, '
                 'safe per day ${money.formatWhole(summary.safePerDayCents)}.',
             child: ExcludeSemantics(
@@ -63,7 +67,7 @@ class HeroCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Spent this month',
+                              title,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: t.heroMuted,

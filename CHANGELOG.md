@@ -2,6 +2,8 @@
 
 ## Fixes after Phase 8
 
+- Releases now include macOS (.dmg), Linux (.deb, .tar.xz, AppImage) and an unsigned iOS build, next to Android and Windows. If the Mac or Linux build fails, the release still goes out without it.
+- Home (Classic header): your picture and name sit in the top row (tap to edit your profile). The overview card says "Spent in August" when you look at another month, and "Spent this month" for the current one.
 - Colour themes now tint the whole app: page, cards, edges and text take the theme's hue (Forest keeps the original green-grey; Graphite stays nearly colourless; Pure black stays black). Before, only the accent and the Home card changed.
 - Glass: the bottom bar and the overview card are frosted (a real blur of what scrolls behind them, and a firmer tint so the bar is never see-through); the other cards stay light to draw, so scrolling stays smooth.
 - The app is called **FET** where a launcher, title bar or explorer shows its name; "FET Family Expenses Tracker" is the description (About page, sign-in, Windows file description, Linux comment, notifications).
