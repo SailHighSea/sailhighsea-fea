@@ -210,13 +210,15 @@ class _BottomTabs extends StatelessWidget {
                   color: t.navRail,
                   borderRadius: radius,
                   border: Border.all(color: t.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.10),
-                      blurRadius: 12,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+                  boxShadow: GlassScope.lightOf(context)
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.10),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                 ),
                 child: row,
               ),

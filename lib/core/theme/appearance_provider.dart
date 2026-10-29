@@ -16,6 +16,7 @@ const _kColorBlind = 'appearance.colorBlindCharts';
 const _kCurrency = 'appearance.currency';
 const _kHomeHeader = 'appearance.homeHeader';
 const _kLook = 'appearance.look';
+const _kLightEffects = 'appearance.lightEffects';
 
 T _enumByName<T extends Enum>(List<T> values, String? name, T fallback) {
   for (final value in values) {
@@ -55,7 +56,13 @@ class AppearanceController extends Notifier<AppearanceSettings> {
         _prefs.getString(_kLook),
         AppLook.standard,
       ),
+      lightEffects: _prefs.getBool(_kLightEffects) ?? false,
     );
+  }
+
+  Future<void> setLightEffects(bool value) {
+    state = state.copyWith(lightEffects: value);
+    return _prefs.setBool(_kLightEffects, value);
   }
 
   Future<void> setMode(AppearanceMode mode) {

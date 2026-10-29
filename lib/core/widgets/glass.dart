@@ -6,16 +6,29 @@ import 'package:flutter/material.dart';
 /// with a thin light edge. Switched on in the app's builder when a personal background is set and
 /// the person left "Glass cards and bars" on.
 class GlassScope extends InheritedWidget {
-  const GlassScope({super.key, required this.enabled, required super.child});
+  const GlassScope({
+    super.key,
+    required this.enabled,
+    this.lightEffects = false,
+    required super.child,
+  });
 
   final bool enabled;
+
+  /// Draw without blur and soft shadows (Appearance, "Light effects").
+  final bool lightEffects;
+
+  static bool lightOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<GlassScope>()?.lightEffects ??
+      false;
 
   static bool of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<GlassScope>()?.enabled ??
       false;
 
   @override
-  bool updateShouldNotify(GlassScope old) => old.enabled != enabled;
+  bool updateShouldNotify(GlassScope old) =>
+      old.enabled != enabled || old.lightEffects != lightEffects;
 }
 
 /// The glass look around [child]: a see-through tint of [color], a soft light sheen from the top
@@ -73,7 +86,7 @@ class GlassBox extends StatelessWidget {
       ),
       child: ClipRRect(borderRadius: borderRadius, child: child),
     );
-    if (blur <= 0) return box;
+    if (blur <= 0 || GlassScope.lightOf(context)) return box;
     return ClipRRect(
       borderRadius: borderRadius,
       child: BackdropFilter(

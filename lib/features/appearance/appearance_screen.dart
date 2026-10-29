@@ -423,6 +423,12 @@ class _SettingsCard extends StatelessWidget {
             onChanged: controller.setColorBlindCharts,
           ),
           Divider(height: 1, color: t.border),
+          _SwitchRow(
+            label: 'Light effects (smoother on older devices)',
+            value: settings.lightEffects,
+            onChanged: controller.setLightEffects,
+          ),
+          Divider(height: 1, color: t.border),
           _CurrencyRow(currency: currency, onChanged: controller.setCurrency),
         ],
       ),

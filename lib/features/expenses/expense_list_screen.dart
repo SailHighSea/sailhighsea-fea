@@ -24,6 +24,7 @@ import '../../core/widgets/context_menu_region.dart';
 import '../../core/widgets/month_navigator.dart';
 import '../../core/widgets/surface_card.dart';
 import '../family/member_providers.dart';
+import '../overview/overview_providers.dart' show activeMemberFilterProvider;
 import '../overview/widgets/member_filter_chips.dart';
 import 'data/day_format.dart';
 import 'expense_list_providers.dart';
@@ -37,6 +38,9 @@ class ExpenseListScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<ExpenseListScreen> createState() => _ExpenseListScreenState();
 }
+
+/// How many expenses are drawn at first, and added by each "Show more".
+const _pageSize = 60;
 
 class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
   final _search = TextEditingController();
@@ -97,6 +101,11 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
   }
 
   bool _selecting = false;
+
+  /// Rows drawn so far. A long month (or a wide date range) is shown in steps, so an older phone
+  /// never builds thousands of rows at once.
+  int _visible = _pageSize;
+  String _viewKey = '';
   final _selected = <String>{};
 
   void _startSelecting([String? first]) => setState(() {
@@ -313,6 +322,16 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
               );
             }
             final total = rows.fold<int>(0, (sum, e) => sum + e.amountCents);
+            // A different month, range, search or filter starts again from the first page.
+            final viewKey =
+                '$month|$range|${filter.query}|${filter.categoryId}|${ref.watch(activeMemberFilterProvider)}';
+            if (viewKey != _viewKey) {
+              _viewKey = viewKey;
+              _visible = _pageSize;
+            }
+            final shown = rows.length <= _visible
+                ? rows
+                : rows.sublist(0, _visible);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -358,29 +377,42 @@ class _ExpenseListScreenState extends ConsumerState<ExpenseListScreen> {
                   ),
                   child: Column(
                     children: [
-                      for (var i = 0; i < rows.length; i++)
+                      for (var i = 0; i < shown.length; i++)
                         _ExpenseTile(
-                          key: ValueKey(rows[i].id),
-                          expense: rows[i],
-                          category: categoryById[rows[i].categoryId],
+                          key: ValueKey(shown[i].id),
+                          expense: shown[i],
+                          category: categoryById[shown[i].categoryId],
                           money: money,
                           now: now,
-                          addedBy: addedByLabel(rows[i].createdBy),
+                          addedBy: addedByLabel(shown[i].createdBy),
                           showDivider: i > 0,
-                          canEdit: canEdit(rows[i].createdBy),
+                          canEdit: canEdit(shown[i].createdBy),
                           selecting: _selecting,
-                          selected: _selected.contains(rows[i].id),
-                          onToggle: () => _toggle(rows[i].id),
-                          onLongPress: () => _startSelecting(rows[i].id),
+                          selected: _selected.contains(shown[i].id),
+                          onToggle: () => _toggle(shown[i].id),
+                          onLongPress: () => _startSelecting(shown[i].id),
                           onSelectSimilar: () =>
-                              _selectSimilar(rows[i], rows, canEdit),
+                              _selectSimilar(shown[i], rows, canEdit),
                           onEdit: () =>
-                              context.push('/expenses/${rows[i].id}/edit'),
-                          onDelete: () => _delete(rows[i]),
+                              context.push('/expenses/${shown[i].id}/edit'),
+                          onDelete: () => _delete(shown[i]),
                         ),
                     ],
                   ),
                 ),
+                if (shown.length < rows.length) ...[
+                  const SizedBox(height: 12),
+                  Center(
+                    child: PillButton(
+                      key: const ValueKey('show-more'),
+                      label:
+                          'Show ${rows.length - shown.length > _pageSize ? _pageSize : rows.length - shown.length} more (${rows.length - shown.length} left)',
+                      style: PillStyle.outlined,
+                      height: 44,
+                      onTap: () => setState(() => _visible += _pageSize),
+                    ),
+                  ),
+                ],
               ],
             );
           },

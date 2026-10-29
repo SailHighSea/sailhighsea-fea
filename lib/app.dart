@@ -124,6 +124,7 @@ class _FamilyExpensesAppState extends ConsumerState<FamilyExpensesApp> {
                   : ThemeVariant.dark);
         final app = GlassScope(
           enabled: glassLook,
+          lightEffects: settings.lightEffects,
           child: Stack(
             fit: StackFit.expand,
             children: [

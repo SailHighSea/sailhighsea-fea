@@ -247,13 +247,15 @@ class OverviewOnGradient extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadii.card),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.14),
-            blurRadius: 22,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: GlassScope.lightOf(context)
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.14),
+                  blurRadius: 22,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Theme(
         data: Theme.of(context).copyWith(extensions: [themed]),
