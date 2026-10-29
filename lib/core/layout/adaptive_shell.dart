@@ -192,7 +192,13 @@ class _BottomTabs extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
+        // The same side margin as the cards above, so the bar lines up with them.
+        padding: EdgeInsets.fromLTRB(
+          context.layout.pagePadding.left,
+          6,
+          context.layout.pagePadding.right,
+          10,
+        ),
         child: glass
             ? GlassBox(
                 key: const ValueKey('glass-bar'),
