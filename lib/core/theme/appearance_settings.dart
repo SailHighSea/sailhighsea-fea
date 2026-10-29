@@ -57,6 +57,7 @@ class AppearanceSettings {
     this.currencyCode = 'SGD',
     this.homeHeader = HomeHeaderStyle.gradient,
     this.look = AppLook.standard,
+    this.lightEffects = false,
   });
 
   final AppearanceMode mode;
@@ -67,6 +68,9 @@ class AppearanceSettings {
   final HomeHeaderStyle homeHeader;
   final AppLook look;
 
+  /// Draws without blur and soft shadows: smoother on older or slower devices.
+  final bool lightEffects;
+
   AppearanceSettings copyWith({
     AppearanceMode? mode,
     ColorThemeId? colorTheme,
@@ -75,6 +79,7 @@ class AppearanceSettings {
     String? currencyCode,
     HomeHeaderStyle? homeHeader,
     AppLook? look,
+    bool? lightEffects,
   }) {
     return AppearanceSettings(
       mode: mode ?? this.mode,
@@ -84,6 +89,7 @@ class AppearanceSettings {
       currencyCode: currencyCode ?? this.currencyCode,
       homeHeader: homeHeader ?? this.homeHeader,
       look: look ?? this.look,
+      lightEffects: lightEffects ?? this.lightEffects,
     );
   }
 
@@ -96,7 +102,8 @@ class AppearanceSettings {
       other.colorBlindCharts == colorBlindCharts &&
       other.currencyCode == currencyCode &&
       other.homeHeader == homeHeader &&
-      other.look == look;
+      other.look == look &&
+      other.lightEffects == lightEffects;
 
   @override
   int get hashCode => Object.hash(
@@ -106,5 +113,7 @@ class AppearanceSettings {
     colorBlindCharts,
     currencyCode,
     homeHeader,
+    look,
+    lightEffects,
   );
 }

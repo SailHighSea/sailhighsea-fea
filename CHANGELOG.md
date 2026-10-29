@@ -2,6 +2,7 @@
 
 ## Fixes after Phase 8
 
+- Lighter on older devices: the Expenses list now draws 60 rows at a time with a "Show more" button (a month with thousands of entries no longer builds them all at once; totals and select-all still count every row, and the list starts again from the top when the month, range, search or filter changes). New Appearance switch "Light effects (smoother on older devices)" turns off the Glass blur and the soft shadows. It is saved with the backup.
 - Releases now include macOS (.dmg), Linux (.deb, .tar.xz, AppImage) and an unsigned iOS build, next to Android and Windows. If the Mac or Linux build fails, the release still goes out without it.
 - Home (Classic header): your picture and name sit in the top row (tap to edit your profile). The overview card says "Spent in August" when you look at another month, and "Spent this month" for the current one.
 - Colour themes now tint the whole app: page, cards, edges and text take the theme's hue (Forest keeps the original green-grey; Graphite stays nearly colourless; Pure black stays black). Before, only the accent and the Home card changed.

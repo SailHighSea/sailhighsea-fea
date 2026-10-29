@@ -18,6 +18,7 @@ const backedUpSettingKeys = <String>{
   'appearance.currency',
   'appearance.homeHeader',
   'appearance.look',
+  'appearance.lightEffects',
   'personal.look',
   'profile.name',
   'profile.avatar',
